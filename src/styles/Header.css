@@ -1,0 +1,32 @@
+.header {
+  background-color: #282c34;
+  padding: 20px;
+  color: white;
+  text-align: center;
+  position: relative;
+  transition: transform 0.3s ease-in-out;
+}
+
+.header--hidden {
+  transform: translateY(-100%);
+}
+
+.header__image {
+  width: 300px; /* Aumente o tamanho conforme necessário */
+  height: auto; /* Mantém a proporção da imagem */
+  margin-bottom: -60px; /* Ajuste para entrelaçar a imagem com o texto */
+  z-index: 1;
+}
+
+.header__title {
+  font-size: 3.5rem; /* Aumente o tamanho da fonte conforme necessário */
+  margin: 0;
+  position: relative;
+  z-index: 2;
+}
+
+.header nav a {
+  margin: 0 15px;
+  color: #61dafb;
+  text-decoration: none;
+}
