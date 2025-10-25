@@ -221,6 +221,8 @@ $profile-glow-size-mobile: 203px; // 169px + 20%
     margin-top: 2rem;
     animation: fadeInUp 0.8s ease-out;
     z-index: 1;
+    // Adiciona espaço no topo para a imagem fixa não sobrepor o texto
+      padding-top: 320px; // Espaço aumentado para a imagem de perfil
   }
 
   // Profile Section
@@ -228,7 +230,17 @@ $profile-glow-size-mobile: 203px; // 169px + 20%
     position: relative;
     margin-top: 2rem;
     margin-bottom: 0.5rem;
-
+    
+    // Estado fixo quando rola a página
+      &--fixed {
+        position: fixed;
+        z-index: 100;
+        margin: 0;
+        // Otimizações de performance
+        will-change: transform, left, top; // Prepara o navegador para animações
+        transform: translateZ(0); // Força aceleração de hardware
+        backface-visibility: hidden; // Evita flickering
+      }
     &-glow {
       position: absolute;
       top: 50%;
@@ -240,6 +252,7 @@ $profile-glow-size-mobile: 203px; // 169px + 20%
       background: var(--primary-gradient);
       filter: blur(20px);
       z-index: -1;
+      transition: all 0.5s ease;
     }
   }
 
@@ -254,7 +267,10 @@ $profile-glow-size-mobile: 203px; // 169px + 20%
       0 0 80px rgba(245, 87, 108, 0.15);
     position: relative;
     z-index: 1;
-    transition: all 0.3s ease;
+    // Otimizações de performance
+      will-change: border-radius; // Apenas border-radius muda
+      transform: translateZ(0); // Força aceleração de hardware
+      backface-visibility: hidden; // Evita flickering
   }
 
   // Text Content
