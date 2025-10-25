@@ -1,6 +1,6 @@
 import { ReactNode, MouseEvent } from "react";
 import { motion } from "framer-motion";
-import "./Button.css";
+import "./Button.scss";
 
 interface ButtonProps {
   children: ReactNode;

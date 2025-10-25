@@ -1,0 +1,115 @@
+/* ============================================
+   Button Component Styles
+   ============================================ */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 2rem;
+  border: none;
+  border-radius: 50px;
+  font-family: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: var(--transition);
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+
+  /* Sizes */
+  &--small {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+
+  &--medium {
+    padding: 1rem 2rem;
+    font-size: 1rem;
+  }
+
+  &--large {
+    padding: 1.25rem 2.5rem;
+    font-size: 1.125rem;
+  }
+
+  /* Variants */
+  &--primary {
+    background: linear-gradient(135deg, var(--primary-gradient));
+    color: white;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, var(--secondary-gradient));
+      opacity: 0;
+      transition: var(--transition);
+    }
+
+    &:hover::before {
+      opacity: 1;
+    }
+  }
+
+  &--secondary {
+    background: transparent;
+    color: var(--text-primary);
+    border: 2px solid var(--accent-color);
+
+    &:hover {
+      background: var(--accent-color);
+      color: white;
+    }
+  }
+
+  &--ghost {
+    background: transparent;
+    color: var(--text-primary);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+
+    &:hover {
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+    }
+  }
+
+  &--disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  &:hover .btn-icon {
+    transform: translateX(2px);
+  }
+}
+
+.btn-icon {
+  display: flex;
+  align-items: center;
+  transition: var(--transition);
+}
+
+/* ============================================
+   Responsive
+   ============================================ */
+
+@media (max-width: 768px) {
+  .btn {
+    padding: 0.875rem 1.75rem;
+    font-size: 0.9rem;
+
+    &--large {
+      padding: 1rem 2rem;
+      font-size: 1rem;
+    }
+  }
+}

@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { motion } from "framer-motion";
 import { itemVariants } from "./motionVariants";
-import "./Card.css";
+import "./Card.scss";
 
 interface CardProps {
   children: ReactNode;

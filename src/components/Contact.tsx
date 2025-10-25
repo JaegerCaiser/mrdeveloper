@@ -11,7 +11,7 @@ import {
   Send,
 } from "lucide-react";
 import { GradientText } from "./common";
-import "../styles/Contact.css";
+import "../styles/Contact.scss";
 
 interface FormData {
   name: string;

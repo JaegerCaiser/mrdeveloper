@@ -8,7 +8,7 @@ import {
   MessageCircle,
   LucideIcon,
 } from "lucide-react";
-import "./SocialLinks.css";
+import "./SocialLinks.scss";
 
 interface SocialLink {
   type: string;

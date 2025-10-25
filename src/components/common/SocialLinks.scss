@@ -1,0 +1,157 @@
+/* ============================================
+   Social Links Component Styles
+   ============================================ */
+
+.social-links {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+
+  /* Sizes */
+  &--small .social-link {
+    width: 2.5rem;
+    height: 2.5rem;
+
+    svg {
+      width: 1rem;
+      height: 1rem;
+    }
+  }
+
+  &--medium .social-link {
+    width: 3rem;
+    height: 3rem;
+  }
+
+  &--large .social-link {
+    width: 3.5rem;
+    height: 3.5rem;
+
+    svg {
+      width: 1.4rem;
+      height: 1.4rem;
+    }
+  }
+
+  /* Vertical Layout */
+  &--vertical {
+    flex-direction: column;
+  }
+
+  /* Horizontal Layout with Wrap */
+  &--wrap {
+    flex-wrap: wrap;
+  }
+}
+
+.social-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  color: var(--text-primary);
+  text-decoration: none;
+  transition: var(--transition);
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, var(--primary-gradient));
+    opacity: 0;
+    transition: var(--transition);
+  }
+
+  &:hover {
+    color: var(--accent-color);
+    border-color: var(--accent-color);
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+
+    &::before {
+      opacity: 0.1;
+    }
+
+    .social-link__tooltip {
+      opacity: 1;
+      visibility: visible;
+    }
+  }
+
+  svg {
+    position: relative;
+    z-index: 1;
+    width: 1.2rem;
+    height: 1.2rem;
+  }
+
+  /* Tooltip */
+  &__tooltip {
+    position: absolute;
+    bottom: 120%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: var(--transition);
+    z-index: 100;
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 5px solid transparent;
+      border-top-color: var(--bg-secondary);
+    }
+  }
+}
+
+/* ============================================
+   Responsive
+   ============================================ */
+
+@media (max-width: 768px) {
+  .social-links {
+    gap: 0.8rem;
+
+    &--large .social-link {
+      width: 3rem;
+      height: 3rem;
+
+      svg {
+        width: 1.2rem;
+        height: 1.2rem;
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .social-links {
+    gap: 0.6rem;
+
+    .social-link {
+      width: 2.5rem;
+      height: 2.5rem;
+
+      svg {
+        width: 1rem;
+        height: 1rem;
+      }
+    }
+  }
+}

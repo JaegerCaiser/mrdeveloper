@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Code, Zap, Heart, Target, Award, Coffee } from "lucide-react";
 import { GradientText } from "./common";
-import "../styles/About.css";
+import "../styles/About.scss";
 
 function About() {
   const containerVariants: any = {

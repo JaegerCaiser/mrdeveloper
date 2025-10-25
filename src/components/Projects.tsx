@@ -11,7 +11,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { GradientText } from "./common";
-import "../styles/Projects.css";
+import "../styles/Projects.scss";
 
 interface Project {
   [key: string]: any;

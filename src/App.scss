@@ -1,4 +1,7 @@
-/* Global Styles and Variables */
+/* ============================================
+   Global Styles and Variables
+   ============================================ */
+
 :root {
   --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
@@ -21,6 +24,11 @@
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 80px; // Compensa a altura do menu fixo
+}
+
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   line-height: 1.6;
@@ -29,36 +37,42 @@ body {
   background: var(--dark-gradient);
   scroll-behavior: smooth;
 }
+
+// Ajuste de scroll para seções com âncoras
+section[id],
+div[id] {
+  scroll-margin-top: 80px; // Espaço para o menu fixo não sobrepor o conteúdo
+}
+
 .App {
   position: relative;
   min-height: 100vh;
   background:
-      radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
-      radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
-      radial-gradient(circle at 40% 80%, rgba(120, 219, 255, 0.3) 0%, transparent 50%),
-      var(--dark-gradient);
-    background-attachment: fixed;
-}
+    radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 40% 80%, rgba(120, 219, 255, 0.3) 0%, transparent 50%),
+    var(--dark-gradient);
+  background-attachment: fixed;
 
-.App-content {
-  position: relative;
+  &-content {
+    position: relative;
     z-index: 1;
-}
-
-/* Floating Particles Animation */
-.App::before,
-.App::after {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 0;
   }
-  
-  .App::before {
+
+  /* Floating Particles Animation */
+  &::before,
+  &::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  &::before {
     background:
       radial-gradient(2px 2px at 20px 30px, rgba(255, 255, 255, 0.3), transparent),
       radial-gradient(2px 2px at 40px 70px, rgba(255, 119, 198, 0.4), transparent),
@@ -67,25 +81,29 @@ body {
     background-repeat: repeat;
     background-size: 150px 100px;
     animation: sparkle 20s linear infinite;
+  }
 }
-  
+
 @keyframes sparkle {
   0% {
     transform: translateY(0px);
   }
-    100% {
-      transform: translateY(-100px);
-    }
-    }
-  
-    /* Glassmorphism utility classes */
-    .glass {
-      background: var(--glass-bg);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border: 1px solid var(--glass-border);
-      border-radius: var(--border-radius);
-      box-shadow: var(--shadow-soft);
+  100% {
+    transform: translateY(-100px);
+  }
+}
+
+/* ============================================
+   Glassmorphism Utility Classes
+   ============================================ */
+
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-soft);
 }
 
 .glass-strong {
@@ -97,23 +115,23 @@ body {
   box-shadow: var(--shadow-hard);
 }
 
-/* Smooth scroll */
-html {
-  scroll-behavior: smooth;
-}
+/* ============================================
+   Custom Scrollbar
+   ============================================ */
 
-/* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
 }
+
 ::-webkit-scrollbar-track {
   background: rgba(0, 0, 0, 0.1);
 }
+
 ::-webkit-scrollbar-thumb {
   background: var(--primary-gradient);
   border-radius: 4px;
-}
 
-::-webkit-scrollbar-thumb:hover {
-  background: var(--secondary-gradient);
+  &:hover {
+    background: var(--secondary-gradient);
+  }
 }
