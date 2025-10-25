@@ -1,17 +1,16 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { Heart, Code, Coffee, ArrowUp } from 'lucide-react';
-import '../styles/Footer.css';
+import { motion } from "framer-motion";
+import { Heart, Code, Coffee, ArrowUp } from "lucide-react";
+import "../styles/Footer.scss";
 
 function Footer() {
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const currentYear = new Date().getFullYear();
 
   return (
-    <motion.footer 
+    <motion.footer
       className="footer"
       initial={{ opacity: 0 }}
       whileInView={{ opacity: 1 }}
@@ -20,7 +19,7 @@ function Footer() {
     >
       <div className="footer__container">
         <div className="footer__content">
-          <motion.div 
+          <motion.div
             className="footer__brand"
             initial={{ y: 20, opacity: 0 }}
             whileInView={{ y: 0, opacity: 1 }}
@@ -36,7 +35,7 @@ function Footer() {
             </p>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             className="footer__links"
             initial={{ y: 20, opacity: 0 }}
             whileInView={{ y: 0, opacity: 1 }}
@@ -46,31 +45,49 @@ function Footer() {
             <div className="footer__column">
               <h4>Navegação</h4>
               <ul>
-                <li><a href="#about">Sobre</a></li>
-                <li><a href="#projects">Projetos</a></li>
-                <li><a href="#contact">Contato</a></li>
+                <li>
+                  <a href="#about">Sobre</a>
+                </li>
+                <li>
+                  <a href="#projects">Projetos</a>
+                </li>
+                <li>
+                  <a href="#contact">Contato</a>
+                </li>
               </ul>
             </div>
             <div className="footer__column">
               <h4>Projetos</h4>
               <ul>
-                <li><a href="#projects">E-Commerce Platform</a></li>
-                <li><a href="#projects">Task Management</a></li>
-                <li><a href="#projects">API Gateway</a></li>
+                <li>
+                  <a href="#projects">E-Commerce Platform</a>
+                </li>
+                <li>
+                  <a href="#projects">Task Management</a>
+                </li>
+                <li>
+                  <a href="#projects">API Gateway</a>
+                </li>
               </ul>
             </div>
             <div className="footer__column">
               <h4>Conecte-se</h4>
               <ul>
-                <li><a href="https://github.com/JaegerCaiser">GitHub</a></li>
-                <li><a href="https://linkedin.com/in/matheus-caiser">LinkedIn</a></li>
-                <li><a href="mailto:matheus@example.com">Email</a></li>
+                <li>
+                  <a href="https://github.com/JaegerCaiser">GitHub</a>
+                </li>
+                <li>
+                  <a href="https://linkedin.com/in/matheus-caiser">LinkedIn</a>
+                </li>
+                <li>
+                  <a href="mailto:matheus@example.com">Email</a>
+                </li>
               </ul>
             </div>
           </motion.div>
         </div>
 
-        <motion.div 
+        <motion.div
           className="footer__bottom"
           initial={{ y: 20, opacity: 0 }}
           whileInView={{ y: 0, opacity: 1 }}
@@ -79,15 +96,15 @@ function Footer() {
         >
           <div className="footer__copyright">
             <p>
-              &copy; {currentYear} Matheus Henrique Caiser. Feito com{' '}
+              &copy; {currentYear} Matheus Henrique Caiser. Feito com{" "}
               <motion.span
                 animate={{ scale: [1, 1.2, 1] }}
                 transition={{ duration: 1, repeat: Infinity }}
                 className="heart-icon"
               >
                 <Heart />
-              </motion.span>{' '}
-              e muito{' '}
+              </motion.span>{" "}
+              e muito{" "}
               <motion.span
                 animate={{ rotate: [0, 15, -15, 0] }}
                 transition={{ duration: 2, repeat: Infinity }}

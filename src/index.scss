@@ -1,4 +1,7 @@
-/* Global Font Import */
+/* ============================================
+   Global Font Import & Base Styles
+   ============================================ */
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 * {
@@ -6,6 +9,11 @@
   padding: 0;
   box-sizing: border-box;
 }
+
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   margin: 0;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -14,8 +22,8 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.6;
-    color: #ffffff;
-    overflow-x: hidden;
+  color: #ffffff;
+  overflow-x: hidden;
 }
 
 code {
@@ -23,20 +31,25 @@ code {
     monospace;
 }
 
-/* Global Link Styles */
+/* ============================================
+   Global Link & Button Styles
+   ============================================ */
+
 a {
   color: inherit;
   text-decoration: none;
 }
 
-/* Global Button Reset */
 button {
   border: none;
   background: none;
   font-family: inherit;
 }
 
-/* Selection Styles */
+/* ============================================
+   Selection Styles
+   ============================================ */
+
 ::selection {
   background: rgba(102, 126, 234, 0.3);
   color: #ffffff;

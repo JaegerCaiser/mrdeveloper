@@ -1,7 +1,14 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { Github, Linkedin, Mail, Twitter, Instagram, MessageCircle, LucideIcon } from 'lucide-react';
-import './SocialLinks.css';
+import { motion } from "framer-motion";
+import {
+  Github,
+  Linkedin,
+  Mail,
+  Twitter,
+  Instagram,
+  MessageCircle,
+  LucideIcon,
+} from "lucide-react";
+import "./SocialLinks.scss";
 
 interface SocialLink {
   type: string;
@@ -11,8 +18,8 @@ interface SocialLink {
 
 interface SocialLinksProps {
   links?: SocialLink[];
-  variant?: 'default' | 'minimal' | 'filled';
-  size?: 'small' | 'medium' | 'large';
+  variant?: "default" | "minimal" | "filled";
+  size?: "small" | "medium" | "large";
   className?: string;
 }
 
@@ -23,14 +30,14 @@ const iconMap: Record<string, LucideIcon> = {
   email: Mail,
   twitter: Twitter,
   instagram: Instagram,
-  whatsapp: MessageCircle
+  whatsapp: MessageCircle,
 };
 
-function SocialLinks({ 
-  links = [], 
-  variant = 'default',
-  size = 'medium',
-  className = '' 
+function SocialLinks({
+  links = [],
+  variant = "default",
+  size = "medium",
+  className = "",
 }: SocialLinksProps) {
   const containerClasses = `social-links social-links--${variant} social-links--${size} ${className}`;
 
@@ -38,7 +45,7 @@ function SocialLinks({
     <div className={containerClasses}>
       {links.map((link, index) => {
         const Icon = iconMap[link.type.toLowerCase()] || Github;
-        
+
         return (
           <motion.a
             key={index}
@@ -46,9 +53,9 @@ function SocialLinks({
             className="social-link"
             target="_blank"
             rel="noopener noreferrer"
-            whileHover={{ 
-              scale: 1.2, 
-              rotate: index % 2 === 0 ? 5 : -5 
+            whileHover={{
+              scale: 1.2,
+              rotate: index % 2 === 0 ? 5 : -5,
             }}
             whileTap={{ scale: 0.9 }}
             initial={{ opacity: 0, y: 20 }}

@@ -1,15 +1,9 @@
-import React from 'react';
-import './App.css';
-// eslint-disable-next-line no-unused-vars
-import Header from './components/Header';
-// eslint-disable-next-line no-unused-vars
-import About from './components/About';
-// eslint-disable-next-line no-unused-vars
-import Projects from './components/Projects';
-// eslint-disable-next-line no-unused-vars
-import Contact from './components/Contact';
-// eslint-disable-next-line no-unused-vars
-import Footer from './components/Footer';
+import "./App.scss";
+import Header from "./components/Header";
+import About from "./components/About";
+import Projects from "./components/Projects";
+import Contact from "./components/Contact";
+import Footer from "./components/Footer";
 
 function App() {
   return (
