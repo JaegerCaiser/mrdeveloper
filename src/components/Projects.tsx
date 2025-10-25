@@ -1,15 +1,24 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Code, Palette, Database, Smartphone, Globe, Zap, Github, ExternalLink } from 'lucide-react';
-import { GradientText } from './common';
-import '../styles/Projects.css';
+import { useState } from "react";
+import { motion } from "framer-motion";
+import {
+  Code,
+  Palette,
+  Database,
+  Smartphone,
+  Globe,
+  Zap,
+  Github,
+  ExternalLink,
+} from "lucide-react";
+import { GradientText } from "./common";
+import "../styles/Projects.css";
 
 interface Project {
   [key: string]: any;
 }
 
 function Projects() {
-  const [filter, setFilter] = useState<string>('all');
+  const [filter, setFilter] = useState<string>("all");
 
   const containerVariants: any = {
     hidden: { opacity: 0 },
@@ -17,9 +26,9 @@ function Projects() {
       opacity: 1,
       transition: {
         duration: 0.6,
-        staggerChildren: 0.1
-      }
-    }
+        staggerChildren: 0.1,
+      },
+    },
   };
 
   const itemVariants: any = {
@@ -29,111 +38,147 @@ function Projects() {
       opacity: 1,
       transition: {
         duration: 0.8,
-        ease: "easeOut"
-      }
-    }
+        ease: "easeOut",
+      },
+    },
   };
 
   const projects: Project[] = [
     {
       id: 1,
-      title: 'E-Commerce Platform',
-      description: 'Plataforma completa de e-commerce com React, Node.js e PostgreSQL. Sistema de pagamentos integrado e dashboard administrativo.',
-      image: '/api/placeholder/400/250',
-      category: 'fullstack',
-      technologies: ['React', 'Node.js', 'PostgreSQL', 'Stripe', 'AWS'],
-      features: ['Sistema de pagamentos', 'Dashboard admin', 'API RESTful', 'Deploy automatizado'],
-      github: 'https://github.com',
-      demo: 'https://demo.com',
-      status: 'Concluído'
+      title: "E-Commerce Platform",
+      description:
+        "Plataforma completa de e-commerce com React, Node.js e PostgreSQL. Sistema de pagamentos integrado e dashboard administrativo.",
+      image: "/api/placeholder/400/250",
+      category: "fullstack",
+      technologies: ["React", "Node.js", "PostgreSQL", "Stripe", "AWS"],
+      features: [
+        "Sistema de pagamentos",
+        "Dashboard admin",
+        "API RESTful",
+        "Deploy automatizado",
+      ],
+      github: "https://github.com",
+      demo: "https://demo.com",
+      status: "Concluído",
     },
     {
       id: 2,
-      title: 'Task Management App',
-      description: 'Aplicativo de gerenciamento de tarefas com interface moderna, drag & drop e sincronização em tempo real.',
-      image: '/api/placeholder/400/250',
-      category: 'frontend',
-      technologies: ['React', 'TypeScript', 'Framer Motion', 'Socket.io'],
-      features: ['Drag & drop', 'Tempo real', 'Notificações', 'Tema escuro'],
-      github: 'https://github.com',
-      demo: 'https://demo.com',
-      status: 'Concluído'
+      title: "Task Management App",
+      description:
+        "Aplicativo de gerenciamento de tarefas com interface moderna, drag & drop e sincronização em tempo real.",
+      image: "/api/placeholder/400/250",
+      category: "frontend",
+      technologies: ["React", "TypeScript", "Framer Motion", "Socket.io"],
+      features: ["Drag & drop", "Tempo real", "Notificações", "Tema escuro"],
+      github: "https://github.com",
+      demo: "https://demo.com",
+      status: "Concluído",
     },
     {
       id: 3,
-      title: 'API Gateway Microservices',
-      description: 'Sistema de microserviços com API Gateway, autenticação JWT e monitoramento avançado.',
-      image: '/api/placeholder/400/250',
-      category: 'backend',
-      technologies: ['Node.js', 'Docker', 'Kubernetes', 'Redis', 'MongoDB'],
-      features: ['Microserviços', 'Load balancing', 'Rate limiting', 'Monitoring'],
-      github: 'https://github.com',
-      demo: 'https://demo.com',
-      status: 'Concluído'
+      title: "API Gateway Microservices",
+      description:
+        "Sistema de microserviços com API Gateway, autenticação JWT e monitoramento avançado.",
+      image: "/api/placeholder/400/250",
+      category: "backend",
+      technologies: ["Node.js", "Docker", "Kubernetes", "Redis", "MongoDB"],
+      features: [
+        "Microserviços",
+        "Load balancing",
+        "Rate limiting",
+        "Monitoring",
+      ],
+      github: "https://github.com",
+      demo: "https://demo.com",
+      status: "Concluído",
     },
     {
       id: 4,
-      title: 'Mobile Weather App',
-      description: 'Aplicativo mobile de previsão do tempo com geolocalização, gráficos interativos e notificações.',
-      image: '/api/placeholder/400/250',
-      category: 'mobile',
-      technologies: ['React Native', 'Expo', 'Redux', 'OpenWeather API'],
-      features: ['Geolocalização', 'Gráficos', 'Push notifications', 'Offline mode'],
-      github: 'https://github.com',
-      demo: 'https://demo.com',
-      status: 'Em desenvolvimento'
+      title: "Mobile Weather App",
+      description:
+        "Aplicativo mobile de previsão do tempo com geolocalização, gráficos interativos e notificações.",
+      image: "/api/placeholder/400/250",
+      category: "mobile",
+      technologies: ["React Native", "Expo", "Redux", "OpenWeather API"],
+      features: [
+        "Geolocalização",
+        "Gráficos",
+        "Push notifications",
+        "Offline mode",
+      ],
+      github: "https://github.com",
+      demo: "https://demo.com",
+      status: "Em desenvolvimento",
     },
     {
       id: 5,
-      title: 'AI-Powered Analytics Dashboard',
-      description: 'Dashboard analítico com IA para insights de negócio, visualizações avançadas e predições.',
-      image: '/api/placeholder/400/250',
-      category: 'fullstack',
-      technologies: ['Python', 'TensorFlow', 'React', 'D3.js', 'FastAPI'],
-      features: ['Machine Learning', 'Visualizações', 'Predições', 'Export de dados'],
-      github: 'https://github.com',
-      demo: 'https://demo.com',
-      status: 'Em desenvolvimento'
+      title: "AI-Powered Analytics Dashboard",
+      description:
+        "Dashboard analítico com IA para insights de negócio, visualizações avançadas e predições.",
+      image: "/api/placeholder/400/250",
+      category: "fullstack",
+      technologies: ["Python", "TensorFlow", "React", "D3.js", "FastAPI"],
+      features: [
+        "Machine Learning",
+        "Visualizações",
+        "Predições",
+        "Export de dados",
+      ],
+      github: "https://github.com",
+      demo: "https://demo.com",
+      status: "Em desenvolvimento",
     },
     {
       id: 6,
-      title: 'Blockchain Voting System',
-      description: 'Sistema de votação descentralizado usando blockchain para garantir transparência e segurança.',
-      image: '/api/placeholder/400/250',
-      category: 'blockchain',
-      technologies: ['Solidity', 'Web3.js', 'React', 'Ethereum', 'IPFS'],
-      features: ['Blockchain', 'Smart contracts', 'Descentralizado', 'Auditável'],
-      github: 'https://github.com',
-      demo: 'https://demo.com',
-      status: 'Conceito'
-    }
+      title: "Blockchain Voting System",
+      description:
+        "Sistema de votação descentralizado usando blockchain para garantir transparência e segurança.",
+      image: "/api/placeholder/400/250",
+      category: "blockchain",
+      technologies: ["Solidity", "Web3.js", "React", "Ethereum", "IPFS"],
+      features: [
+        "Blockchain",
+        "Smart contracts",
+        "Descentralizado",
+        "Auditável",
+      ],
+      github: "https://github.com",
+      demo: "https://demo.com",
+      status: "Conceito",
+    },
   ];
 
   const categories = [
-    { id: 'all', name: 'Todos', icon: Globe },
-    { id: 'frontend', name: 'Frontend', icon: Palette },
-    { id: 'backend', name: 'Backend', icon: Database },
-    { id: 'fullstack', name: 'Full-Stack', icon: Code },
-    { id: 'mobile', name: 'Mobile', icon: Smartphone },
-    { id: 'blockchain', name: 'Blockchain', icon: Zap }
+    { id: "all", name: "Todos", icon: Globe },
+    { id: "frontend", name: "Frontend", icon: Palette },
+    { id: "backend", name: "Backend", icon: Database },
+    { id: "fullstack", name: "Full-Stack", icon: Code },
+    { id: "mobile", name: "Mobile", icon: Smartphone },
+    { id: "blockchain", name: "Blockchain", icon: Zap },
   ];
 
-  const filteredProjects = filter === 'all' 
-    ? projects 
-    : projects.filter(project => project.category === filter);
+  const filteredProjects =
+    filter === "all"
+      ? projects
+      : projects.filter((project) => project.category === filter);
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'Concluído': return '#10b981';
-      case 'Em desenvolvimento': return '#f59e0b';
-      case 'Conceito': return '#6366f1';
-      default: return '#6b7280';
+      case "Concluído":
+        return "#10b981";
+      case "Em desenvolvimento":
+        return "#f59e0b";
+      case "Conceito":
+        return "#6366f1";
+      default:
+        return "#6b7280";
     }
   };
 
   return (
-    <motion.section 
-      id="projects" 
+    <motion.section
+      id="projects"
       className="projects"
       variants={containerVariants}
       initial="hidden"
@@ -153,12 +198,14 @@ function Projects() {
 
         <motion.div className="projects__filters" variants={itemVariants}>
           {categories.map((category) => {
-            // eslint-disable-next-line no-unused-vars
+             
             const Icon = category.icon;
             return (
               <motion.button
                 key={category.id}
-                className={`filter-btn ${filter === category.id ? 'active' : ''}`}
+                className={`filter-btn ${
+                  filter === category.id ? "active" : ""
+                }`}
                 onClick={() => setFilter(category.id)}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -178,14 +225,14 @@ function Projects() {
               variants={itemVariants}
               layout
               initial={{ opacity: 0, scale: 0.8 }}
-              whileInView={{ 
-                opacity: 1, 
+              whileInView={{
+                opacity: 1,
                 scale: 1,
-                transition: { duration: 0.5, delay: index * 0.1 }
+                transition: { duration: 0.5, delay: index * 0.1 },
               }}
-              whileHover={{ 
+              whileHover={{
                 y: -10,
-                transition: { duration: 0.3 }
+                transition: { duration: 0.3 },
               }}
               viewport={{ once: true }}
             >
@@ -218,7 +265,7 @@ function Projects() {
               <div className="project-content">
                 <div className="project-header">
                   <h3 className="project-title">{project.title}</h3>
-                  <span 
+                  <span
                     className="project-status"
                     style={{ backgroundColor: getStatusColor(project.status) }}
                   >
@@ -229,14 +276,20 @@ function Projects() {
                 <p className="project-description">{project.description}</p>
 
                 <div className="project-features">
-                  {project.features.slice(0, 3).map((feature: any, idx: number) => (
-                    <span key={idx} className="feature-tag">{feature}</span>
-                  ))}
+                  {project.features
+                    .slice(0, 3)
+                    .map((feature: any, idx: number) => (
+                      <span key={idx} className="feature-tag">
+                        {feature}
+                      </span>
+                    ))}
                 </div>
 
                 <div className="project-tech">
                   {project.technologies.map((tech: any, idx: number) => (
-                    <span key={idx} className="tech-tag">{tech}</span>
+                    <span key={idx} className="tech-tag">
+                      {tech}
+                    </span>
                   ))}
                 </div>
               </div>

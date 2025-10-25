@@ -1,20 +1,20 @@
-import React, { ElementType, ReactNode } from 'react';
-import './GradientText.css';
+import { ElementType, ReactNode } from "react";
+import "./GradientText.css";
 
 interface GradientTextProps {
   children: ReactNode;
-  gradient?: 'primary' | 'secondary' | 'accent' | 'rainbow' | 'warm' | 'cool';
+  gradient?: "primary" | "secondary" | "accent" | "rainbow" | "warm" | "cool";
   className?: string;
   as?: ElementType;
   [key: string]: any;
 }
 
-function GradientText({ 
-  children, 
-  gradient = 'primary', 
-  className = '',
-  as: Component = 'span',
-  ...props 
+function GradientText({
+  children,
+  gradient = "primary",
+  className = "",
+  as: Component = "span",
+  ...props
 }: GradientTextProps) {
   const classes = `gradient-text gradient-text--${gradient} ${className}`;
 

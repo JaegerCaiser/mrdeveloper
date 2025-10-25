@@ -1,7 +1,7 @@
-import React, { ReactNode } from 'react';
-import { motion } from 'framer-motion';
-import { containerVariants, itemVariants } from './motionVariants';
-import './Section.css';
+import { ReactNode } from "react";
+import { motion } from "framer-motion";
+import { containerVariants, itemVariants } from "./motionVariants";
+import "./Section.css";
 
 interface SectionProps {
   children: ReactNode;
@@ -9,23 +9,23 @@ interface SectionProps {
   className?: string;
   title?: ReactNode | string;
   subtitle?: string;
-  background?: 'default' | 'dark' | 'gradient' | 'glass';
+  background?: "default" | "dark" | "gradient" | "glass";
   [key: string]: any;
 }
 
-function Section({ 
-  children, 
-  id, 
-  className = '', 
-  title, 
+function Section({
+  children,
+  id,
+  className = "",
+  title,
   subtitle,
-  background = 'default',
-  ...props 
+  background = "default",
+  ...props
 }: SectionProps) {
   const sectionClasses = `section section--${background} ${className}`;
 
   return (
-    <motion.section 
+    <motion.section
       id={id}
       className={sectionClasses}
       variants={containerVariants}
@@ -39,7 +39,8 @@ function Section({
           <motion.div className="section__header" variants={itemVariants}>
             {title && (
               <h2 className="section__title">
-                {typeof title === 'string' && title.includes('gradient-text') ? (
+                {typeof title === "string" &&
+                title.includes("gradient-text") ? (
                   <span dangerouslySetInnerHTML={{ __html: title }} />
                 ) : (
                   title
@@ -49,10 +50,8 @@ function Section({
             {subtitle && <p className="section__subtitle">{subtitle}</p>}
           </motion.div>
         )}
-        
-        <div className="section__content">
-          {children}
-        </div>
+
+        <div className="section__content">{children}</div>
       </div>
     </motion.section>
   );

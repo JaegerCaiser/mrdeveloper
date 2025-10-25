@@ -1,8 +1,17 @@
-import React, { useState, ChangeEvent, FormEvent } from 'react';
-import { motion } from 'framer-motion';
-import { Mail, Phone, MapPin, Github, Linkedin, Twitter, MessageCircle, Send } from 'lucide-react';
-import { GradientText } from './common';
-import '../styles/Contact.css';
+import { useState, ChangeEvent, FormEvent } from "react";
+import { motion } from "framer-motion";
+import {
+  Mail,
+  Phone,
+  MapPin,
+  Github,
+  Linkedin,
+  Twitter,
+  MessageCircle,
+  Send,
+} from "lucide-react";
+import { GradientText } from "./common";
+import "../styles/Contact.css";
 
 interface FormData {
   name: string;
@@ -13,10 +22,10 @@ interface FormData {
 
 function Contact() {
   const [formData, setFormData] = useState<FormData>({
-    name: '',
-    email: '',
-    subject: '',
-    message: ''
+    name: "",
+    email: "",
+    subject: "",
+    message: "",
   });
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
@@ -26,9 +35,9 @@ function Contact() {
       opacity: 1,
       transition: {
         duration: 0.6,
-        staggerChildren: 0.2
-      }
-    }
+        staggerChildren: 0.2,
+      },
+    },
   };
 
   const itemVariants: any = {
@@ -38,85 +47,87 @@ function Contact() {
       opacity: 1,
       transition: {
         duration: 0.8,
-        ease: "easeOut"
-      }
-    }
+        ease: "easeOut",
+      },
+    },
   };
 
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+
     // Simulate form submission
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
     // eslint-disable-next-line no-console
-    console.log('Form submitted:', formData);
+    console.log("Form submitted:", formData);
     setIsSubmitting(false);
-    setFormData({ name: '', email: '', subject: '', message: '' });
+    setFormData({ name: "", email: "", subject: "", message: "" });
   };
 
   const contactInfo = [
     {
       icon: Mail,
-      label: 'Email',
-      value: 'matheus@example.com',
-      href: 'mailto:matheus@example.com',
-      color: '#ea4335'
+      label: "Email",
+      value: "matheus@example.com",
+      href: "mailto:matheus@example.com",
+      color: "#ea4335",
     },
     {
       icon: Phone,
-      label: 'Telefone',
-      value: '+55 (11) 99999-9999',
-      href: 'tel:+5511999999999',
-      color: '#34a853'
+      label: "Telefone",
+      value: "+55 (11) 99999-9999",
+      href: "tel:+5511999999999",
+      color: "#34a853",
     },
     {
       icon: MapPin,
-      label: 'Localização',
-      value: 'São Paulo, Brasil',
-      href: 'https://maps.google.com',
-      color: '#4285f4'
-    }
+      label: "Localização",
+      value: "São Paulo, Brasil",
+      href: "https://maps.google.com",
+      color: "#4285f4",
+    },
   ];
 
   const socialLinks = [
     {
       icon: Github,
-      name: 'GitHub',
-      url: 'https://github.com/JaegerCaiser',
-      color: '#333'
+      name: "GitHub",
+      url: "https://github.com/JaegerCaiser",
+      color: "#333",
     },
     {
       icon: Linkedin,
-      name: 'LinkedIn',
-      url: 'https://linkedin.com/in/matheus-caiser',
-      color: '#0077b5'
+      name: "LinkedIn",
+      url: "https://linkedin.com/in/matheus-caiser",
+      color: "#0077b5",
     },
     {
       icon: Twitter,
-      name: 'Twitter',
-      url: 'https://twitter.com/matheuscaiser',
-      color: '#1da1f2'
+      name: "Twitter",
+      url: "https://twitter.com/matheuscaiser",
+      color: "#1da1f2",
     },
     {
       icon: MessageCircle,
-      name: 'WhatsApp',
-      url: 'https://wa.me/5511999999999',
-      color: '#25d366'
-    }
+      name: "WhatsApp",
+      url: "https://wa.me/5511999999999",
+      color: "#25d366",
+    },
   ];
 
   return (
-    <motion.section 
-      id="contact" 
+    <motion.section
+      id="contact"
       className="contact"
       variants={containerVariants}
       initial="hidden"
@@ -139,13 +150,14 @@ function Contact() {
             <div className="contact__info-content glass">
               <h3>Informações de Contato</h3>
               <p>
-                Estou sempre aberto para discutir novos projetos, oportunidades criativas 
-                ou simplesmente conversar sobre tecnologia. Não hesite em entrar em contato!
+                Estou sempre aberto para discutir novos projetos, oportunidades
+                criativas ou simplesmente conversar sobre tecnologia. Não hesite
+                em entrar em contato!
               </p>
 
               <div className="contact__details">
                 {contactInfo.map((item, index) => {
-                  // eslint-disable-next-line no-unused-vars
+                   
                   const Icon = item.icon;
                   return (
                     <motion.a
@@ -155,16 +167,19 @@ function Contact() {
                       whileHover={{ x: 10 }}
                       whileTap={{ scale: 0.95 }}
                       initial={{ opacity: 0, x: -20 }}
-                      whileInView={{ 
-                        opacity: 1, 
+                      whileInView={{
+                        opacity: 1,
                         x: 0,
-                        transition: { duration: 0.5, delay: index * 0.1 }
+                        transition: { duration: 0.5, delay: index * 0.1 },
                       }}
                       viewport={{ once: true }}
                     >
-                      <div 
+                      <div
                         className="contact-icon"
-                        style={{ backgroundColor: `${item.color}20`, color: item.color }}
+                        style={{
+                          backgroundColor: `${item.color}20`,
+                          color: item.color,
+                        }}
                       >
                         <Icon />
                       </div>
@@ -181,25 +196,25 @@ function Contact() {
                 <h4>Redes Sociais</h4>
                 <div className="social-links">
                   {socialLinks.map((social, index) => {
-                    // eslint-disable-next-line no-unused-vars
+                     
                     const Icon = social.icon;
                     return (
                       <motion.a
                         key={social.name}
                         href={social.url}
                         className="social-link"
-                        style={{ '--social-color': social.color } as any}
-                        whileHover={{ 
+                        style={{ "--social-color": social.color } as any}
+                        whileHover={{
                           scale: 1.1,
                           y: -5,
-                          backgroundColor: social.color
+                          backgroundColor: social.color,
                         }}
                         whileTap={{ scale: 0.9 }}
                         initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ 
-                          opacity: 1, 
+                        whileInView={{
+                          opacity: 1,
                           y: 0,
-                          transition: { duration: 0.5, delay: index * 0.1 }
+                          transition: { duration: 0.5, delay: index * 0.1 },
                         }}
                         viewport={{ once: true }}
                         target="_blank"
@@ -218,7 +233,7 @@ function Contact() {
           <motion.div className="contact__form" variants={itemVariants}>
             <form onSubmit={handleSubmit} className="contact-form glass">
               <h3>Envie uma Mensagem</h3>
-              
+
               <div className="form-row">
                 <div className="form-group">
                   <input
@@ -276,10 +291,14 @@ function Contact() {
                 whileTap={{ scale: 0.98 }}
               >
                 {isSubmitting ? (
-                  <motion.div 
+                  <motion.div
                     className="loading-spinner"
                     animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    transition={{
+                      duration: 1,
+                      repeat: Infinity,
+                      ease: "linear",
+                    }}
                   />
                 ) : (
                   <>

@@ -1,8 +1,7 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { Code, Zap, Heart, Target, Award, Coffee } from 'lucide-react';
-import { GradientText } from './common';
-import '../styles/About.css';
+import { motion } from "framer-motion";
+import { Code, Zap, Heart, Target, Award, Coffee } from "lucide-react";
+import { GradientText } from "./common";
+import "../styles/About.css";
 
 function About() {
   const containerVariants: any = {
@@ -11,9 +10,9 @@ function About() {
       opacity: 1,
       transition: {
         duration: 0.6,
-        staggerChildren: 0.2
-      }
-    }
+        staggerChildren: 0.2,
+      },
+    },
   };
 
   const itemVariants: any = {
@@ -23,46 +22,50 @@ function About() {
       opacity: 1,
       transition: {
         duration: 0.8,
-        ease: "easeOut"
-      }
-    }
+        ease: "easeOut",
+      },
+    },
   };
 
   const skills = [
-    { name: 'JavaScript/TypeScript', level: 95, color: '#f7df1e' },
-    { name: 'React & Next.js', level: 92, color: '#61dafb' },
-    { name: 'Node.js & Express', level: 88, color: '#68a063' },
-    { name: 'Python & Django', level: 85, color: '#3776ab' },
-    { name: 'Database & SQL', level: 80, color: '#336791' },
-    { name: 'DevOps & AWS', level: 75, color: '#ff9900' }
+    { name: "JavaScript/TypeScript", level: 95, color: "#f7df1e" },
+    { name: "React & Next.js", level: 92, color: "#61dafb" },
+    { name: "Node.js & Express", level: 88, color: "#68a063" },
+    { name: "Python & Django", level: 85, color: "#3776ab" },
+    { name: "Database & SQL", level: 80, color: "#336791" },
+    { name: "DevOps & AWS", level: 75, color: "#ff9900" },
   ];
 
   const qualities = [
     {
       icon: Code,
-      title: 'Código Limpo',
-      description: 'Escrevo código legível, maintível e seguindo as melhores práticas da indústria.'
+      title: "Código Limpo",
+      description:
+        "Escrevo código legível, maintível e seguindo as melhores práticas da indústria.",
     },
     {
       icon: Zap,
-      title: 'Performance',
-      description: 'Foco em otimização e performance para entregar experiências rápidas e fluidas.'
+      title: "Performance",
+      description:
+        "Foco em otimização e performance para entregar experiências rápidas e fluidas.",
     },
     {
       icon: Heart,
-      title: 'Paixão',
-      description: 'Apaixonado por tecnologia e sempre em busca de aprender algo novo.'
+      title: "Paixão",
+      description:
+        "Apaixonado por tecnologia e sempre em busca de aprender algo novo.",
     },
     {
       icon: Target,
-      title: 'Resultados',
-      description: 'Focado em entregar soluções que agregam valor real ao negócio.'
-    }
+      title: "Resultados",
+      description:
+        "Focado em entregar soluções que agregam valor real ao negócio.",
+    },
   ];
 
   return (
-    <motion.section 
-      id="about" 
+    <motion.section
+      id="about"
       className="about"
       variants={containerVariants}
       initial="hidden"
@@ -76,7 +79,8 @@ function About() {
             Sobre <GradientText>Mim</GradientText>
           </h2>
           <p className="section-subtitle">
-            Desenvolvedor apaixonado por criar experiências digitais extraordinárias
+            Desenvolvedor apaixonado por criar experiências digitais
+            extraordinárias
           </p>
         </motion.div>
 
@@ -85,16 +89,19 @@ function About() {
             <div className="about__story-content glass">
               <h3>Minha História</h3>
               <p>
-                Sou <strong>Matheus Henrique Caiser</strong>, um desenvolvedor Full-Stack apaixonado por tecnologia 
-                e inovação. Com anos de experiência em desenvolvimento web, tenho me especializado em criar 
-                soluções elegantes e funcionais que fazem a diferença na vida das pessoas.
+                Sou <strong>Matheus Henrique Caiser</strong>, um desenvolvedor
+                Full-Stack apaixonado por tecnologia e inovação. Com anos de
+                experiência em desenvolvimento web, tenho me especializado em
+                criar soluções elegantes e funcionais que fazem a diferença na
+                vida das pessoas.
               </p>
               <p>
-                Minha jornada começou com curiosidade sobre como as coisas funcionam por trás das telas. 
-                Hoje, transformo ideias em realidade digital, sempre buscando a excelência técnica e a 
+                Minha jornada começou com curiosidade sobre como as coisas
+                funcionam por trás das telas. Hoje, transformo ideias em
+                realidade digital, sempre buscando a excelência técnica e a
                 melhor experiência do usuário.
               </p>
-              
+
               <div className="about__stats">
                 <div className="stat">
                   <div className="stat__number">
@@ -125,11 +132,11 @@ function About() {
             <h3>Habilidades Técnicas</h3>
             <div className="skills-grid">
               {skills.map((skill, index) => (
-                <motion.div 
+                <motion.div
                   key={skill.name}
                   className="skill-item"
                   initial={{ width: 0 }}
-                  whileInView={{ width: '100%' }}
+                  whileInView={{ width: "100%" }}
                   transition={{ duration: 1, delay: index * 0.1 }}
                   viewport={{ once: true }}
                 >
@@ -138,7 +145,7 @@ function About() {
                     <span className="skill-percentage">{skill.level}%</span>
                   </div>
                   <div className="skill-bar">
-                    <motion.div 
+                    <motion.div
                       className="skill-progress"
                       style={{ backgroundColor: skill.color }}
                       initial={{ width: 0 }}
@@ -157,19 +164,19 @@ function About() {
           <h3>O que me define</h3>
           <div className="qualities-grid">
             {qualities.map((quality, index) => (
-              <motion.div 
+              <motion.div
                 key={quality.title}
                 className="quality-card glass"
-                whileHover={{ 
+                whileHover={{
                   y: -10,
                   scale: 1.05,
-                  transition: { duration: 0.3 }
+                  transition: { duration: 0.3 },
                 }}
                 initial={{ opacity: 0, y: 50 }}
-                whileInView={{ 
-                  opacity: 1, 
+                whileInView={{
+                  opacity: 1,
                   y: 0,
-                  transition: { duration: 0.6, delay: index * 0.1 }
+                  transition: { duration: 0.6, delay: index * 0.1 },
                 }}
                 viewport={{ once: true }}
               >
