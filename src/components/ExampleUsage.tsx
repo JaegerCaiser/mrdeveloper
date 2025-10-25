@@ -1,7 +1,7 @@
 // Exemplo de como usar os componentes reutilizáveis no projeto
 // Este arquivo contém exemplos de uso e pode ser removido em produção
 
-/* eslint-disable no-unused-vars */
+import React from 'react';
 import { Code, Zap, Heart } from 'lucide-react';
 import { 
   Section, 
@@ -10,14 +10,13 @@ import {
   GradientText, 
   SocialLinks
 } from './common';
-/* eslint-enable no-unused-vars */
 
 // Exemplo de como refatorar uma seção usando os componentes comuns
-function ExampleSection() {
+function ExampleSection(): React.ReactElement {
   const socialLinks = [
-    { type: 'github', url: 'https://github.com/JaegerCaiser', label: 'GitHub' },
-    { type: 'linkedin', url: 'https://linkedin.com/in/matheus-caiser', label: 'LinkedIn' },
-    { type: 'email', url: 'mailto:matheus@example.com', label: 'E-mail' }
+    { type: 'github' as const, url: 'https://github.com/JaegerCaiser', label: 'GitHub' },
+    { type: 'linkedin' as const, url: 'https://linkedin.com/in/matheus-caiser', label: 'LinkedIn' },
+    { type: 'email' as const, url: 'mailto:matheus@example.com', label: 'E-mail' }
   ];
 
   return (

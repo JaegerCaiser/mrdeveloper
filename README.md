@@ -126,7 +126,8 @@ mrdeveloper/
 │   │   ├── About.tsx
 │   │   ├── Projects.tsx
 │   │   ├── Contact.tsx
-│   │   └── Footer.tsx
+│   │   ├── Footer.tsx
+│   │   └── ExampleUsage.tsx
 │   ├── styles/           # Arquivos CSS
 │   ├── App.tsx           # Componente principal
 │   ├── index.tsx         # Entry point
@@ -173,7 +174,7 @@ import { GradientText } from './components/common';
 </GradientText>
 ```
 
-> 📖 Veja mais exemplos em [`src/components/ExampleUsage.js`](./src/components/ExampleUsage.js)
+> 📖 Veja mais exemplos em [`src/components/ExampleUsage.tsx`](./src/components/ExampleUsage.tsx)
 
 ## 🧪 Testes
 
