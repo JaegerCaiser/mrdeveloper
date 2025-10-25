@@ -1,39 +1,54 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
 import { Code, ChevronDown } from "lucide-react";
-import {
-  containerVariants,
-  itemVariants,
-  GradientText,
-  Button,
-  SocialLinks,
-} from "./common";
+import { GradientText, Button, SocialLinks } from "./common";
 import MustacheIcon from "./common/MustacheIcon";
 import "../styles/Header.scss";
 import profileImage from "../assets/profile.png";
 
 function Header() {
-  const [isVisible, setIsVisible] = useState<boolean>(true);
-  const [scrollProgress, setScrollProgress] = useState<number>(0);
-  const [isImageFixed, setIsImageFixed] = useState<boolean>(false);
-  const [currentScroll, setCurrentScroll] = useState<number>(0);
+  const [isReady, setIsReady] = useState(false);
+
+  const [isVisible, setIsVisible] = useState<boolean>(() => {
+    if (typeof window !== "undefined") {
+      return window.scrollY < 100;
+    }
+    return true;
+  });
+  const [scrollProgress, setScrollProgress] = useState<number>(() => {
+    if (typeof window !== "undefined") {
+      return Math.min(window.scrollY / 400, 1);
+    }
+    return 0;
+  });
+  const [currentScroll, setCurrentScroll] = useState<number>(() => {
+    if (typeof window !== "undefined") {
+      return window.scrollY;
+    }
+    return 0;
+  });
   const ticking = useRef<boolean>(false);
 
-  // Otimização: usa requestAnimationFrame para throttle
+  // Marca como pronto após um pequeno delay para garantir posicionamento correto
+  useEffect(() => {
+    // Força atualização do scroll antes de mostrar a foto
+    const currentScrollY = window.scrollY;
+    // eslint-disable-next-line
+    setCurrentScroll(currentScrollY);
+    setScrollProgress(Math.min(currentScrollY / 400, 1));
+    const timer = setTimeout(() => {
+      setIsReady(true);
+    }, 100); // 100ms de delay
+
+    return () => clearTimeout(timer);
+  }, []);
   const handleScroll = useCallback(() => {
     if (!ticking.current) {
       window.requestAnimationFrame(() => {
         const currentScrollY = window.scrollY;
         setCurrentScroll(currentScrollY);
         setIsVisible(currentScrollY < 100);
-
-        // Calcula o progresso do scroll - primeira animação (0-400px)
-        const progress = Math.min(currentScrollY / 400, 1);
-        setScrollProgress(progress);
-
-        // A imagem sempre fica fixa após iniciar a transição
-        setIsImageFixed(progress >= 0.2);
-
+        setScrollProgress(Math.min(currentScrollY / 400, 1));
         ticking.current = false;
       });
       ticking.current = true;
@@ -45,66 +60,95 @@ function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [handleScroll]);
 
-  const scrollToNext = () => {
+  const scrollToNext = useCallback(() => {
     const aboutSection = document.getElementById("about");
     aboutSection?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
+  }, []);
 
-  const scrollToTop = () => {
+  const scrollToTop = useCallback(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
-  };
+  }, []);
 
-  /**
-   * Cálculos de animação da imagem de perfil baseados no scroll
-   *
-   * Fase 1 (0-400px): Animação de scale, movimento e border-radius
-   * Fase 2: Após a seção "Sobre", a imagem continua subindo (simulando scroll natural)
-   *
-   * ✅ Testado com testes unitários (Header.test.tsx)
-   * ⚡ Otimizado com useMemo para evitar recálculos desnecessários
-   */
   const imageStyles = useMemo(() => {
-    // Fase 1: Animação inicial (0-400px)
-    const imageScale = 1 + scrollProgress * 0.8; // 1x -> 1.8x
-    const borderRadius = 50 - scrollProgress * 30; // 50% -> 20%
+    const imageScale = 1 + scrollProgress * 0.8;
+    const borderRadius = 50 - scrollProgress * 30;
+    const borderWidth = 3 - scrollProgress * 3;
+    const borderOpacity = 1 - scrollProgress;
+    const imageLeft = 50 - scrollProgress * 42;
 
-    // Calcula a posição da imagem
-    // Vai de 50% (centro) até 8% (com margem de ~1cm da borda)
-    const imageLeft = 50 - scrollProgress * 42; // 50% -> 8%
+    let imageTop = 33 - scrollProgress * 7;
 
-    // Posição vertical: começa em 22%, vai até 15% (na animação inicial)
-    let imageTop = 22 - scrollProgress * 7; // 22% -> 15%
-
-    // Fase 2: Após a animação inicial (scrollY > 900px), continua subindo
-    // Isso faz a imagem "rolar" junto com a página naturalmente
-    if (currentScroll > 900) {
-      const extraScroll = currentScroll - 900;
-      // Sobe 1px a cada 10px de scroll (velocidade natural)
+    if (currentScroll > 400 && currentScroll <= 800) {
+      const extraScroll = currentScroll - 400;
+      const extraMovement = (extraScroll / window.innerHeight) * 7;
+      imageTop = 26 - extraMovement;
+    } else if (currentScroll > 800) {
+      const scrollUntil800 = 400;
+      const movement800 = (scrollUntil800 / window.innerHeight) * 7;
+      const positionAt800 = 26 - movement800;
+      const extraScroll = currentScroll - 800;
       const extraMovement = (extraScroll / window.innerHeight) * 100;
-      imageTop = 15 - extraMovement;
+      imageTop = positionAt800 - extraMovement;
     }
 
-    // Transform para centralizar e depois mover
-    const translateX = -50 + scrollProgress * 50; // -50% -> 0%
-    const translateY = -50 + scrollProgress * 50; // -50% -> 0%
+    const translateX = -50 + scrollProgress * 50;
+    const translateY = -50 + scrollProgress * 50;
+    const shadowSize1 = 40 * borderOpacity;
+    const shadowOpacity1 = 0.3 * borderOpacity;
+    const shadowSize2 = 80 * borderOpacity;
+    const shadowOpacity2 = 0.15 * borderOpacity;
 
     return {
       imageScale,
       borderRadius,
+      borderWidth,
+      borderOpacity,
       imageLeft,
       imageTop,
       translateX,
       translateY,
+      shadowSize1,
+      shadowOpacity1,
+      shadowSize2,
+      shadowOpacity2,
     };
-  }, [scrollProgress, currentScroll]); // Using imported motion variants from common components
+  }, [scrollProgress, currentScroll]);
+
+  const profileStyles = useMemo(() => {
+    return {
+      left: `${imageStyles.imageLeft}%`,
+      top: `${imageStyles.imageTop}%`,
+      transform: `translate(${imageStyles.translateX}%, ${imageStyles.translateY}%) scale(${imageStyles.imageScale}) translateZ(0)`,
+    };
+  }, [imageStyles]);
+
+  const imageStylesMemo = useMemo(
+    () => ({
+      borderRadius: `${imageStyles.borderRadius}%`,
+      borderWidth: `${imageStyles.borderWidth}px`,
+      borderColor: `rgba(255, 255, 255, ${imageStyles.borderOpacity * 0.2})`,
+      boxShadow: `0 0 ${imageStyles.shadowSize1}px rgba(102, 126, 234, ${imageStyles.shadowOpacity1}), 0 0 ${imageStyles.shadowSize2}px rgba(245, 87, 108, ${imageStyles.shadowOpacity2})`,
+    }),
+    [imageStyles]
+  );
+
+  const glowStyles = useMemo(
+    () => ({
+      opacity: imageStyles.borderOpacity * 0.7,
+    }),
+    [imageStyles.borderOpacity]
+  );
+
+  const scrollIndicatorStyles = useMemo(
+    () => ({
+      opacity: isVisible ? 1 : 0,
+      pointerEvents: isVisible ? ("auto" as const) : ("none" as const),
+    }),
+    [isVisible]
+  );
 
   return (
-    <motion.header
-      className="header"
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-    >
+    <header className="header">
       <div className="header__background">
         <div className="header__gradient"></div>
         <div className="header__particles"></div>
@@ -138,102 +182,43 @@ function Header() {
       </nav>
 
       <div className="header__content">
-        <motion.div
-          className="header__profile header__profile--fixed"
-          variants={itemVariants}
-          style={{
-            scale: imageStyles.imageScale,
-            left: `${imageStyles.imageLeft}%`,
-            top: `${imageStyles.imageTop}%`,
-            x: `${imageStyles.translateX}%`,
-            y: `${imageStyles.translateY}%`,
-          }}
-        >
-          <motion.img
-            src={profileImage}
-            alt="Matheus Henrique Caiser"
-            className="header__image"
-            style={{
-              borderRadius: `${imageStyles.borderRadius}%`,
-            }}
-            animate={
-              isImageFixed
-                ? {}
-                : {
-                    y: [-3, 3, -3],
-                  }
-            }
-            transition={
-              isImageFixed
-                ? {}
-                : {
-                    duration: 5,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                  }
-            }
-          />
-
+        {isReady && (
           <motion.div
-            className="header__profile-glow"
-            animate={{
-              opacity: [0.4, 0.7, 0.4],
-              scale: [1, 1.08, 1],
-            }}
-            transition={{
-              duration: 4,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-          />
-        </motion.div>
-
-        <motion.div className="header__text" variants={itemVariants}>
-          <motion.div
-            className="header__greeting"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.5, ease: "easeOut" }}
+            className="header__profile header__profile--fixed"
+            style={profileStyles}
           >
-            <span className="header__greeting-text">Olá, eu sou</span>
+            <motion.img
+              src={profileImage}
+              alt="Matheus Henrique Caiser"
+              className="header__image"
+              style={imageStylesMemo}
+            />
+
+            <motion.div className="header__profile-glow" style={glowStyles} />
           </motion.div>
+        )}
 
-          <motion.h1
-            className="header__title"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.5, ease: "easeOut" }}
-          >
+        <div className="header__text">
+          <div className="header__greeting">
+            <span className="header__greeting-text">Olá, eu sou</span>
+          </div>
+
+          <h1 className="header__title">
             <GradientText>Matheus Henrique</GradientText>
             <br />
             <span className="header__title-surname">Caiser</span>
-          </motion.h1>
+          </h1>
 
-          <motion.p
-            className="header__subtitle"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.5, ease: "easeOut" }}
-          >
+          <p className="header__subtitle">
             <span className="typing-text">Desenvolvedor Full-Stack</span>
-          </motion.p>
+          </p>
 
-          <motion.p
-            className="header__description"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, duration: 0.5, ease: "easeOut" }}
-          >
+          <p className="header__description">
             Transformando ideias em soluções digitais inovadoras através de
             código elegante e design intuitivo
-          </motion.p>
+          </p>
 
-          <motion.div
-            className="header__cta"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6, duration: 0.5, ease: "easeOut" }}
-          >
+          <div className="header__cta">
             <Button variant="primary" onClick={scrollToNext} icon={<Code />}>
               Conheça meu trabalho
             </Button>
@@ -259,31 +244,21 @@ function Header() {
               variant="default"
               size="medium"
             />
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       </div>
 
       <motion.div
         className="header__scroll-indicator"
         onClick={scrollToNext}
-        animate={{ y: [0, 8, 0] }}
-        transition={{
-          duration: 2,
-          repeat: Infinity,
-          ease: "easeInOut",
-          repeatType: "loop",
-        }}
-        style={{
-          opacity: isVisible ? 1 : 0,
-          pointerEvents: isVisible ? "auto" : "none",
-        }}
+        style={scrollIndicatorStyles}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
       >
         <span>Role para baixo</span>
         <ChevronDown />
       </motion.div>
-    </motion.header>
+    </header>
   );
 }
 
