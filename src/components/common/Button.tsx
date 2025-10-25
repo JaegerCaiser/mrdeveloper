@@ -1,7 +1,17 @@
-
-// eslint-disable-next-line no-unused-vars
+import React, { ReactNode, MouseEvent } from 'react';
 import { motion } from 'framer-motion';
 import './Button.css';
+
+interface ButtonProps {
+  children: ReactNode;
+  variant?: 'primary' | 'secondary' | 'ghost';
+  size?: 'small' | 'medium' | 'large';
+  onClick?: (e: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => void;
+  disabled?: boolean;
+  icon?: ReactNode;
+  href?: string | null;
+  [key: string]: any;
+}
 
 function Button({ 
   children, 
@@ -12,7 +22,7 @@ function Button({
   icon = null,
   href = null,
   ...props 
-}) {
+}: ButtonProps) {
   const buttonClasses = `btn btn--${variant} btn--${size} ${disabled ? 'btn--disabled' : ''}`;
 
   const buttonContent = (

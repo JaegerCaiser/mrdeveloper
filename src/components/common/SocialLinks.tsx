@@ -1,10 +1,22 @@
-
-// eslint-disable-next-line no-unused-vars
+import React from 'react';
 import { motion } from 'framer-motion';
-import { Github, Linkedin, Mail, Twitter, Instagram, MessageCircle } from 'lucide-react';
+import { Github, Linkedin, Mail, Twitter, Instagram, MessageCircle, LucideIcon } from 'lucide-react';
 import './SocialLinks.css';
 
-const iconMap = {
+interface SocialLink {
+  type: string;
+  url: string;
+  label: string;
+}
+
+interface SocialLinksProps {
+  links?: SocialLink[];
+  variant?: 'default' | 'minimal' | 'filled';
+  size?: 'small' | 'medium' | 'large';
+  className?: string;
+}
+
+const iconMap: Record<string, LucideIcon> = {
   github: Github,
   linkedin: Linkedin,
   mail: Mail,
@@ -19,13 +31,12 @@ function SocialLinks({
   variant = 'default',
   size = 'medium',
   className = '' 
-}) {
+}: SocialLinksProps) {
   const containerClasses = `social-links social-links--${variant} social-links--${size} ${className}`;
 
   return (
     <div className={containerClasses}>
       {links.map((link, index) => {
-        // eslint-disable-next-line no-unused-vars
         const Icon = iconMap[link.type.toLowerCase()] || Github;
         
         return (

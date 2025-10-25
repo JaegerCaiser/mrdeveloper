@@ -1,8 +1,17 @@
-
-// eslint-disable-next-line no-unused-vars
+import React, { ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import { containerVariants, itemVariants } from './motionVariants';
 import './Section.css';
+
+interface SectionProps {
+  children: ReactNode;
+  id?: string;
+  className?: string;
+  title?: ReactNode | string;
+  subtitle?: string;
+  background?: 'default' | 'dark' | 'gradient' | 'glass';
+  [key: string]: any;
+}
 
 function Section({ 
   children, 
@@ -12,7 +21,7 @@ function Section({
   subtitle,
   background = 'default',
   ...props 
-}) {
+}: SectionProps) {
   const sectionClasses = `section section--${background} ${className}`;
 
   return (

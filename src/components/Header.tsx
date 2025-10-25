@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Code, ChevronDown } from 'lucide-react';
 import { containerVariants, itemVariants, GradientText, Button, SocialLinks } from './common';
@@ -7,7 +7,7 @@ import '../styles/Header.css';
 import profileImage from '../assets/profile.png';
 
 function Header() {
-  const [isVisible, setIsVisible] = useState(true);
+  const [isVisible, setIsVisible] = useState<boolean>(true);
 
   useEffect(() => {
     const handleScroll = () => {

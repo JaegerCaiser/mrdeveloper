@@ -1,5 +1,6 @@
+import React from 'react';
 import { motion } from 'framer-motion';
-import { Code, Heart, Coffee, ArrowUp } from 'lucide-react';
+import { Heart, Code, Coffee, ArrowUp } from 'lucide-react';
 import '../styles/Footer.css';
 
 function Footer() {
