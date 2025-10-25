@@ -1,4 +1,5 @@
 
+// eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
 import { Github, Linkedin, Mail, Twitter, Instagram, MessageCircle } from 'lucide-react';
 import './SocialLinks.css';
@@ -24,6 +25,7 @@ function SocialLinks({
   return (
     <div className={containerClasses}>
       {links.map((link, index) => {
+        // eslint-disable-next-line no-unused-vars
         const Icon = iconMap[link.type.toLowerCase()] || Github;
         
         return (

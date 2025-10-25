@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Mail, Phone, MapPin, Send, Github, Linkedin, Twitter, MessageCircle } from 'lucide-react';
+import { Mail, Phone, MapPin, Github, Linkedin, Twitter, MessageCircle, Send } from 'lucide-react';
 import { GradientText } from './common';
 import '../styles/Contact.css';
 
@@ -50,6 +50,7 @@ function Contact() {
     // Simulate form submission
     await new Promise(resolve => setTimeout(resolve, 2000));
     
+    // eslint-disable-next-line no-console
     console.log('Form submitted:', formData);
     setIsSubmitting(false);
     setFormData({ name: '', email: '', subject: '', message: '' });
@@ -137,7 +138,8 @@ function Contact() {
 
               <div className="contact__details">
                 {contactInfo.map((item, index) => {
-                  const IconComponent = item.icon;
+                  // eslint-disable-next-line no-unused-vars
+                  const Icon = item.icon;
                   return (
                     <motion.a
                       key={item.label}
@@ -157,7 +159,7 @@ function Contact() {
                         className="contact-icon"
                         style={{ backgroundColor: `${item.color}20`, color: item.color }}
                       >
-                        <IconComponent />
+                        <Icon />
                       </div>
                       <div className="contact-text">
                         <span className="contact-label">{item.label}</span>
@@ -172,7 +174,8 @@ function Contact() {
                 <h4>Redes Sociais</h4>
                 <div className="social-links">
                   {socialLinks.map((social, index) => {
-                    const IconComponent = social.icon;
+                    // eslint-disable-next-line no-unused-vars
+                    const Icon = social.icon;
                     return (
                       <motion.a
                         key={social.name}
@@ -195,7 +198,7 @@ function Contact() {
                         target="_blank"
                         rel="noopener noreferrer"
                       >
-                        <IconComponent />
+                        <Icon />
                         <span className="social-tooltip">{social.name}</span>
                       </motion.a>
                     );

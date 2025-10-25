@@ -8,6 +8,7 @@ function GradientText({
   as = 'span',
   ...props 
 }) {
+  // eslint-disable-next-line no-unused-vars
   const Component = as;
   const classes = `gradient-text gradient-text--${gradient} ${className}`;
 
