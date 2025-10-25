@@ -1,0 +1,91 @@
+/* ============================================
+   Card Component Styles
+   ============================================ */
+
+.card {
+  position: relative;
+  border-radius: 20px;
+  padding: 2rem;
+  transition: var(--transition);
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, var(--glass-border), transparent);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: subtract;
+    pointer-events: none;
+  }
+
+  /* Variants */
+  &--glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.08);
+    }
+  }
+
+  &--solid {
+    background: var(--bg-secondary);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+  }
+
+  &--gradient {
+    background: linear-gradient(135deg, 
+      rgba(102, 126, 234, 0.1) 0%, 
+      rgba(245, 87, 108, 0.1) 100%
+    );
+    border: 1px solid var(--glass-border);
+  }
+
+  &--primary {
+    background: linear-gradient(135deg, var(--primary-gradient));
+    color: white;
+  }
+
+  &--secondary {
+    background: linear-gradient(135deg, var(--secondary-gradient));
+    color: white;
+  }
+
+  /* Hover Effects */
+  &:hover {
+    box-shadow: 
+      0 20px 40px rgba(0, 0, 0, 0.1),
+      0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  }
+
+  /* Content Spacing */
+  > *:first-child {
+    margin-top: 0;
+  }
+
+  > *:last-child {
+    margin-bottom: 0;
+  }
+}
+
+/* ============================================
+   Responsive
+   ============================================ */
+
+@media (max-width: 768px) {
+  .card {
+    padding: 1.5rem;
+    border-radius: 15px;
+  }
+}

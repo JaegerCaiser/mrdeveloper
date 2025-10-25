@@ -1,11 +1,11 @@
-import React, { ReactNode, MouseEvent } from 'react';
-import { motion } from 'framer-motion';
-import './Button.css';
+import { ReactNode, MouseEvent } from "react";
+import { motion } from "framer-motion";
+import "./Button.scss";
 
 interface ButtonProps {
   children: ReactNode;
-  variant?: 'primary' | 'secondary' | 'ghost';
-  size?: 'small' | 'medium' | 'large';
+  variant?: "primary" | "secondary" | "ghost";
+  size?: "small" | "medium" | "large";
   onClick?: (e: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => void;
   disabled?: boolean;
   icon?: ReactNode;
@@ -13,17 +13,19 @@ interface ButtonProps {
   [key: string]: any;
 }
 
-function Button({ 
-  children, 
-  variant = 'primary', 
-  size = 'medium', 
-  onClick, 
+function Button({
+  children,
+  variant = "primary",
+  size = "medium",
+  onClick,
   disabled = false,
   icon = null,
   href = null,
-  ...props 
+  ...props
 }: ButtonProps) {
-  const buttonClasses = `btn btn--${variant} btn--${size} ${disabled ? 'btn--disabled' : ''}`;
+  const buttonClasses = `btn btn--${variant} btn--${size} ${
+    disabled ? "btn--disabled" : ""
+  }`;
 
   const buttonContent = (
     <>
@@ -37,7 +39,7 @@ function Button({
     whileTap: disabled ? {} : { scale: 0.95 },
     className: buttonClasses,
     onClick: disabled ? undefined : onClick,
-    ...props
+    ...props,
   };
 
   if (href && !disabled) {
