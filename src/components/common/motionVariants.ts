@@ -1,6 +1,7 @@
 // Variações de animação reutilizáveis para Framer Motion
+import { Variants } from 'framer-motion';
 
-export const containerVariants = {
+export const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -11,7 +12,7 @@ export const containerVariants = {
   }
 };
 
-export const itemVariants = {
+export const itemVariants: Variants = {
   hidden: { y: 50, opacity: 0 },
   visible: {
     y: 0,
@@ -23,7 +24,7 @@ export const itemVariants = {
   }
 };
 
-export const fadeInVariants = {
+export const fadeInVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -33,7 +34,7 @@ export const fadeInVariants = {
   }
 };
 
-export const slideInVariants = {
+export const slideInVariants: Variants = {
   hidden: { x: -50, opacity: 0 },
   visible: {
     x: 0,
@@ -45,7 +46,7 @@ export const slideInVariants = {
   }
 };
 
-export const scaleInVariants = {
+export const scaleInVariants: Variants = {
   hidden: { scale: 0.8, opacity: 0 },
   visible: {
     scale: 1,

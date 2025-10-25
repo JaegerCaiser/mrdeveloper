@@ -1,11 +1,11 @@
-
+import React from 'react';
 import { motion } from 'framer-motion';
 import { Code, Zap, Heart, Target, Award, Coffee } from 'lucide-react';
 import { GradientText } from './common';
 import '../styles/About.css';
 
 function About() {
-  const containerVariants = {
+  const containerVariants: any = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
@@ -16,7 +16,7 @@ function About() {
     }
   };
 
-  const itemVariants = {
+  const itemVariants: any = {
     hidden: { y: 50, opacity: 0 },
     visible: {
       y: 0,

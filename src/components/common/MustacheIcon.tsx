@@ -1,6 +1,11 @@
+import React, { SVGProps } from 'react';
 
+interface MustacheIconProps extends SVGProps<SVGSVGElement> {
+  className?: string;
+  size?: number;
+}
 
-function MustacheIcon({ className, size = 24, ...props }) {
+function MustacheIcon({ className, size = 24, ...props }: MustacheIconProps) {
   return (
     <svg
       width={size}

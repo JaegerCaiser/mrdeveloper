@@ -1,7 +1,16 @@
-
+import React, { ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import { itemVariants } from './motionVariants';
 import './Card.css';
+
+interface CardProps {
+  children: ReactNode;
+  className?: string;
+  variant?: 'glass' | 'solid' | 'gradient' | 'primary' | 'secondary';
+  hover?: boolean;
+  delay?: number;
+  [key: string]: any;
+}
 
 function Card({ 
   children, 
@@ -10,10 +19,10 @@ function Card({
   hover = true,
   delay = 0,
   ...props 
-}) {
+}: CardProps) {
   const cardClasses = `card card--${variant} ${className}`;
 
-  const motionProps = {
+  const motionProps: any = {
     className: cardClasses,
     variants: itemVariants,
     transition: { delay },

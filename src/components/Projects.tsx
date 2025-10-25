@@ -1,13 +1,17 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ExternalLink, Github, Code, Palette, Database, Smartphone, Globe, Zap } from 'lucide-react';
 import { GradientText } from './common';
 import '../styles/Projects.css';
 
-function Projects() {
-  const [filter, setFilter] = useState('all');
+interface Project {
+  [key: string]: any;
+}
 
-  const containerVariants = {
+function Projects() {
+  const [filter, setFilter] = useState<string>('all');
+
+  const containerVariants: any = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
@@ -18,7 +22,7 @@ function Projects() {
     }
   };
 
-  const itemVariants = {
+  const itemVariants: any = {
     hidden: { y: 50, opacity: 0 },
     visible: {
       y: 0,
@@ -30,7 +34,7 @@ function Projects() {
     }
   };
 
-  const projects = [
+  const projects: Project[] = [
     {
       id: 1,
       title: 'E-Commerce Platform',
@@ -118,7 +122,7 @@ function Projects() {
     ? projects 
     : projects.filter(project => project.category === filter);
 
-  const getStatusColor = (status) => {
+  const getStatusColor = (status: string) => {
     switch (status) {
       case 'Concluído': return '#10b981';
       case 'Em desenvolvimento': return '#f59e0b';
@@ -224,13 +228,13 @@ function Projects() {
                 <p className="project-description">{project.description}</p>
 
                 <div className="project-features">
-                  {project.features.slice(0, 3).map((feature, idx) => (
+                  {project.features.slice(0, 3).map((feature: any, idx: number) => (
                     <span key={idx} className="feature-tag">{feature}</span>
                   ))}
                 </div>
 
                 <div className="project-tech">
-                  {project.technologies.map((tech, idx) => (
+                  {project.technologies.map((tech: any, idx: number) => (
                     <span key={idx} className="tech-tag">{tech}</span>
                   ))}
                 </div>

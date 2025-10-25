@@ -1,19 +1,26 @@
-import { useState } from 'react';
+import React, { useState, ChangeEvent, FormEvent } from 'react';
 import { motion } from 'framer-motion';
 import { Mail, Phone, MapPin, Send, Github, Linkedin, Twitter, MessageCircle } from 'lucide-react';
 import { GradientText } from './common';
 import '../styles/Contact.css';
 
+interface FormData {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+}
+
 function Contact() {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     name: '',
     email: '',
     subject: '',
     message: ''
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-  const containerVariants = {
+  const containerVariants: any = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
@@ -24,7 +31,7 @@ function Contact() {
     }
   };
 
-  const itemVariants = {
+  const itemVariants: any = {
     hidden: { y: 50, opacity: 0 },
     visible: {
       y: 0,
@@ -36,14 +43,14 @@ function Contact() {
     }
   };
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
     });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
     
@@ -178,7 +185,7 @@ function Contact() {
                         key={social.name}
                         href={social.url}
                         className="social-link"
-                        style={{ '--social-color': social.color }}
+                        style={{ '--social-color': social.color } as any}
                         whileHover={{ 
                           scale: 1.1,
                           y: -5,
@@ -250,7 +257,7 @@ function Contact() {
                 <textarea
                   name="message"
                   placeholder="Sua mensagem..."
-                  rows="6"
+                  rows={6}
                   value={formData.message}
                   onChange={handleInputChange}
                   required
