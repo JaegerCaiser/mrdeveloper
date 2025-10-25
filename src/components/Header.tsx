@@ -7,7 +7,14 @@ import "../styles/Header.scss";
 import profileImage from "../assets/profile.png";
 
 function Header() {
-  const [isVisible, setIsVisible] = useState<boolean>(true);
+  const [isReady, setIsReady] = useState(false);
+
+  const [isVisible, setIsVisible] = useState<boolean>(() => {
+    if (typeof window !== "undefined") {
+      return window.scrollY < 100;
+    }
+    return true;
+  });
   const [scrollProgress, setScrollProgress] = useState<number>(() => {
     if (typeof window !== "undefined") {
       return Math.min(window.scrollY / 400, 1);
@@ -22,6 +29,19 @@ function Header() {
   });
   const ticking = useRef<boolean>(false);
 
+  // Marca como pronto após um pequeno delay para garantir posicionamento correto
+  useEffect(() => {
+    // Força atualização do scroll antes de mostrar a foto
+    const currentScrollY = window.scrollY;
+    // eslint-disable-next-line
+    setCurrentScroll(currentScrollY);
+    setScrollProgress(Math.min(currentScrollY / 400, 1));
+    const timer = setTimeout(() => {
+      setIsReady(true);
+    }, 100); // 100ms de delay
+
+    return () => clearTimeout(timer);
+  }, []);
   const handleScroll = useCallback(() => {
     if (!ticking.current) {
       window.requestAnimationFrame(() => {
@@ -94,14 +114,13 @@ function Header() {
     };
   }, [scrollProgress, currentScroll]);
 
-  const profileStyles = useMemo(
-    () => ({
-      left: scrollProgress === 0 ? "50%" : `${imageStyles.imageLeft}%`,
-      top: scrollProgress === 0 ? "33%" : `${imageStyles.imageTop}%`,
+  const profileStyles = useMemo(() => {
+    return {
+      left: `${imageStyles.imageLeft}%`,
+      top: `${imageStyles.imageTop}%`,
       transform: `translate(${imageStyles.translateX}%, ${imageStyles.translateY}%) scale(${imageStyles.imageScale}) translateZ(0)`,
-    }),
-    [scrollProgress, imageStyles]
-  );
+    };
+  }, [imageStyles]);
 
   const imageStylesMemo = useMemo(
     () => ({
@@ -163,19 +182,21 @@ function Header() {
       </nav>
 
       <div className="header__content">
-        <motion.div
-          className="header__profile header__profile--fixed"
-          style={profileStyles}
-        >
-          <motion.img
-            src={profileImage}
-            alt="Matheus Henrique Caiser"
-            className="header__image"
-            style={imageStylesMemo}
-          />
+        {isReady && (
+          <motion.div
+            className="header__profile header__profile--fixed"
+            style={profileStyles}
+          >
+            <motion.img
+              src={profileImage}
+              alt="Matheus Henrique Caiser"
+              className="header__image"
+              style={imageStylesMemo}
+            />
 
-          <motion.div className="header__profile-glow" style={glowStyles} />
-        </motion.div>
+            <motion.div className="header__profile-glow" style={glowStyles} />
+          </motion.div>
+        )}
 
         <div className="header__text">
           <div className="header__greeting">

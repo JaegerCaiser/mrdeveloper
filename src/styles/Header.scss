@@ -56,6 +56,15 @@ $profile-glow-size-mobile: 203px; // 169px + 20%
   }
 }
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
 @keyframes blink {
   0%, 50% {
     opacity: 1;
@@ -65,15 +74,6 @@ $profile-glow-size-mobile: 203px; // 169px + 20%
   }
 }
 
-@keyframes profileFadeIn {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
 // Main Header
 .header {
   position: relative;
@@ -228,7 +228,7 @@ $profile-glow-size-mobile: 203px; // 169px + 20%
     margin-top: 2rem;
     z-index: 1;
     // Adiciona espaço no topo para a imagem fixa não sobrepor o texto
-      padding-top: 320px; // Espaço aumentado para a imagem de perfil
+    padding-top: 320px; // Espaço aumentado para a imagem de perfil
   }
 
   // Profile Section
@@ -237,18 +237,16 @@ $profile-glow-size-mobile: 203px; // 169px + 20%
     margin-top: 2rem;
     margin-bottom: 0.5rem;
     
-    // Estado fixo quando rola a página
     &--fixed {
-        position: fixed;
+      position: fixed;
         z-index: 100;
         margin: 0;
-        // SEM ANIMAÇÃO - apenas posicionamento
-        // Otimizações de performance
-        will-change: transform, left, top;
-          backface-visibility: hidden;
-        }
-        
-        &-glow {
+      will-change: transform, left, top;
+        backface-visibility: hidden;
+      animation: fadeIn 0.3s ease-out;
+      }
+    }
+    &__profile-glow {
       position: absolute;
       top: 50%;
       left: 50%;
@@ -260,7 +258,6 @@ $profile-glow-size-mobile: 203px; // 169px + 20%
       filter: blur(20px);
       z-index: -1;
       transition: all 0.5s ease;
-    }
   }
 
   &__image {
