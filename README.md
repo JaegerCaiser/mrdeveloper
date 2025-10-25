@@ -1,70 +1,248 @@
-# Getting Started with Create React App
+<div align="center">
+  
+# 🎨 MR.DEVELOPER Portfolio
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
+[![Framer Motion](https://img.shields.io/badge/Framer%20Motion-0055FF?style=for-the-badge&logo=framer&logoColor=white)](https://www.framer.com/motion/)
+[![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://vercel.com)
 
-## Available Scripts
+**Um portfólio moderno e interativo construído com React e TypeScript**
 
-In the project directory, you can run:
+[🌐 Live Demo](https://mrdeveloper.vercel.app) • [📝 Documentação](#-features) • [🚀 Deploy](#-deploy)
 
-### `npm start`
+</div>
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+---
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## ✨ Features
 
-### `npm test`
+- 🎭 **Animações Suaves** - Transições elegantes com Framer Motion
+- 💎 **Design Glassmorphism** - Interface moderna com efeitos de vidro
+- 📱 **Totalmente Responsivo** - Perfeito em qualquer dispositivo
+- 🎨 **Gradientes Vibrantes** - Paleta de cores dinâmica e atraente
+- ⚡ **Performance Otimizada** - Build otimizado e lazy loading
+- 🔍 **SEO Friendly** - Meta tags e estrutura semântica
+- 🎯 **TypeScript** - Type safety completo
+- 🧪 **Testado** - Cobertura de testes com Jest e React Testing Library
+- 🐳 **Docker Ready** - Containerização completa
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## 🛠️ Tech Stack
 
-### `npm run build`
+### Core
+- **React 18.3.1** - Biblioteca UI moderna
+- **TypeScript 5.9.3** - Superset JavaScript tipado
+- **Framer Motion 12.23.24** - Biblioteca de animações
+- **Lucide React 0.548.0** - Ícones modernos e leves
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### Desenvolvimento
+- **React Scripts 5.0.1** - Ferramentas de build
+- **Jest & Testing Library** - Framework de testes
+- **pnpm** - Gerenciador de pacotes rápido
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### DevOps
+- **Docker** - Containerização
+- **Vercel** - Deploy e hosting
+- **GitHub Actions** - CI/CD
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## 🚀 Quick Start
 
-### `npm run eject`
+### Pré-requisitos
+```bash
+Node.js >= 16.x
+pnpm >= 8.x (recomendado) ou npm/yarn
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### Instalação
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+1. **Clone o repositório**
+```bash
+git clone https://github.com/JaegerCaiser/mrdeveloper.git
+cd mrdeveloper
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+2. **Instale as dependências**
+```bash
+pnpm install
+# ou
+npm install
+```
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+3. **Inicie o servidor de desenvolvimento**
+```bash
+pnpm start
+# ou
+npm start
+```
 
-## Learn More
+4. **Abra no navegador**
+```
+http://localhost:3000
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## 📦 Scripts Disponíveis
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+| Comando | Descrição |
+|---------|-----------|
+| `pnpm start` | Inicia o servidor de desenvolvimento |
+| `pnpm build` | Cria build de produção |
+| `pnpm test` | Executa os testes |
+| `pnpm test:coverage` | Testes com cobertura |
+| `pnpm eject` | Ejeta configuração do CRA (irreversível) |
 
-### Code Splitting
+## 🐳 Docker
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+### Build da imagem
+```bash
+docker build -t mrdeveloper .
+```
 
-### Analyzing the Bundle Size
+### Executar container
+```bash
+docker run -p 3000:3000 mrdeveloper
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+### Docker Compose
+```bash
+docker-compose up
+```
 
-### Making a Progressive Web App
+## 📁 Estrutura do Projeto
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+```
+mrdeveloper/
+├── public/                 # Arquivos estáticos
+├── src/
+│   ├── assets/            # Imagens e recursos
+│   ├── components/        # Componentes React
+│   │   ├── common/       # Componentes reutilizáveis
+│   │   │   ├── Button.tsx
+│   │   │   ├── Card.tsx
+│   │   │   ├── GradientText.tsx
+│   │   │   ├── Section.tsx
+│   │   │   ├── SocialLinks.tsx
+│   │   │   └── MustacheIcon.tsx
+│   │   ├── Header.tsx
+│   │   ├── About.tsx
+│   │   ├── Projects.tsx
+│   │   ├── Contact.tsx
+│   │   └── Footer.tsx
+│   ├── styles/           # Arquivos CSS
+│   ├── App.tsx           # Componente principal
+│   ├── index.tsx         # Entry point
+│   └── react-app-env.d.ts # Type declarations
+├── tsconfig.json         # Configuração TypeScript
+├── package.json
+├── Dockerfile
+└── docker-compose.yml
+```
 
-### Advanced Configuration
+## 🎨 Componentes Reutilizáveis
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+O projeto utiliza uma arquitetura de componentes bem estruturada:
 
-### Deployment
+### Button
+```tsx
+import { Button } from './components/common';
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+<Button 
+  variant="primary" 
+  size="large"
+  onClick={handleClick}
+>
+  Click Me
+</Button>
+```
 
-### `npm run build` fails to minify
+### Card
+```tsx
+import { Card } from './components/common';
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+<Card variant="glass" hover delay={0.2}>
+  <h3>Title</h3>
+  <p>Content</p>
+</Card>
+```
+
+### GradientText
+```tsx
+import { GradientText } from './components/common';
+
+<GradientText gradient="primary">
+  Highlighted Text
+</GradientText>
+```
+
+> 📖 Veja mais exemplos em [`src/components/ExampleUsage.js`](./src/components/ExampleUsage.js)
+
+## 🧪 Testes
+
+```bash
+# Executar todos os testes
+pnpm test
+
+# Testes com cobertura
+pnpm test -- --coverage
+
+# Modo watch
+pnpm test -- --watch
+```
+
+## 🌐 Deploy
+
+### Vercel (Recomendado)
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/JaegerCaiser/mrdeveloper)
+
+1. Conecte seu repositório no [Vercel](https://vercel.com)
+2. Configure as variáveis de ambiente (se necessário)
+3. Deploy automático a cada push na main
+
+### Build Manual
+```bash
+pnpm build
+# Arquivos estarão em ./build/
+```
+
+## 🎯 Roadmap
+
+- [x] Migração para TypeScript
+- [x] Testes unitários
+- [x] Docker setup
+- [ ] Adicionar modo escuro/claro
+- [ ] Implementar i18n (EN/PT)
+- [ ] Blog integrado
+- [ ] Analytics dashboard
+- [ ] Acessibilidade (WCAG AA)
+
+## 🤝 Contribuindo
+
+Contribuições são bem-vindas! Siga os passos:
+
+1. Fork o projeto
+2. Crie uma branch (`git checkout -b feature/AmazingFeature`)
+3. Commit suas mudanças (`git commit -m 'Add: amazing feature'`)
+4. Push para a branch (`git push origin feature/AmazingFeature`)
+5. Abra um Pull Request
+
+## 📄 Licença
+
+Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+
+## 👨‍💻 Autor
+
+**Matheus Caiser**
+
+- GitHub: [@JaegerCaiser](https://github.com/JaegerCaiser)
+- LinkedIn: [Matheus Caiser](https://linkedin.com/in/matheus-caiser)
+- Portfolio: [mrdeveloper.vercel.app](https://mrdeveloper.vercel.app)
+
+---
+
+<div align="center">
+
+**⭐ Se este projeto te ajudou, deixe uma estrela!**
+
+Made with ❤️ and ☕ by [MR.DEVELOPER](https://github.com/JaegerCaiser)
+
+</div>
