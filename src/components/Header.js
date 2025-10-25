@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ChevronDown, Code } from 'lucide-react';
-import { Button, SocialLinks, GradientText, MustacheIcon, containerVariants, itemVariants } from './common';
+import { Code, ChevronDown } from 'lucide-react';
+import { containerVariants, itemVariants, GradientText, Button, SocialLinks } from './common';
+import MustacheIcon from './common/MustacheIcon';
 import '../styles/Header.css';
 import profileImage from '../assets/profile.png';
 

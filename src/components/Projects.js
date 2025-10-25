@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ExternalLink, Github, Code, Palette, Database, Smartphone, Globe, Zap } from 'lucide-react';
+import { Code, Palette, Database, Smartphone, Globe, Zap, Github, ExternalLink } from 'lucide-react';
 import { GradientText } from './common';
 import '../styles/Projects.css';
 
@@ -149,7 +149,8 @@ function Projects() {
 
         <motion.div className="projects__filters" variants={itemVariants}>
           {categories.map((category) => {
-            const IconComponent = category.icon;
+            // eslint-disable-next-line no-unused-vars
+            const Icon = category.icon;
             return (
               <motion.button
                 key={category.id}
@@ -158,7 +159,7 @@ function Projects() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <IconComponent className="filter-icon" />
+                <Icon className="filter-icon" />
                 <span>{category.name}</span>
               </motion.button>
             );

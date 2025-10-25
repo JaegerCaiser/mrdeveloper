@@ -1,6 +1,7 @@
 // Exemplo de como usar os componentes reutilizáveis no projeto
+// Este arquivo contém exemplos de uso e pode ser removido em produção
 
-
+/* eslint-disable no-unused-vars */
 import { Code, Zap, Heart } from 'lucide-react';
 import { 
   Section, 
@@ -9,6 +10,7 @@ import {
   GradientText, 
   SocialLinks
 } from './common';
+/* eslint-enable no-unused-vars */
 
 // Exemplo de como refatorar uma seção usando os componentes comuns
 function ExampleSection() {

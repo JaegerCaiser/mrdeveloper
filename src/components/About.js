@@ -1,4 +1,3 @@
-
 import { motion } from 'framer-motion';
 import { Code, Zap, Heart, Target, Award, Coffee } from 'lucide-react';
 import { GradientText } from './common';
