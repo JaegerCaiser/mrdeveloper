@@ -232,7 +232,7 @@ $profile-glow-size-mobile: 203px; // 169px + 20%
     margin-bottom: 0.5rem;
     
     // Estado fixo quando rola a página
-      &--fixed {
+    &--fixed {
         position: fixed;
         z-index: 100;
         margin: 0;
@@ -241,6 +241,7 @@ $profile-glow-size-mobile: 203px; // 169px + 20%
         transform: translateZ(0); // Força aceleração de hardware
         backface-visibility: hidden; // Evita flickering
       }
+
     &-glow {
       position: absolute;
       top: 50%;
