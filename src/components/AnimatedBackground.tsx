@@ -65,7 +65,7 @@ const AnimatedBackground: React.FC = () => {
     resize();
     window.addEventListener("resize", resize);
 
-    const mouse = { x: -1000, y: -1000, radius: 200, radiusSquared: 40000 };
+    const mouse = { x: -1000, y: -1000, radius: 300, radiusSquared: 90000 };
 
     const handleMouseMove = (e: MouseEvent) => {
       mouse.x = e.clientX;
@@ -80,147 +80,109 @@ const AnimatedBackground: React.FC = () => {
     window.addEventListener("mousemove", handleMouseMove, { passive: true });
     window.addEventListener("mouseleave", handleMouseLeave, { passive: true });
 
-    const particleCount = 150;
+    const particleCount = 500;
     const particles: Particle[] = [];
     for (let i = 0; i < particleCount; i++) {
       particles.push(new Particle(canvas.width, canvas.height));
     }
 
     let animationFrameId: number;
-    let heroRect: DOMRect | null = null;
-    let heroRectUpdateCounter = 0;
 
     const animate = () => {
       ctx.fillStyle = "#000000";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Configurable parameters
+      const maxLineLengthSquared = 75 ** 2; // 75px max line length
+      const propagationRadiusSquared = 10 ** 2; // 10px propagation radius
+      const maxLayers = 6; // Number of propagation layers
 
       for (let i = 0; i < particleCount; i++) {
         particles[i].update();
         particles[i].draw(ctx);
       }
 
-      if (heroRectUpdateCounter++ % 60 === 0) {
-        const heroEl = document.getElementById("hero");
-        heroRect = heroEl?.getBoundingClientRect() || null;
+      // Always check for connections, regardless of hero section
+      const connectedParticles: Particle[] = [];
+
+      for (let i = 0; i < particleCount; i++) {
+        const p = particles[i];
+        const dx = mouse.x - p.x;
+        const dy = mouse.y - p.y;
+        const distSquared = dx * dx + dy * dy;
+        if (distSquared < mouse.radiusSquared) {
+          connectedParticles.push(p);
+        }
       }
 
-      const isMouseInHero =
-        !!heroRect &&
-        mouse.x >= heroRect.left &&
-        mouse.x <= heroRect.right &&
-        mouse.y >= heroRect.top &&
-        mouse.y <= heroRect.bottom;
+      const processedParticles: Particle[] = [...connectedParticles];
 
-      if (isMouseInHero) {
-        const connectedParticles: Particle[] = [];
-        const propagationRadius = 250;
-        const propagationRadiusSquared = 62500;
+      if (connectedParticles.length > 0) {
+        ctx.save();
+        ctx.globalCompositeOperation = "lighter";
 
-        for (let i = 0; i < particleCount; i++) {
-          const p = particles[i];
+        // Use Set for O(1) processed particles lookup
+        const processedSet = new Set<Particle>(connectedParticles);
+
+        // Draw connections from mouse to all particles within radius
+        for (let i = 0; i < connectedParticles.length; i++) {
+          const p = connectedParticles[i];
           const dx = mouse.x - p.x;
           const dy = mouse.y - p.y;
           const distSquared = dx * dx + dy * dy;
-          if (distSquared < mouse.radiusSquared) {
-            connectedParticles.push(p);
-          }
+          if (distSquared > maxLineLengthSquared) continue; // Max line length
+
+          const opacity = 0.6;
+
+          ctx.shadowColor = `rgba(255, 50, 50, ${opacity})`;
+          ctx.shadowBlur = 14;
+          ctx.strokeStyle = `rgba(255, 30, 30, ${opacity * 0.55})`;
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.moveTo(mouse.x, mouse.y);
+          ctx.lineTo(p.x, p.y);
+          ctx.stroke();
+
+          ctx.shadowBlur = 0;
+          ctx.strokeStyle = `rgba(255, 95, 95, ${Math.min(1, opacity * 1.1)})`;
+          ctx.lineWidth = 1.0;
+          ctx.beginPath();
+          ctx.moveTo(mouse.x, mouse.y);
+          ctx.lineTo(p.x, p.y);
+          ctx.stroke();
+
+          ctx.strokeStyle = `rgba(255, 255, 255, ${opacity * 0.35})`;
+          ctx.lineWidth = 0.4;
+          ctx.beginPath();
+          ctx.moveTo(mouse.x, mouse.y);
+          ctx.lineTo(p.x, p.y);
+          ctx.stroke();
         }
 
-        if (connectedParticles.length > 0) {
-          const processedSet = new Set<Particle>();
-          ctx.save();
-          ctx.globalCompositeOperation = "lighter";
+        // Multi-layer propagation connections
+        const processedParticles: Particle[] = [...connectedParticles];
+        let currentLayer = [...connectedParticles];
 
-          for (let i = 0; i < connectedParticles.length; i++) {
-            const p = connectedParticles[i];
-            if (processedSet.has(p) || !p.flickerState) continue;
+        for (let layer = 0; layer < maxLayers; layer++) {
+          const nextLayer: Particle[] = [];
+          const layerOpacity = 0.4; // Constant opacity for all layers
 
-            const flickerGroup: Particle[] = [p];
-            processedSet.add(p);
-
-            for (
-              let j = i + 1;
-              j < connectedParticles.length && flickerGroup.length < 5;
-              j++
-            ) {
-              const other = connectedParticles[j];
-              if (processedSet.has(other)) continue;
-              const dx = p.x - other.x;
-              const dy = p.y - other.y;
-              if (dx * dx + dy * dy < 14400) {
-                flickerGroup.push(other);
-                processedSet.add(other);
-              }
-            }
-
-            for (let k = 0; k < flickerGroup.length; k++) {
-              const gp = flickerGroup[k];
-              if (!gp.flickerState) continue;
-
-              const dx = mouse.x - gp.x;
-              const dy = mouse.y - gp.y;
-              const distance = Math.sqrt(dx * dx + dy * dy);
-              const fadeProgress = Math.min(1, gp.flickerTimer * 0.1);
-              const opacity =
-                (1 - distance / mouse.radius) * 0.6 * fadeProgress;
-
-              ctx.shadowColor = `rgba(255, 50, 50, ${opacity})`;
-              ctx.shadowBlur = 14;
-              ctx.strokeStyle = `rgba(255, 30, 30, ${opacity * 0.55})`;
-              ctx.lineWidth = 3.5;
-              ctx.beginPath();
-              ctx.moveTo(mouse.x, mouse.y);
-              ctx.lineTo(gp.x, gp.y);
-              ctx.stroke();
-
-              ctx.shadowBlur = 0;
-              ctx.strokeStyle = `rgba(255, 95, 95, ${Math.min(
-                1,
-                opacity * 1.1
-              )})`;
-              ctx.lineWidth = 1.5;
-              ctx.beginPath();
-              ctx.moveTo(mouse.x, mouse.y);
-              ctx.lineTo(gp.x, gp.y);
-              ctx.stroke();
-
-              ctx.strokeStyle = `rgba(255, 255, 255, ${opacity * 0.35})`;
-              ctx.lineWidth = 0.6;
-              ctx.beginPath();
-              ctx.moveTo(mouse.x, mouse.y);
-              ctx.lineTo(gp.x, gp.y);
-              ctx.stroke();
-            }
-          }
-
-          for (let i = 0; i < connectedParticles.length; i++) {
-            const cp = connectedParticles[i];
+          for (const cp of currentLayer) {
             for (let j = 0; j < particleCount; j++) {
               const p = particles[j];
-              if (!p.flickerState) continue;
-              let isConnected = false;
-              for (let k = 0; k < connectedParticles.length; k++) {
-                if (connectedParticles[k] === p) {
-                  isConnected = true;
-                  break;
-                }
-              }
-              if (isConnected) continue;
+              if (processedSet.has(p)) continue;
 
               const dx = cp.x - p.x;
               const dy = cp.y - p.y;
               const distSquared = dx * dx + dy * dy;
 
               if (distSquared < propagationRadiusSquared) {
-                const distance = Math.sqrt(distSquared);
-                const fadeProgress = Math.min(1, p.flickerTimer * 0.1);
-                const opacity =
-                  (1 - distance / propagationRadius) * 0.4 * fadeProgress;
+                const opacity = layerOpacity;
 
                 ctx.shadowColor = `rgba(255, 50, 50, ${opacity})`;
                 ctx.shadowBlur = 8;
                 ctx.strokeStyle = `rgba(255, 30, 30, ${opacity * 0.4})`;
-                ctx.lineWidth = 2.25;
+                ctx.lineWidth = 3.5;
                 ctx.beginPath();
                 ctx.moveTo(cp.x, cp.y);
                 ctx.lineTo(p.x, p.y);
@@ -228,24 +190,144 @@ const AnimatedBackground: React.FC = () => {
 
                 ctx.shadowBlur = 0;
                 ctx.strokeStyle = `rgba(255, 95, 95, ${opacity * 0.9})`;
-                ctx.lineWidth = 0.9;
+                ctx.lineWidth = 1.5;
                 ctx.beginPath();
                 ctx.moveTo(cp.x, cp.y);
                 ctx.lineTo(p.x, p.y);
                 ctx.stroke();
 
                 ctx.strokeStyle = `rgba(255, 255, 255, ${opacity * 0.25})`;
-                ctx.lineWidth = 0.5;
+                ctx.lineWidth = 0.6;
                 ctx.beginPath();
                 ctx.moveTo(cp.x, cp.y);
                 ctx.lineTo(p.x, p.y);
                 ctx.stroke();
+
+                processedSet.add(p);
+                nextLayer.push(p);
               }
             }
           }
-
-          ctx.restore();
+          currentLayer = nextLayer;
         }
+
+        // Batch inter-connections between all processed particles
+        const processedArray = Array.from(processedSet);
+        const interLines: Array<{ p1: Particle; p2: Particle }> = [];
+
+        for (let i = 0; i < processedArray.length; i++) {
+          const p1 = processedArray[i];
+          for (let j = i + 1; j < processedArray.length; j++) {
+            const p2 = processedArray[j];
+            const dx = p1.x - p2.x;
+            const dy = p1.y - p2.y;
+            if (dx * dx + dy * dy < maxLineLengthSquared) {
+              interLines.push({ p1, p2 });
+            }
+          }
+        }
+
+        // Draw batched inter-connections
+        if (interLines.length > 0) {
+          const opacity = 0.5;
+
+          // First pass: shadow
+          ctx.shadowBlur = 10;
+          ctx.strokeStyle = `rgba(255, 30, 30, ${opacity * 0.5})`;
+          ctx.lineWidth = 4.5;
+          ctx.beginPath();
+          for (const line of interLines) {
+            ctx.moveTo(line.p1.x, line.p1.y);
+            ctx.lineTo(line.p2.x, line.p2.y);
+          }
+          ctx.stroke();
+
+          // Second pass: main
+          ctx.shadowBlur = 0;
+          ctx.strokeStyle = `rgba(255, 95, 95, ${Math.min(1, opacity * 1.1)})`;
+          ctx.lineWidth = 2.0;
+          ctx.beginPath();
+          for (const line of interLines) {
+            ctx.moveTo(line.p1.x, line.p1.y);
+            ctx.lineTo(line.p2.x, line.p2.y);
+          }
+          ctx.stroke();
+
+          // Third pass: highlight
+          ctx.strokeStyle = `rgba(255, 255, 255, ${opacity * 0.35})`;
+          ctx.lineWidth = 0.8;
+          ctx.beginPath();
+          for (const line of interLines) {
+            ctx.moveTo(line.p1.x, line.p1.y);
+            ctx.lineTo(line.p2.x, line.p2.y);
+          }
+          ctx.stroke();
+        }
+
+        ctx.restore();
+      }
+
+      // Draw inter-connections between particles near the mouse
+      if (mouse.x !== -1000) {
+        ctx.save();
+        ctx.globalCompositeOperation = "lighter";
+
+        for (let i = 0; i < particleCount; i++) {
+          const p1 = particles[i];
+          const dx1 = mouse.x - p1.x;
+          const dy1 = mouse.y - p1.y;
+          if (dx1 * dx1 + dy1 * dy1 > 90000) continue; // 300px from mouse
+
+          for (let j = i + 1; j < particleCount; j++) {
+            const p2 = particles[j];
+            const dx2 = mouse.x - p2.x;
+            const dy2 = mouse.y - p2.y;
+            if (dx2 * dx2 + dy2 * dy2 > 90000) continue; // 300px from mouse
+
+            const dx = p1.x - p2.x;
+            const dy = p1.y - p2.y;
+            const distSquared = dx * dx + dy * dy;
+            if (distSquared < maxLineLengthSquared) {
+              // Skip if both particles are already in the processed network
+              if (
+                connectedParticles.length > 0 &&
+                processedParticles.includes(p1) &&
+                processedParticles.includes(p2)
+              )
+                continue;
+
+              const opacity = 0.5;
+
+              ctx.shadowBlur = 10;
+              ctx.strokeStyle = `rgba(255, 30, 30, ${opacity * 0.5})`;
+              ctx.lineWidth = 2.5;
+              ctx.beginPath();
+              ctx.moveTo(p1.x, p1.y);
+              ctx.lineTo(p2.x, p2.y);
+              ctx.stroke();
+
+              ctx.shadowBlur = 0;
+              ctx.strokeStyle = `rgba(255, 95, 95, ${Math.min(
+                1,
+                opacity * 1.1
+              )})`;
+              ctx.lineWidth = 1.0;
+              ctx.beginPath();
+              ctx.moveTo(p1.x, p1.y);
+              ctx.lineTo(p2.x, p2.y);
+              ctx.stroke();
+
+              ctx.strokeStyle = `rgba(255, 255, 255, ${opacity * 0.35})`;
+              ctx.lineWidth = 0.4;
+              ctx.beginPath();
+              ctx.moveTo(p1.x, p1.y);
+              ctx.lineTo(p2.x, p2.y);
+              ctx.stroke();
+            }
+          }
+        }
+
+        ctx.restore();
       }
 
       animationFrameId = requestAnimationFrame(animate);
