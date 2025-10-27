@@ -1,20 +1,27 @@
+import React from "react";
 import "./App.scss";
+import "./styles/layout.scss";
+
 import Header from "./components/Header";
-import About from "./components/About";
-import Projects from "./components/Projects";
-import Contact from "./components/Contact";
-import Footer from "./components/Footer";
+import AnimatedBackground from "./components/AnimatedBackground";
+import Hero from "./sections/Hero";
+import About from "./sections/About";
+import Experience from "./sections/Experience";
+import Writing from "./sections/Writing";
+import Contact from "./sections/Contact";
 
 function App() {
   return (
-    <div className="App">
-      <div className="App-content">
-        <Header />
+    <div className="app">
+      <AnimatedBackground />
+      <Header />
+      <main className="main" role="main">
+        <Hero />
         <About />
-        <Projects />
+        <Experience />
+        <Writing />
         <Contact />
-      </div>
-      <Footer />
+      </main>
     </div>
   );
 }

@@ -1,61 +1,34 @@
-/* ============================================
-   Global Font Import & Base Styles
-   ============================================ */
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Roboto+Mono:wght@400;500;600&display=swap");
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+/* Base resets and selection */
+*::selection {
+  background: rgba(100, 255, 218, 0.3);
 }
 
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  margin: 0;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  line-height: 1.6;
-  color: #ffffff;
-  overflow-x: hidden;
-}
-
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
-}
-
-/* ============================================
-   Global Link & Button Styles
-   ============================================ */
-
-a {
-  color: inherit;
-  text-decoration: none;
+img {
+  max-width: 100%;
+  display: block;
 }
 
 button {
-  border: none;
-  background: none;
-  font-family: inherit;
+  font: inherit;
 }
 
-/* ============================================
-   Selection Styles
-   ============================================ */
-
-::selection {
-  background: rgba(102, 126, 234, 0.3);
-  color: #ffffff;
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 12px;
 }
 
-::-moz-selection {
-  background: rgba(102, 126, 234, 0.3);
-  color: #ffffff;
+::-webkit-scrollbar-track {
+  background: #0a192f;
 }
+
+::-webkit-scrollbar-thumb {
+  background: #64ffda;
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #52d4b3;
+}
+
