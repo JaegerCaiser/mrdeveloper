@@ -15,6 +15,7 @@ class Particle {
   fillStyle: string;
   gridX: number;
   gridY: number;
+  layer: number; // Camada de propagação (0 = mouse, 1+ = propagação)
 
   constructor(canvasWidth: number, canvasHeight: number) {
     this.canvasWidth = canvasWidth;
@@ -31,6 +32,7 @@ class Particle {
     this.fillStyle = `rgba(100, 255, 218, ${this.opacity})`;
     this.gridX = 0;
     this.gridY = 0;
+    this.layer = 0; // Inicialmente na camada 0
   }
 
   update(gridSize: number) {
@@ -203,7 +205,7 @@ const AnimatedBackground: React.FC = () => {
     // Optimized configuration
     const particleCount = 500;
     const gridSize = 50; // Spatial partitioning grid size
-    const mouseRadius = 300;
+    const mouseRadius = 800;
     const mouseRadiusSquared = mouseRadius * mouseRadius;
     const maxLineLength = 95;
     const maxLineLengthSquared = maxLineLength * maxLineLength;
@@ -272,6 +274,7 @@ const AnimatedBackground: React.FC = () => {
       for (const p of nearbyParticles) {
         const distSquared = distanceCache.get(mouse.x, mouse.y, p.x, p.y);
         if (distSquared < mouseRadiusSquared) {
+          p.layer = 0; // Partículas conectadas diretamente ao mouse = camada 0
           connectedParticles.push(p);
         }
       }
@@ -282,51 +285,56 @@ const AnimatedBackground: React.FC = () => {
 
         const processedSet = new Set<Particle>(connectedParticles);
 
-        // Batch mouse connections
-        connectionBatch.setStyle(
-          0,
-          "rgba(255, 30, 30, 0.33)",
-          2.5,
-          14,
-          "rgba(255, 50, 50, 0.6)"
-        );
-        connectionBatch.setStyle(1, "rgba(255, 95, 95, 0.66)", 1.0);
-        connectionBatch.setStyle(2, "rgba(255, 255, 255, 0.21)", 0.4);
+        // Função para calcular opacidade baseada na proximidade do mouse
+        const getOpacityFromMouseDistance = (x: number, y: number): number => {
+          const distSquared = distanceCache.get(mouse.x, mouse.y, x, y);
+          const normalizedDistance = Math.sqrt(distSquared) / mouseRadius; // 0-1
+          // Opacidade máxima quando próximo, decai exponencialmente
+          return Math.max(0.05, Math.pow(1 - normalizedDistance, 2)); // Mínimo 5%
+        };
 
+        // Batch mouse connections with distance-based opacity
         for (const p of connectedParticles) {
           const distSquared = distanceCache.get(mouse.x, mouse.y, p.x, p.y);
           if (distSquared > maxLineLengthSquared) continue;
+
+          const mouseOpacity = getOpacityFromMouseDistance(p.x, p.y);
+
+          connectionBatch.setStyle(
+            0,
+            `rgba(255, 30, 30, ${mouseOpacity * 0.4})`,
+            2.5,
+            14,
+            `rgba(255, 50, 50, ${mouseOpacity * 0.6})`
+          );
+          connectionBatch.setStyle(
+            1,
+            `rgba(255, 95, 95, ${mouseOpacity * 0.8})`,
+            1.0
+          );
+          connectionBatch.setStyle(
+            2,
+            `rgba(255, 255, 255, ${mouseOpacity * 0.3})`,
+            0.4
+          );
 
           connectionBatch.addLine(mouse.x, mouse.y, p.x, p.y, 0);
           connectionBatch.addLine(mouse.x, mouse.y, p.x, p.y, 1);
           connectionBatch.addLine(mouse.x, mouse.y, p.x, p.y, 2);
         }
 
-        // Multi-layer propagation with optimized neighbor finding
+        // Multi-layer propagation with optimized neighbor finding and opacity banding
         let currentLayer = [...connectedParticles];
         let styleOffset = 3;
 
+        // Agrupar conexões de propagação por faixas de opacidade para otimizar performance
+        const propagationOpacityBands = 6; // 6 faixas de opacidade (0-5)
+        const propagationLinesByOpacity: Array<
+          Array<{ cp: Particle; p: Particle; layer: number }>
+        > = Array.from({ length: propagationOpacityBands }, () => []);
+
         for (let layer = 0; layer < maxLayers; layer++) {
           const nextLayer: Particle[] = [];
-          const layerOpacity = 0.4;
-
-          connectionBatch.setStyle(
-            styleOffset,
-            `rgba(255, 30, 30, ${layerOpacity * 0.4})`,
-            3.5,
-            8,
-            `rgba(255, 50, 50, ${layerOpacity})`
-          );
-          connectionBatch.setStyle(
-            styleOffset + 1,
-            `rgba(255, 95, 95, ${layerOpacity * 0.9})`,
-            1.5
-          );
-          connectionBatch.setStyle(
-            styleOffset + 2,
-            `rgba(255, 255, 255, ${layerOpacity * 0.25})`,
-            0.6
-          );
 
           for (const cp of currentLayer) {
             const cpGridX = Math.floor(cp.x / gridSize);
@@ -342,10 +350,19 @@ const AnimatedBackground: React.FC = () => {
 
               const distSquared = distanceCache.get(cp.x, cp.y, p.x, p.y);
               if (distSquared < propagationRadiusSquared) {
-                connectionBatch.addLine(cp.x, cp.y, p.x, p.y, styleOffset);
-                connectionBatch.addLine(cp.x, cp.y, p.x, p.y, styleOffset + 1);
-                connectionBatch.addLine(cp.x, cp.y, p.x, p.y, styleOffset + 2);
+                // Opacidade baseada na proximidade do mouse para AMBAS as partículas
+                const cpOpacity = getOpacityFromMouseDistance(cp.x, cp.y);
+                const pOpacity = getOpacityFromMouseDistance(p.x, p.y);
+                const connectionOpacity = Math.min(cpOpacity, pOpacity); // Usa a menor opacidade
 
+                // Mapear opacidade para banda (0-5)
+                const band = Math.min(
+                  propagationOpacityBands - 1,
+                  Math.floor(connectionOpacity * propagationOpacityBands)
+                );
+                propagationLinesByOpacity[band].push({ cp, p, layer });
+
+                p.layer = layer + 1; // Define a camada da partícula
                 processedSet.add(p);
                 nextLayer.push(p);
               }
@@ -353,8 +370,62 @@ const AnimatedBackground: React.FC = () => {
           }
 
           currentLayer = nextLayer;
-          styleOffset += 3;
           if (currentLayer.length === 0) break; // Early exit if no more propagation
+        }
+
+        // Desenhar conexões de propagação agrupadas por banda de opacidade
+        for (let band = 0; band < propagationOpacityBands; band++) {
+          const lines = propagationLinesByOpacity[band];
+          if (lines.length === 0) continue;
+
+          // Calcular opacidade base da banda
+          const bandOpacity = band / (propagationOpacityBands - 1);
+
+          // Configurar estilos para esta banda
+          connectionBatch.setStyle(
+            styleOffset,
+            `rgba(255, 30, 30, ${bandOpacity * 0.4})`,
+            3.5,
+            8,
+            `rgba(255, 50, 50, ${bandOpacity})`
+          );
+          connectionBatch.setStyle(
+            styleOffset + 1,
+            `rgba(255, 95, 95, ${bandOpacity * 0.9})`,
+            1.5
+          );
+          connectionBatch.setStyle(
+            styleOffset + 2,
+            `rgba(255, 255, 255, ${bandOpacity * 0.25})`,
+            0.6
+          );
+
+          // Adicionar todas as linhas desta banda
+          for (const line of lines) {
+            connectionBatch.addLine(
+              line.cp.x,
+              line.cp.y,
+              line.p.x,
+              line.p.y,
+              styleOffset
+            );
+            connectionBatch.addLine(
+              line.cp.x,
+              line.cp.y,
+              line.p.x,
+              line.p.y,
+              styleOffset + 1
+            );
+            connectionBatch.addLine(
+              line.cp.x,
+              line.cp.y,
+              line.p.x,
+              line.p.y,
+              styleOffset + 2
+            );
+          }
+
+          styleOffset += 3; // Próxima banda
         }
 
         // Batch inter-connections between processed particles
@@ -385,49 +456,76 @@ const AnimatedBackground: React.FC = () => {
           }
         }
 
-        // Batch inter-connection drawing
+        // Batch inter-connection drawing with optimized distance-based opacity
         if (interLines.length > 0) {
-          const opacity = 0.5;
-          connectionBatch.setStyle(
-            styleOffset,
-            `rgba(255, 30, 30, ${opacity * 0.5})`,
-            4.5,
-            10,
-            "rgba(255, 30, 30, 0.5)"
-          );
-          connectionBatch.setStyle(
-            styleOffset + 1,
-            `rgba(255, 95, 95, ${Math.min(1, opacity * 1.1)})`,
-            2.0
-          );
-          connectionBatch.setStyle(
-            styleOffset + 2,
-            `rgba(255, 255, 255, ${opacity * 0.35})`,
-            0.8
-          );
+          // Agrupar por faixas de opacidade para otimizar performance
+          const opacityBands = 8; // 8 faixas de opacidade (0-7)
+          const linesByOpacity: Array<Array<{ p1: Particle; p2: Particle }>> =
+            Array.from({ length: opacityBands }, () => []);
 
           for (const line of interLines) {
-            connectionBatch.addLine(
-              line.p1.x,
-              line.p1.y,
-              line.p2.x,
-              line.p2.y,
-              styleOffset
+            const p1Opacity = getOpacityFromMouseDistance(line.p1.x, line.p1.y);
+            const p2Opacity = getOpacityFromMouseDistance(line.p2.x, line.p2.y);
+            const interOpacity = Math.min(p1Opacity, p2Opacity) * 0.7;
+            // Mapear opacidade para banda (0-7)
+            const band = Math.min(
+              opacityBands - 1,
+              Math.floor(interOpacity * opacityBands)
             );
-            connectionBatch.addLine(
-              line.p1.x,
-              line.p1.y,
-              line.p2.x,
-              line.p2.y,
-              styleOffset + 1
+            linesByOpacity[band].push(line);
+          }
+
+          // Desenhar cada banda com sua opacidade específica
+          for (let band = 0; band < opacityBands; band++) {
+            const lines = linesByOpacity[band];
+            if (lines.length === 0) continue;
+
+            // Calcular opacidade base da banda
+            const bandOpacity = (band / (opacityBands - 1)) * 0.7;
+
+            connectionBatch.setStyle(
+              styleOffset,
+              `rgba(255, 30, 30, ${bandOpacity * 0.5})`,
+              4.5,
+              10,
+              `rgba(255, 30, 30, ${bandOpacity})`
             );
-            connectionBatch.addLine(
-              line.p1.x,
-              line.p1.y,
-              line.p2.x,
-              line.p2.y,
-              styleOffset + 2
+            connectionBatch.setStyle(
+              styleOffset + 1,
+              `rgba(255, 95, 95, ${Math.min(1, bandOpacity * 1.1)})`,
+              2.0
             );
+            connectionBatch.setStyle(
+              styleOffset + 2,
+              `rgba(255, 255, 255, ${bandOpacity * 0.35})`,
+              0.8
+            );
+
+            for (const line of lines) {
+              connectionBatch.addLine(
+                line.p1.x,
+                line.p1.y,
+                line.p2.x,
+                line.p2.y,
+                styleOffset
+              );
+              connectionBatch.addLine(
+                line.p1.x,
+                line.p1.y,
+                line.p2.x,
+                line.p2.y,
+                styleOffset + 1
+              );
+              connectionBatch.addLine(
+                line.p1.x,
+                line.p1.y,
+                line.p2.x,
+                line.p2.y,
+                styleOffset + 2
+              );
+            }
+
+            styleOffset += 3; // Próxima banda
           }
         }
 
