@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo } from "react";
 import "./Header.scss";
 import mustacheSvg from "../assets/mustache.svg";
 
@@ -94,4 +94,4 @@ const Header: React.FC = () => {
   );
 };
 
-export default Header;
+export default memo(Header);

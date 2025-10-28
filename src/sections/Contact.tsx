@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback, useMemo } from "react";
 import "./Contact.scss";
 
 const Contact: React.FC = () => {
@@ -13,21 +13,26 @@ const Contact: React.FC = () => {
     message: false,
   });
 
-  const emailRegex =
-    /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  const emailRegex = useMemo(
+    () =>
+      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+    []
+  );
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    // Clear error when user starts typing
-    if (errors[name as keyof typeof errors]) {
-      setErrors((prev) => ({ ...prev, [name]: false }));
-    }
-  };
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      const { name, value } = e.target;
+      const fieldName = name === "_replyto" ? "email" : name;
+      setFormData((prev) => ({ ...prev, [fieldName]: value }));
+      // Clear error when user starts typing
+      if (errors[fieldName as keyof typeof errors]) {
+        setErrors((prev) => ({ ...prev, [fieldName]: false }));
+      }
+    },
+    [errors]
+  );
 
-  const validateForm = () => {
+  const validateForm = useCallback(() => {
     const newErrors = {
       name: !formData.name.trim(),
       email: !formData.email.trim() || !emailRegex.test(formData.email),
@@ -35,14 +40,17 @@ const Contact: React.FC = () => {
     };
     setErrors(newErrors);
     return !Object.values(newErrors).some(Boolean);
-  };
+  }, [formData, emailRegex]);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (validateForm()) {
-      e.currentTarget.submit();
-    }
-  };
+  const handleSubmit = useCallback(
+    (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      if (validateForm()) {
+        e.currentTarget.submit();
+      }
+    },
+    [validateForm]
+  );
 
   return (
     <section id="contact" className="contact" aria-label="Contact">
