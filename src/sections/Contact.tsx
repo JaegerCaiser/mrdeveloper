@@ -1,86 +1,146 @@
-import React, { useState } from "react";
+import React, { useEffect } from "react";
 import { Github, Mail } from "lucide-react";
 
 const Contact: React.FC = () => {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    message: "",
-  });
+  useEffect(() => {
+    const formSubmitBtn = document.querySelector(
+      "#form-submit"
+    ) as HTMLButtonElement;
+    const unameInput = document.querySelector(
+      ".contact__form-name"
+    ) as HTMLInputElement;
+    const emailInput = document.querySelector(
+      ".contact__form-email"
+    ) as HTMLInputElement;
+    const msgInput = document.querySelector(
+      ".contact__form-message"
+    ) as HTMLTextAreaElement;
+    const unameError = document.querySelector(
+      ".form-error__name"
+    ) as HTMLElement;
+    const emailError = document.querySelector(
+      ".form-error__email"
+    ) as HTMLElement;
+    const msgError = document.querySelector(".form-error__msg") as HTMLElement;
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Handle form submission
-    console.warn("Form submitted:", formData);
-    alert("Message sent! (Demo only)");
-  };
+    const re =
+      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
-  };
+    const handleFormSubmit = () => {
+      const uname = unameInput.value;
+      const email = emailInput.value;
+      const msg = msgInput.value;
+
+      let validUname = false;
+      let validEmail = false;
+      let validMsg = false;
+
+      // Validate name
+      if (!uname) {
+        validUname = false;
+        unameInput.classList.add("input-error");
+        unameError.style.display = "block";
+      } else {
+        validUname = true;
+        unameInput.classList.remove("input-error");
+        unameError.style.display = "none";
+      }
+
+      // Validate email
+      if (!email || !re.test(email)) {
+        validEmail = false;
+        emailInput.classList.add("input-error");
+        emailError.style.display = "block";
+      } else {
+        validEmail = true;
+        emailInput.classList.remove("input-error");
+        emailError.style.display = "none";
+      }
+
+      // Validate message
+      if (!msg) {
+        validMsg = false;
+        msgInput.classList.add("input-error");
+        msgError.style.display = "block";
+      } else {
+        validMsg = true;
+        msgInput.classList.remove("input-error");
+        msgError.style.display = "none";
+      }
+
+      // If all valid, submit form
+      if (validUname && validEmail && validMsg) {
+        const form = document.querySelector(
+          ".contact__form"
+        ) as HTMLFormElement;
+        form.submit();
+      }
+    };
+
+    formSubmitBtn.addEventListener("click", handleFormSubmit);
+
+    return () => {
+      formSubmitBtn.removeEventListener("click", handleFormSubmit);
+    };
+  }, []);
 
   return (
     <section id="contact" className="contact" aria-label="Contact">
       <h2 className="contact__heading section-heading">Contact</h2>
-      <p className="contact__subtitle">
+      <p className="contact__text">
         Have a question or want to work together? Leave your details and
         I&apos;ll get back to you as soon as possible.
       </p>
-      <form className="contact__form" onSubmit={handleSubmit}>
-        <div className="contact__form-row">
-          <input
-            type="text"
-            name="name"
-            placeholder="Name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-            className="contact__input"
-          />
-          <input
-            type="email"
-            name="email"
-            placeholder="Email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-            className="contact__input"
-          />
-        </div>
+      <form
+        className="contact__form"
+        action="https://formspree.io/f/xdoprgpv"
+        method="POST"
+      >
+        <input
+          type="text"
+          name="name"
+          placeholder="Name"
+          className="contact__form-name"
+        />
+        <input
+          type="email"
+          name="_replyto"
+          placeholder="Email"
+          className="contact__form-email"
+        />
         <textarea
           name="message"
-          placeholder="Your Message"
-          value={formData.message}
-          onChange={handleChange}
-          required
-          rows={6}
-          className="contact__textarea"
+          placeholder="Message"
+          className="contact__form-message"
         />
-        <button type="submit" className="contact__submit">
-          SUBMIT
-        </button>
+        <div className="contact__form-error-submit">
+          <div className="form-error">
+            <div className="form-error__name">Please enter your name.</div>
+            <div className="form-error__email">Please enter a valid email.</div>
+            <div className="form-error__msg">Please enter a message.</div>
+          </div>
+          <button
+            type="button"
+            className="contact__form-submit"
+            id="form-submit"
+          >
+            Submit
+          </button>
+        </div>
       </form>
       <div className="contact__social">
         <a
-          href="https://github.com/"
+          href="https://github.com/JaegerCaiser"
           target="_blank"
           rel="noreferrer"
           aria-label="GitHub"
         >
           <Github size={24} />
         </a>
-        <a href="mailto:email@example.com" aria-label="Email">
+        <a href="mailto:matheus.caiser@gmail.com" aria-label="Email">
           <Mail size={24} />
         </a>
       </div>
-      <footer className="footer">
-        <p>MATHEUS ©{new Date().getFullYear()}</p>
-      </footer>
     </section>
   );
 };
