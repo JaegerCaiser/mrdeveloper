@@ -96,7 +96,7 @@ button {
 
   &:before {
     position: absolute;
-    content: '';
+    content: "";
     border-bottom: 18px solid $accent;
     width: 16rem;
     display: block;
@@ -500,7 +500,12 @@ a {
   }
 
   &__heading {
-    @extend .section-heading;
+    // Avoid extending `.section-heading` here — using `@extend` merges
+    // selectors at compile time which caused `.section-heading,
+    // .about__heading, .contact__heading` to be grouped and produced
+    // unexpected overrides when other files also extended the same
+    // selector. The markup already applies both classes where needed
+    // (e.g. `class="contact__heading section-heading"`).
 
     &:before {
       width: 18rem;

@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Github, Mail } from "lucide-react";
+import "./Contact.scss";
 
 const Contact: React.FC = () => {
   useEffect(() => {
@@ -128,19 +128,6 @@ const Contact: React.FC = () => {
           </button>
         </div>
       </form>
-      <div className="contact__social">
-        <a
-          href="https://github.com/JaegerCaiser"
-          target="_blank"
-          rel="noreferrer"
-          aria-label="GitHub"
-        >
-          <Github size={24} />
-        </a>
-        <a href="mailto:matheus.caiser@gmail.com" aria-label="Email">
-          <Mail size={24} />
-        </a>
-      </div>
     </section>
   );
 };
