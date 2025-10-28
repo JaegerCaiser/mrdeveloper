@@ -1,0 +1,4 @@
+# Ignore build and config files that run in Node environment
+build/
+dist/
+node_modules/
