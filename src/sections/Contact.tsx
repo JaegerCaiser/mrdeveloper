@@ -11,7 +11,7 @@ const Contact: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Handle form submission
-    console.log("Form submitted:", formData);
+    console.warn("Form submitted:", formData);
     alert("Message sent! (Demo only)");
   };
 
@@ -25,11 +25,11 @@ const Contact: React.FC = () => {
   };
 
   return (
-    <section id="contact" className="section contact" aria-label="Contact">
-      <h2 className="section__title">Contact</h2>
+    <section id="contact" className="contact" aria-label="Contact">
+      <h2 className="contact__heading section-heading">Contact</h2>
       <p className="contact__subtitle">
-        Have a question or want to work together? Leave your details and I'll
-        get back to you as soon as possible.
+        Have a question or want to work together? Leave your details and
+        I&apos;ll get back to you as soon as possible.
       </p>
       <form className="contact__form" onSubmit={handleSubmit}>
         <div className="contact__form-row">
@@ -79,7 +79,7 @@ const Contact: React.FC = () => {
         </a>
       </div>
       <footer className="footer">
-        <p>BEN SCOTT ©{new Date().getFullYear()}</p>
+        <p>MATHEUS ©{new Date().getFullYear()}</p>
       </footer>
     </section>
   );

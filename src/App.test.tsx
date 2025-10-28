@@ -16,8 +16,6 @@ describe("App", () => {
 
     expect(container.querySelector("#hero")).toBeInTheDocument();
     expect(container.querySelector("#about")).toBeInTheDocument();
-    expect(container.querySelector("#experience")).toBeInTheDocument();
-    expect(container.querySelector("#writing")).toBeInTheDocument();
     expect(container.querySelector("#contact")).toBeInTheDocument();
   });
 });

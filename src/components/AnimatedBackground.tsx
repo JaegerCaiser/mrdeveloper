@@ -264,7 +264,7 @@ const AnimatedBackground: React.FC = () => {
     if (!canvas) return;
     const ctx = canvas.getContext("2d", { alpha: false });
     if (!ctx) return;
-    canvas.style.backgroundColor = "#000";
+    canvas.style.backgroundColor = "transparent";
     canvas.style.pointerEvents = "none";
 
     const resize = () => {

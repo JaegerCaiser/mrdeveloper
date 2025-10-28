@@ -1,66 +1,142 @@
 import React, { useState, useEffect } from "react";
+import "./Header.scss";
 
 const Header: React.FC = () => {
-  const [visible, setVisible] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
+  const [activeSection, setActiveSection] = useState("hero");
 
   useEffect(() => {
-    const handleScroll = () => {
-      const about = document.getElementById("about");
-      if (about) {
-        const rect = about.getBoundingClientRect();
-        // Show header when top of About reaches the top of the viewport (or above)
-        const shouldShow = rect.top <= 0;
-        setVisible(shouldShow);
-        setScrolled(shouldShow || window.scrollY > 0);
-      } else {
-        // Fallback: if no about section, show after small scroll
-        const shouldShow = window.scrollY > window.innerHeight * 0.6;
-        setVisible(shouldShow);
-        setScrolled(shouldShow);
-      }
+    // Navigation items in nav bar
+    const navLinks = document.querySelectorAll(".navigation__item");
+
+    // Change highlighted nav link depending on page position
+    function navFadeIn(
+      entries: IntersectionObserverEntry[],
+      _observer: IntersectionObserver
+    ) {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          navLinks.forEach((link) => {
+            link.classList.remove("navigation__item--active");
+          });
+
+          const targetId = entry.target.id;
+          const navItem = document.querySelector(`#nav-${targetId}`);
+          if (navItem) {
+            navItem.classList.add("navigation__item--active");
+            setActiveSection(targetId);
+          }
+        }
+      });
+    }
+
+    // Projects section is a lot longer and needs custom settings
+    function navFadeInProjects(
+      entries: IntersectionObserverEntry[],
+      _observer: IntersectionObserver
+    ) {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          navLinks.forEach((link) => {
+            link.classList.remove("navigation__item--active");
+          });
+
+          const targetId = entry.target.id;
+          const navItem = document.querySelector(`#nav-${targetId}`);
+          if (navItem) {
+            navItem.classList.add("navigation__item--active");
+            setActiveSection(targetId);
+          }
+        }
+      });
+    }
+
+    const options = {
+      root: null,
+      rootMargin: "0px",
+      threshold: 0.5,
     };
 
-    handleScroll();
+    const options2 = {
+      root: null,
+      rootMargin: "0px",
+      threshold: 0.2,
+    };
+
+    const observerNav = new IntersectionObserver(navFadeIn, options);
+    const observerNavProjects = new IntersectionObserver(
+      navFadeInProjects,
+      options2
+    );
+
+    // Observe sections
+    const heroSection = document.querySelector("#hero");
+    const aboutSection = document.querySelector("#about");
+    const projectsSection = document.querySelector("#projects");
+    const contactSection = document.querySelector("#contact");
+
+    if (heroSection) observerNav.observe(heroSection);
+    if (aboutSection) observerNav.observe(aboutSection);
+    if (contactSection) observerNav.observe(contactSection);
+    if (projectsSection) observerNavProjects.observe(projectsSection);
+
+    // Show/hide navigation based on scroll position (like in Ben's code)
+    const handleScroll = () => {
+      // Navigation is always visible
+    };
+
     window.addEventListener("scroll", handleScroll, { passive: true });
-    window.addEventListener("resize", handleScroll);
+
     return () => {
+      observerNav.disconnect();
+      observerNavProjects.disconnect();
       window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", handleScroll);
     };
   }, []);
 
   return (
-    <header
-      className={`header ${visible ? "header--visible" : ""} ${
-        scrolled ? "header--scrolled" : ""
-      }`}
-    >
-      <div className="header__container">
-        <a href="#hero" className="header__logo">
-          BS
+    <nav className="navigation-bar">
+      <a href="#hero" className="navigation-bar__logo">
+        MR
+      </a>
+      <div className="navigation">
+        <a
+          href="#hero"
+          id="nav-hero"
+          className={`navigation__item ${
+            activeSection === "hero" ? "navigation__item--active" : ""
+          }`}
+        >
+          Home
         </a>
-        <nav className="header__nav" aria-label="Navegação principal">
-          <ul>
-            <li>
-              <a href="#hero">Home</a>
-            </li>
-            <li>
-              <a href="#about">About</a>
-            </li>
-            <li>
-              <a href="#experience">Experience</a>
-            </li>
-            <li>
-              <a href="#writing">Writing</a>
-            </li>
-            <li>
-              <a href="#contact">Contact</a>
-            </li>
-          </ul>
-        </nav>
+        <a
+          href="#about"
+          id="nav-about"
+          className={`navigation__item ${
+            activeSection === "about" ? "navigation__item--active" : ""
+          }`}
+        >
+          About
+        </a>
+        <a
+          href="#projects"
+          id="nav-projects"
+          className={`navigation__item ${
+            activeSection === "projects" ? "navigation__item--active" : ""
+          }`}
+        >
+          Projects
+        </a>
+        <a
+          href="#contact"
+          id="nav-contact"
+          className={`navigation__item ${
+            activeSection === "contact" ? "navigation__item--active" : ""
+          }`}
+        >
+          Contact
+        </a>
       </div>
-    </header>
+    </nav>
   );
 };
 

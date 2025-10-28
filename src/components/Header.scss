@@ -1,0 +1,85 @@
+@use "../styles/variables" as *;
+
+// Navigation - exact match from benscott.dev
+.navigation-bar {
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 6rem;
+  padding: 0 4rem;
+  border-bottom: 1px solid $color-background;
+  background-color: $color-background-light;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.3);
+  z-index: 99999999999;
+
+  @media (max-width: 700px) {
+    justify-content: center;
+    padding: 0 2rem;
+  }
+
+  &__logo {
+    color: $color-red;
+    font-family: "Roboto Mono", "Courier New", monospace;
+    font-size: 2rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.3s ease;
+
+    &:hover {
+      transform: translateY(-1px);
+    }
+  }
+}
+
+.navigation {
+  display: flex;
+  font-size: 1.6rem;
+  font-weight: 500;
+  letter-spacing: 1px;
+
+  @media (max-width: 700px) {
+    display: none;
+  }
+
+  &__item {
+    position: relative;
+    color: $color-text;
+    text-decoration: none;
+    transition: all 0.2s;
+    padding: 0.5rem 1rem;
+
+    &:not(:last-child) {
+      margin-right: 2rem;
+    }
+
+    &--active {
+      color: $color-red;
+    }
+
+    &:hover {
+      color: $color-red;
+    }
+
+    &::after {
+      content: "";
+      position: absolute;
+      bottom: -5px;
+      left: 50%;
+      width: 0;
+      height: 2px;
+      background: $color-red;
+      transition: all 0.2s;
+      transform: translateX(-50%);
+    }
+
+    &:hover::after,
+    &--active::after {
+      width: 100%;
+    }
+  }
+}
