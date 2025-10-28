@@ -33,7 +33,7 @@ const Header: React.FC = () => {
     const options = {
       root: null,
       rootMargin: "0px",
-      threshold: 0.5,
+      threshold: 0.1,
     };
 
     const observerNav = new IntersectionObserver(navFadeIn, options);
@@ -47,23 +47,19 @@ const Header: React.FC = () => {
     if (aboutSection) observerNav.observe(aboutSection);
     if (contactSection) observerNav.observe(contactSection);
 
-    // Show/hide navigation based on scroll position (like in Ben's code)
-    const handleScroll = () => {
-      // Navigation is always visible
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-
     return () => {
       observerNav.disconnect();
-      window.removeEventListener("scroll", handleScroll);
     };
   }, []);
 
   return (
     <nav className="navigation-bar">
       <a href="#hero" className="navigation-bar__logo">
-        <img src={mustacheSvg} alt="Mustache Logo" className="navigation-bar__logo-svg" />
+        <img
+          src={mustacheSvg}
+          alt="Mustache Logo"
+          className="navigation-bar__logo-svg"
+        />
       </a>
       <div className="navigation">
         <a

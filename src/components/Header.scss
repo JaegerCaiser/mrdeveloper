@@ -28,7 +28,7 @@
     font-size: 2rem;
     font-weight: 700;
     text-decoration: none;
-    transition: all 0.3s ease;
+    transition: all 0.3s;
 
     &:hover {
       transform: translateY(-1px);
@@ -38,7 +38,7 @@
       height: 3rem;
       width: auto;
       fill: $color-red;
-      transition: all 0.3s ease;
+      transition: all 0.3s;
 
       &:hover {
         transform: scale(1.1);
@@ -61,8 +61,7 @@
     position: relative;
     color: $color-text;
     text-decoration: none;
-    transition: all 0.2s;
-    padding: 0.5rem 1rem;
+    transition: all 0.3s;
 
     &:not(:last-child) {
       margin-right: 2rem;
