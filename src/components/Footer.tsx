@@ -2,6 +2,8 @@ import { SiGithub, SiGmail } from "@icons-pack/react-simple-icons";
 import { ChevronUp } from "lucide-react";
 import "./Footer.scss";
 
+const CURRENT_YEAR = new Date().getFullYear();
+
 const Footer: React.FC = () => {
   return (
     <footer className="footer">
@@ -26,7 +28,7 @@ const Footer: React.FC = () => {
           </div>
         </a>
       </div>
-      <p className="copyright">MATHEUS CAISER ©{new Date().getFullYear()}</p>
+      <p className="copyright">MATHEUS CAISER ©{CURRENT_YEAR}</p>
     </footer>
   );
 };
