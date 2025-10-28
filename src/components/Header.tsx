@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./Header.scss";
+import mustacheSvg from "../assets/mustache.svg";
 
 const Header: React.FC = () => {
   const [activeSection, setActiveSection] = useState("hero");
@@ -62,7 +63,7 @@ const Header: React.FC = () => {
   return (
     <nav className="navigation-bar">
       <a href="#hero" className="navigation-bar__logo">
-        MR
+        <img src={mustacheSvg} alt="Mustache Logo" className="navigation-bar__logo-svg" />
       </a>
       <div className="navigation">
         <a

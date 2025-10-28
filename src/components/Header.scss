@@ -33,6 +33,17 @@
     &:hover {
       transform: translateY(-1px);
     }
+
+    &-svg {
+      height: 3rem;
+      width: auto;
+      fill: $color-red;
+      transition: all 0.3s ease;
+
+      &:hover {
+        transform: scale(1.1);
+      }
+    }
   }
 }
 
