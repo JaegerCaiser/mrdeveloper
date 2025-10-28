@@ -1,4 +1,5 @@
-import { Github, Mail, ChevronUp } from "lucide-react";
+import { SiGithub, SiGmail } from "@icons-pack/react-simple-icons";
+import { ChevronUp } from "lucide-react";
 import "./Footer.scss";
 
 const Footer: React.FC = () => {
@@ -16,12 +17,12 @@ const Footer: React.FC = () => {
           rel="noreferrer"
         >
           <div className="socials__github">
-            <Github size={24} />
+            <SiGithub size={24} />
           </div>
         </a>
         <a href="mailto:matheus.caiser@gmail.com">
           <div className="socials__email">
-            <Mail size={24} />
+            <SiGmail size={24} />
           </div>
         </a>
       </div>
