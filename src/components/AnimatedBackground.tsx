@@ -13,6 +13,8 @@ class Particle {
   flickerTimer: number;
   flickerDuration: number;
   fillStyle: string;
+  gridX: number;
+  gridY: number;
 
   constructor(canvasWidth: number, canvasHeight: number) {
     this.canvasWidth = canvasWidth;
@@ -27,9 +29,11 @@ class Particle {
     this.flickerTimer = 0;
     this.flickerDuration = Math.random() * 120 + 60;
     this.fillStyle = `rgba(100, 255, 218, ${this.opacity})`;
+    this.gridX = 0;
+    this.gridY = 0;
   }
 
-  update() {
+  update(gridSize: number) {
     this.x += this.vx;
     this.y += this.vy;
     if (this.x < 0) this.x = this.canvasWidth;
@@ -37,6 +41,10 @@ class Particle {
     if (this.y < 0) this.y = this.canvasHeight;
     else if (this.y > this.canvasHeight) this.y = 0;
     this.flickerTimer++;
+
+    // Update grid position for spatial partitioning
+    this.gridX = Math.floor(this.x / gridSize);
+    this.gridY = Math.floor(this.y / gridSize);
   }
 
   draw(ctx: CanvasRenderingContext2D) {
@@ -44,6 +52,133 @@ class Particle {
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
     ctx.fill();
+  }
+}
+
+// Spatial grid for O(n) neighbor finding
+class SpatialGrid {
+  grid: Particle[][][];
+  gridSize: number;
+  gridWidth: number;
+  gridHeight: number;
+
+  constructor(gridSize: number, canvasWidth: number, canvasHeight: number) {
+    this.gridSize = gridSize;
+    this.gridWidth = Math.ceil(canvasWidth / gridSize);
+    this.gridHeight = Math.ceil(canvasHeight / gridSize);
+    this.grid = Array.from({ length: this.gridWidth }, () =>
+      Array.from({ length: this.gridHeight }, () => [])
+    );
+  }
+
+  clear() {
+    for (let x = 0; x < this.gridWidth; x++) {
+      for (let y = 0; y < this.gridHeight; y++) {
+        this.grid[x][y].length = 0;
+      }
+    }
+  }
+
+  add(particle: Particle) {
+    const x = Math.max(0, Math.min(this.gridWidth - 1, particle.gridX));
+    const y = Math.max(0, Math.min(this.gridHeight - 1, particle.gridY));
+    this.grid[x][y].push(particle);
+  }
+
+  getNeighbors(x: number, y: number, radius: number): Particle[] {
+    const neighbors: Particle[] = [];
+    const gridRadius = Math.ceil(radius / this.gridSize);
+
+    for (let dx = -gridRadius; dx <= gridRadius; dx++) {
+      for (let dy = -gridRadius; dy <= gridRadius; dy++) {
+        const nx = x + dx;
+        const ny = y + dy;
+        if (nx >= 0 && nx < this.gridWidth && ny >= 0 && ny < this.gridHeight) {
+          neighbors.push(...this.grid[nx][ny]);
+        }
+      }
+    }
+
+    return neighbors;
+  }
+}
+
+// Connection batching system
+class ConnectionBatch {
+  paths: Path2D[] = [];
+  styles: Array<{
+    strokeStyle: string;
+    lineWidth: number;
+    shadowBlur: number;
+    shadowColor: string;
+  }> = [];
+
+  addLine(x1: number, y1: number, x2: number, y2: number, styleIndex: number) {
+    if (!this.paths[styleIndex]) {
+      this.paths[styleIndex] = new Path2D();
+    }
+    this.paths[styleIndex].moveTo(x1, y1);
+    this.paths[styleIndex].lineTo(x2, y2);
+  }
+
+  setStyle(
+    index: number,
+    strokeStyle: string,
+    lineWidth: number,
+    shadowBlur: number = 0,
+    shadowColor: string = ""
+  ) {
+    this.styles[index] = { strokeStyle, lineWidth, shadowBlur, shadowColor };
+  }
+
+  draw(ctx: CanvasRenderingContext2D) {
+    for (let i = 0; i < this.paths.length; i++) {
+      if (this.paths[i]) {
+        const style = this.styles[i];
+        if (style.shadowBlur > 0) {
+          ctx.shadowBlur = style.shadowBlur;
+          ctx.shadowColor = style.shadowColor;
+        }
+        ctx.strokeStyle = style.strokeStyle;
+        ctx.lineWidth = style.lineWidth;
+        ctx.stroke(this.paths[i]);
+        if (style.shadowBlur > 0) {
+          ctx.shadowBlur = 0;
+        }
+      }
+    }
+    this.clear();
+  }
+
+  clear() {
+    this.paths.length = 0;
+    this.styles.length = 0;
+  }
+}
+
+// Distance cache for performance
+class DistanceCache {
+  cache: Map<string, number> = new Map();
+  maxSize = 10000;
+
+  get(x1: number, y1: number, x2: number, y2: number): number {
+    const key = `${Math.round(x1)},${Math.round(y1)},${Math.round(
+      x2
+    )},${Math.round(y2)}`;
+    let dist = this.cache.get(key);
+    if (dist === undefined) {
+      const dx = x1 - x2;
+      const dy = y1 - y2;
+      dist = dx * dx + dy * dy;
+      if (this.cache.size < this.maxSize) {
+        this.cache.set(key, dist);
+      }
+    }
+    return dist;
+  }
+
+  clear() {
+    this.cache.clear();
   }
 }
 
@@ -65,7 +200,23 @@ const AnimatedBackground: React.FC = () => {
     resize();
     window.addEventListener("resize", resize);
 
-    const mouse = { x: -1000, y: -1000, radius: 300, radiusSquared: 90000 };
+    // Optimized configuration
+    const particleCount = 500;
+    const gridSize = 50; // Spatial partitioning grid size
+    const mouseRadius = 300;
+    const mouseRadiusSquared = mouseRadius * mouseRadius;
+    const maxLineLength = 95;
+    const maxLineLengthSquared = maxLineLength * maxLineLength;
+    const propagationRadius = 40; // Valor mais realista para propagação visível
+    const propagationRadiusSquared = propagationRadius * propagationRadius;
+    const maxLayers = 6;
+
+    // Initialize systems
+    const spatialGrid = new SpatialGrid(gridSize, canvas.width, canvas.height);
+    const distanceCache = new DistanceCache();
+    const connectionBatch = new ConnectionBatch();
+
+    const mouse = { x: -1000, y: -1000 };
 
     const handleMouseMove = (e: MouseEvent) => {
       mouse.x = e.clientX;
@@ -80,253 +231,208 @@ const AnimatedBackground: React.FC = () => {
     window.addEventListener("mousemove", handleMouseMove, { passive: true });
     window.addEventListener("mouseleave", handleMouseLeave, { passive: true });
 
-    const particleCount = 500;
     const particles: Particle[] = [];
     for (let i = 0; i < particleCount; i++) {
       particles.push(new Particle(canvas.width, canvas.height));
     }
 
     let animationFrameId: number;
+    let frameCount = 0;
 
     const animate = () => {
+      frameCount++;
+
+      // Clear canvas
       ctx.fillStyle = "#000000";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Configurable parameters
-      const maxLineLengthSquared = 75 ** 2; // 75px max line length
-      const propagationRadiusSquared = 10 ** 2; // 10px propagation radius
-      const maxLayers = 6; // Number of propagation layers
-
+      // Update spatial grid
+      spatialGrid.clear();
       for (let i = 0; i < particleCount; i++) {
-        particles[i].update();
+        particles[i].update(gridSize);
         particles[i].draw(ctx);
+        spatialGrid.add(particles[i]);
       }
 
-      // Always check for connections, regardless of hero section
-      const connectedParticles: Particle[] = [];
+      // Clear distance cache every 60 frames to prevent memory bloat
+      if (frameCount % 60 === 0) {
+        distanceCache.clear();
+      }
 
-      for (let i = 0; i < particleCount; i++) {
-        const p = particles[i];
-        const dx = mouse.x - p.x;
-        const dy = mouse.y - p.y;
-        const distSquared = dx * dx + dy * dy;
-        if (distSquared < mouse.radiusSquared) {
+      // Find particles near mouse using spatial grid
+      const mouseGridX = Math.floor(mouse.x / gridSize);
+      const mouseGridY = Math.floor(mouse.y / gridSize);
+      const nearbyParticles =
+        mouse.x !== -1000
+          ? spatialGrid.getNeighbors(mouseGridX, mouseGridY, mouseRadius)
+          : [];
+
+      // Filter particles within mouse radius
+      const connectedParticles: Particle[] = [];
+      for (const p of nearbyParticles) {
+        const distSquared = distanceCache.get(mouse.x, mouse.y, p.x, p.y);
+        if (distSquared < mouseRadiusSquared) {
           connectedParticles.push(p);
         }
       }
-
-      const processedParticles: Particle[] = [...connectedParticles];
 
       if (connectedParticles.length > 0) {
         ctx.save();
         ctx.globalCompositeOperation = "lighter";
 
-        // Use Set for O(1) processed particles lookup
         const processedSet = new Set<Particle>(connectedParticles);
 
-        // Draw connections from mouse to all particles within radius
-        for (let i = 0; i < connectedParticles.length; i++) {
-          const p = connectedParticles[i];
-          const dx = mouse.x - p.x;
-          const dy = mouse.y - p.y;
-          const distSquared = dx * dx + dy * dy;
-          if (distSquared > maxLineLengthSquared) continue; // Max line length
+        // Batch mouse connections
+        connectionBatch.setStyle(
+          0,
+          "rgba(255, 30, 30, 0.33)",
+          2.5,
+          14,
+          "rgba(255, 50, 50, 0.6)"
+        );
+        connectionBatch.setStyle(1, "rgba(255, 95, 95, 0.66)", 1.0);
+        connectionBatch.setStyle(2, "rgba(255, 255, 255, 0.21)", 0.4);
 
-          const opacity = 0.6;
+        for (const p of connectedParticles) {
+          const distSquared = distanceCache.get(mouse.x, mouse.y, p.x, p.y);
+          if (distSquared > maxLineLengthSquared) continue;
 
-          ctx.shadowColor = `rgba(255, 50, 50, ${opacity})`;
-          ctx.shadowBlur = 14;
-          ctx.strokeStyle = `rgba(255, 30, 30, ${opacity * 0.55})`;
-          ctx.lineWidth = 2.5;
-          ctx.beginPath();
-          ctx.moveTo(mouse.x, mouse.y);
-          ctx.lineTo(p.x, p.y);
-          ctx.stroke();
-
-          ctx.shadowBlur = 0;
-          ctx.strokeStyle = `rgba(255, 95, 95, ${Math.min(1, opacity * 1.1)})`;
-          ctx.lineWidth = 1.0;
-          ctx.beginPath();
-          ctx.moveTo(mouse.x, mouse.y);
-          ctx.lineTo(p.x, p.y);
-          ctx.stroke();
-
-          ctx.strokeStyle = `rgba(255, 255, 255, ${opacity * 0.35})`;
-          ctx.lineWidth = 0.4;
-          ctx.beginPath();
-          ctx.moveTo(mouse.x, mouse.y);
-          ctx.lineTo(p.x, p.y);
-          ctx.stroke();
+          connectionBatch.addLine(mouse.x, mouse.y, p.x, p.y, 0);
+          connectionBatch.addLine(mouse.x, mouse.y, p.x, p.y, 1);
+          connectionBatch.addLine(mouse.x, mouse.y, p.x, p.y, 2);
         }
 
-        // Multi-layer propagation connections
-        const processedParticles: Particle[] = [...connectedParticles];
+        // Multi-layer propagation with optimized neighbor finding
         let currentLayer = [...connectedParticles];
+        let styleOffset = 3;
 
         for (let layer = 0; layer < maxLayers; layer++) {
           const nextLayer: Particle[] = [];
-          const layerOpacity = 0.4; // Constant opacity for all layers
+          const layerOpacity = 0.4;
+
+          connectionBatch.setStyle(
+            styleOffset,
+            `rgba(255, 30, 30, ${layerOpacity * 0.4})`,
+            3.5,
+            8,
+            `rgba(255, 50, 50, ${layerOpacity})`
+          );
+          connectionBatch.setStyle(
+            styleOffset + 1,
+            `rgba(255, 95, 95, ${layerOpacity * 0.9})`,
+            1.5
+          );
+          connectionBatch.setStyle(
+            styleOffset + 2,
+            `rgba(255, 255, 255, ${layerOpacity * 0.25})`,
+            0.6
+          );
 
           for (const cp of currentLayer) {
-            for (let j = 0; j < particleCount; j++) {
-              const p = particles[j];
+            const cpGridX = Math.floor(cp.x / gridSize);
+            const cpGridY = Math.floor(cp.y / gridSize);
+            const neighbors = spatialGrid.getNeighbors(
+              cpGridX,
+              cpGridY,
+              propagationRadius
+            );
+
+            for (const p of neighbors) {
               if (processedSet.has(p)) continue;
 
-              const dx = cp.x - p.x;
-              const dy = cp.y - p.y;
-              const distSquared = dx * dx + dy * dy;
-
+              const distSquared = distanceCache.get(cp.x, cp.y, p.x, p.y);
               if (distSquared < propagationRadiusSquared) {
-                const opacity = layerOpacity;
-
-                ctx.shadowColor = `rgba(255, 50, 50, ${opacity})`;
-                ctx.shadowBlur = 8;
-                ctx.strokeStyle = `rgba(255, 30, 30, ${opacity * 0.4})`;
-                ctx.lineWidth = 3.5;
-                ctx.beginPath();
-                ctx.moveTo(cp.x, cp.y);
-                ctx.lineTo(p.x, p.y);
-                ctx.stroke();
-
-                ctx.shadowBlur = 0;
-                ctx.strokeStyle = `rgba(255, 95, 95, ${opacity * 0.9})`;
-                ctx.lineWidth = 1.5;
-                ctx.beginPath();
-                ctx.moveTo(cp.x, cp.y);
-                ctx.lineTo(p.x, p.y);
-                ctx.stroke();
-
-                ctx.strokeStyle = `rgba(255, 255, 255, ${opacity * 0.25})`;
-                ctx.lineWidth = 0.6;
-                ctx.beginPath();
-                ctx.moveTo(cp.x, cp.y);
-                ctx.lineTo(p.x, p.y);
-                ctx.stroke();
+                connectionBatch.addLine(cp.x, cp.y, p.x, p.y, styleOffset);
+                connectionBatch.addLine(cp.x, cp.y, p.x, p.y, styleOffset + 1);
+                connectionBatch.addLine(cp.x, cp.y, p.x, p.y, styleOffset + 2);
 
                 processedSet.add(p);
                 nextLayer.push(p);
               }
             }
           }
+
           currentLayer = nextLayer;
+          styleOffset += 3;
+          if (currentLayer.length === 0) break; // Early exit if no more propagation
         }
 
-        // Batch inter-connections between all processed particles
+        // Batch inter-connections between processed particles
         const processedArray = Array.from(processedSet);
         const interLines: Array<{ p1: Particle; p2: Particle }> = [];
 
+        // Use spatial grid to find inter-connections efficiently
         for (let i = 0; i < processedArray.length; i++) {
           const p1 = processedArray[i];
-          for (let j = i + 1; j < processedArray.length; j++) {
-            const p2 = processedArray[j];
-            const dx = p1.x - p2.x;
-            const dy = p1.y - p2.y;
-            if (dx * dx + dy * dy < maxLineLengthSquared) {
+          const p1GridX = Math.floor(p1.x / gridSize);
+          const p1GridY = Math.floor(p1.y / gridSize);
+          const neighbors = spatialGrid.getNeighbors(
+            p1GridX,
+            p1GridY,
+            maxLineLength
+          );
+
+          for (const p2 of neighbors) {
+            if (p2 === p1 || !processedSet.has(p2)) continue;
+            // Avoid duplicate connections by comparing indices
+            const p2Index = processedArray.indexOf(p2);
+            if (p2Index <= i) continue;
+
+            const distSquared = distanceCache.get(p1.x, p1.y, p2.x, p2.y);
+            if (distSquared < maxLineLengthSquared) {
               interLines.push({ p1, p2 });
             }
           }
         }
 
-        // Draw batched inter-connections
+        // Batch inter-connection drawing
         if (interLines.length > 0) {
           const opacity = 0.5;
+          connectionBatch.setStyle(
+            styleOffset,
+            `rgba(255, 30, 30, ${opacity * 0.5})`,
+            4.5,
+            10,
+            "rgba(255, 30, 30, 0.5)"
+          );
+          connectionBatch.setStyle(
+            styleOffset + 1,
+            `rgba(255, 95, 95, ${Math.min(1, opacity * 1.1)})`,
+            2.0
+          );
+          connectionBatch.setStyle(
+            styleOffset + 2,
+            `rgba(255, 255, 255, ${opacity * 0.35})`,
+            0.8
+          );
 
-          // First pass: shadow
-          ctx.shadowBlur = 10;
-          ctx.strokeStyle = `rgba(255, 30, 30, ${opacity * 0.5})`;
-          ctx.lineWidth = 4.5;
-          ctx.beginPath();
           for (const line of interLines) {
-            ctx.moveTo(line.p1.x, line.p1.y);
-            ctx.lineTo(line.p2.x, line.p2.y);
-          }
-          ctx.stroke();
-
-          // Second pass: main
-          ctx.shadowBlur = 0;
-          ctx.strokeStyle = `rgba(255, 95, 95, ${Math.min(1, opacity * 1.1)})`;
-          ctx.lineWidth = 2.0;
-          ctx.beginPath();
-          for (const line of interLines) {
-            ctx.moveTo(line.p1.x, line.p1.y);
-            ctx.lineTo(line.p2.x, line.p2.y);
-          }
-          ctx.stroke();
-
-          // Third pass: highlight
-          ctx.strokeStyle = `rgba(255, 255, 255, ${opacity * 0.35})`;
-          ctx.lineWidth = 0.8;
-          ctx.beginPath();
-          for (const line of interLines) {
-            ctx.moveTo(line.p1.x, line.p1.y);
-            ctx.lineTo(line.p2.x, line.p2.y);
-          }
-          ctx.stroke();
-        }
-
-        ctx.restore();
-      }
-
-      // Draw inter-connections between particles near the mouse
-      if (mouse.x !== -1000) {
-        ctx.save();
-        ctx.globalCompositeOperation = "lighter";
-
-        for (let i = 0; i < particleCount; i++) {
-          const p1 = particles[i];
-          const dx1 = mouse.x - p1.x;
-          const dy1 = mouse.y - p1.y;
-          if (dx1 * dx1 + dy1 * dy1 > 90000) continue; // 300px from mouse
-
-          for (let j = i + 1; j < particleCount; j++) {
-            const p2 = particles[j];
-            const dx2 = mouse.x - p2.x;
-            const dy2 = mouse.y - p2.y;
-            if (dx2 * dx2 + dy2 * dy2 > 90000) continue; // 300px from mouse
-
-            const dx = p1.x - p2.x;
-            const dy = p1.y - p2.y;
-            const distSquared = dx * dx + dy * dy;
-            if (distSquared < maxLineLengthSquared) {
-              // Skip if both particles are already in the processed network
-              if (
-                connectedParticles.length > 0 &&
-                processedParticles.includes(p1) &&
-                processedParticles.includes(p2)
-              )
-                continue;
-
-              const opacity = 0.5;
-
-              ctx.shadowBlur = 10;
-              ctx.strokeStyle = `rgba(255, 30, 30, ${opacity * 0.5})`;
-              ctx.lineWidth = 2.5;
-              ctx.beginPath();
-              ctx.moveTo(p1.x, p1.y);
-              ctx.lineTo(p2.x, p2.y);
-              ctx.stroke();
-
-              ctx.shadowBlur = 0;
-              ctx.strokeStyle = `rgba(255, 95, 95, ${Math.min(
-                1,
-                opacity * 1.1
-              )})`;
-              ctx.lineWidth = 1.0;
-              ctx.beginPath();
-              ctx.moveTo(p1.x, p1.y);
-              ctx.lineTo(p2.x, p2.y);
-              ctx.stroke();
-
-              ctx.strokeStyle = `rgba(255, 255, 255, ${opacity * 0.35})`;
-              ctx.lineWidth = 0.4;
-              ctx.beginPath();
-              ctx.moveTo(p1.x, p1.y);
-              ctx.lineTo(p2.x, p2.y);
-              ctx.stroke();
-            }
+            connectionBatch.addLine(
+              line.p1.x,
+              line.p1.y,
+              line.p2.x,
+              line.p2.y,
+              styleOffset
+            );
+            connectionBatch.addLine(
+              line.p1.x,
+              line.p1.y,
+              line.p2.x,
+              line.p2.y,
+              styleOffset + 1
+            );
+            connectionBatch.addLine(
+              line.p1.x,
+              line.p1.y,
+              line.p2.x,
+              line.p2.y,
+              styleOffset + 2
+            );
           }
         }
 
+        // Draw all batched connections in single operations
+        connectionBatch.draw(ctx);
         ctx.restore();
       }
 
