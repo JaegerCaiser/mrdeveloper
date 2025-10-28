@@ -1,3 +1,5 @@
+@use "./styles/animations" as *;
+
 @import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Roboto+Mono:wght@400;500;600&display=swap");
 
 /* Base resets and selection */
@@ -31,4 +33,3 @@ button {
 ::-webkit-scrollbar-thumb:hover {
   background: #52d4b3;
 }
-

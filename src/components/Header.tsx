@@ -29,55 +29,22 @@ const Header: React.FC = () => {
       });
     }
 
-    // Projects section is a lot longer and needs custom settings
-    function navFadeInProjects(
-      entries: IntersectionObserverEntry[],
-      _observer: IntersectionObserver
-    ) {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          navLinks.forEach((link) => {
-            link.classList.remove("navigation__item--active");
-          });
-
-          const targetId = entry.target.id;
-          const navItem = document.querySelector(`#nav-${targetId}`);
-          if (navItem) {
-            navItem.classList.add("navigation__item--active");
-            setActiveSection(targetId);
-          }
-        }
-      });
-    }
-
     const options = {
       root: null,
       rootMargin: "0px",
       threshold: 0.5,
     };
 
-    const options2 = {
-      root: null,
-      rootMargin: "0px",
-      threshold: 0.2,
-    };
-
     const observerNav = new IntersectionObserver(navFadeIn, options);
-    const observerNavProjects = new IntersectionObserver(
-      navFadeInProjects,
-      options2
-    );
 
     // Observe sections
     const heroSection = document.querySelector("#hero");
     const aboutSection = document.querySelector("#about");
-    const projectsSection = document.querySelector("#projects");
     const contactSection = document.querySelector("#contact");
 
     if (heroSection) observerNav.observe(heroSection);
     if (aboutSection) observerNav.observe(aboutSection);
     if (contactSection) observerNav.observe(contactSection);
-    if (projectsSection) observerNavProjects.observe(projectsSection);
 
     // Show/hide navigation based on scroll position (like in Ben's code)
     const handleScroll = () => {
@@ -88,7 +55,6 @@ const Header: React.FC = () => {
 
     return () => {
       observerNav.disconnect();
-      observerNavProjects.disconnect();
       window.removeEventListener("scroll", handleScroll);
     };
   }, []);
@@ -116,15 +82,6 @@ const Header: React.FC = () => {
           }`}
         >
           About
-        </a>
-        <a
-          href="#projects"
-          id="nav-projects"
-          className={`navigation__item ${
-            activeSection === "projects" ? "navigation__item--active" : ""
-          }`}
-        >
-          Projects
         </a>
         <a
           href="#contact"

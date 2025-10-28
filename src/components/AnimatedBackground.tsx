@@ -625,7 +625,11 @@ const AnimatedBackground: React.FC = () => {
     };
   }, []);
 
-  return <canvas ref={canvasRef} className="animated-background" />;
+  return (
+    <div className="canvas">
+      <canvas ref={canvasRef} className="connecting-dots" />
+    </div>
+  );
 };
 
 export default AnimatedBackground;
