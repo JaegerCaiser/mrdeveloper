@@ -63,28 +63,38 @@ class SpatialGrid {
   gridSize: number;
   gridWidth: number;
   gridHeight: number;
+  totalCells: number;
 
   constructor(gridSize: number, canvasWidth: number, canvasHeight: number) {
     this.gridSize = gridSize;
     this.gridWidth = Math.ceil(canvasWidth / gridSize);
     this.gridHeight = Math.ceil(canvasHeight / gridSize);
+    this.totalCells = this.gridWidth * this.gridHeight;
     this.grid = Array.from({ length: this.gridWidth }, () =>
       Array.from({ length: this.gridHeight }, () => [])
     );
   }
 
   clear() {
+    // Otimização: em vez de percorrer toda a grid, podemos usar uma abordagem mais eficiente
+    // Mantém as referências aos arrays para reduzir alocações de GC
     for (let x = 0; x < this.gridWidth; x++) {
+      const row = this.grid[x];
       for (let y = 0; y < this.gridHeight; y++) {
-        this.grid[x][y].length = 0;
+        row[y].length = 0; // Reset array sem realocar
       }
     }
   }
 
   add(particle: Particle) {
-    const x = Math.max(0, Math.min(this.gridWidth - 1, particle.gridX));
-    const y = Math.max(0, Math.min(this.gridHeight - 1, particle.gridY));
-    this.grid[x][y].push(particle);
+    // Otimização: reduz verificações Math.max/Math.min usando operações bitwise
+    const x = (particle.gridX | 0) & 0x7fff; // Converte para int e limita
+    const y = (particle.gridY | 0) & 0x7fff;
+
+    // Verificação de bounds mais eficiente
+    if (x >= 0 && x < this.gridWidth && y >= 0 && y < this.gridHeight) {
+      this.grid[x][y].push(particle);
+    }
   }
 
   getNeighbors(x: number, y: number, radius: number): Particle[] {
@@ -160,13 +170,30 @@ class ConnectionBatch {
 
 // Distance cache for performance
 class DistanceCache {
-  cache: Map<string, number> = new Map();
+  cache: Map<number, number> = new Map();
   maxSize = 10000;
 
+  // Função hash mais eficiente para coordenadas
+  private hash(x1: number, y1: number, x2: number, y2: number): number {
+    // Arredonda para reduzir colisões e usa uma função hash simples
+    const rx1 = Math.round(x1) & 0xffff; // Máscara para 16 bits
+    const ry1 = Math.round(y1) & 0xffff;
+    const rx2 = Math.round(x2) & 0xffff;
+    const ry2 = Math.round(y2) & 0xffff;
+
+    // Combina as coordenadas em um único número de 64 bits (simulado com 32 bits)
+    // Usa uma função hash simples para distribuir melhor
+    return (
+      ((rx1 * 73856093) ^
+        (ry1 * 19349663) ^
+        (rx2 * 83492791) ^
+        (ry2 * 126271)) >>>
+      0
+    );
+  }
+
   get(x1: number, y1: number, x2: number, y2: number): number {
-    const key = `${Math.round(x1)},${Math.round(y1)},${Math.round(
-      x2
-    )},${Math.round(y2)}`;
+    const key = this.hash(x1, y1, x2, y2);
     let dist = this.cache.get(key);
     if (dist === undefined) {
       const dx = x1 - x2;
@@ -177,6 +204,51 @@ class DistanceCache {
       }
     }
     return dist;
+  }
+
+  clear() {
+    this.cache.clear();
+  }
+}
+
+// Opacity cache for mouse distance calculations
+class OpacityCache {
+  cache: Map<string, number> = new Map();
+  maxSize = 2000; // Menor que distance cache pois opacidades mudam menos frequentemente
+  mouseX = 0;
+  mouseY = 0;
+  mouseRadius = 800;
+  invMouseRadius = 1 / 800; // Pré-computado
+
+  updateMouse(mouseX: number, mouseY: number, mouseRadius: number) {
+    // Só limpa cache se mouse mudou significativamente
+    if (
+      Math.abs(this.mouseX - mouseX) > 10 ||
+      Math.abs(this.mouseY - mouseY) > 10 ||
+      this.mouseRadius !== mouseRadius
+    ) {
+      this.cache.clear();
+      this.mouseX = mouseX;
+      this.mouseY = mouseY;
+      this.mouseRadius = mouseRadius;
+      this.invMouseRadius = 1 / mouseRadius;
+    }
+  }
+
+  get(x: number, y: number): number {
+    const key = `${Math.round(x)},${Math.round(y)}`;
+    let opacity = this.cache.get(key);
+    if (opacity === undefined) {
+      const dx = x - this.mouseX;
+      const dy = y - this.mouseY;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      const normalizedDistance = distance * this.invMouseRadius;
+      opacity = Math.max(0.05, Math.pow(1 - normalizedDistance, 2));
+      if (this.cache.size < this.maxSize) {
+        this.cache.set(key, opacity);
+      }
+    }
+    return opacity;
   }
 
   clear() {
@@ -202,7 +274,7 @@ const AnimatedBackground: React.FC = () => {
     resize();
     window.addEventListener("resize", resize);
 
-    // Optimized configuration
+    // Optimized configuration with pre-computed constants
     const particleCount = 500;
     const gridSize = 50; // Spatial partitioning grid size
     const mouseRadius = 800;
@@ -213,16 +285,24 @@ const AnimatedBackground: React.FC = () => {
     const propagationRadiusSquared = propagationRadius * propagationRadius;
     const maxLayers = 6;
 
+    // Pre-computed constants for opacity calculations
+    const propagationOpacityBands = 6; // 6 faixas de opacidade (0-5)
+    const interOpacityBands = 8; // 8 faixas de opacidade (0-7)
+    const invPropagationBands = 1 / (propagationOpacityBands - 1);
+    const invInterBands = 1 / (interOpacityBands - 1);
+
     // Initialize systems
     const spatialGrid = new SpatialGrid(gridSize, canvas.width, canvas.height);
     const distanceCache = new DistanceCache();
     const connectionBatch = new ConnectionBatch();
+    const opacityCache = new OpacityCache();
 
     const mouse = { x: -1000, y: -1000 };
 
     const handleMouseMove = (e: MouseEvent) => {
       mouse.x = e.clientX;
       mouse.y = e.clientY;
+      opacityCache.updateMouse(mouse.x, mouse.y, mouseRadius);
     };
 
     const handleMouseLeave = () => {
@@ -256,8 +336,8 @@ const AnimatedBackground: React.FC = () => {
         spatialGrid.add(particles[i]);
       }
 
-      // Clear distance cache every 60 frames to prevent memory bloat
-      if (frameCount % 60 === 0) {
+      // Clear distance cache every 120 frames to prevent memory bloat
+      if (frameCount % 120 === 0) {
         distanceCache.clear();
       }
 
@@ -285,12 +365,9 @@ const AnimatedBackground: React.FC = () => {
 
         const processedSet = new Set<Particle>(connectedParticles);
 
-        // Função para calcular opacidade baseada na proximidade do mouse
+        // Função para calcular opacidade baseada na proximidade do mouse (usando cache)
         const getOpacityFromMouseDistance = (x: number, y: number): number => {
-          const distSquared = distanceCache.get(mouse.x, mouse.y, x, y);
-          const normalizedDistance = Math.sqrt(distSquared) / mouseRadius; // 0-1
-          // Opacidade máxima quando próximo, decai exponencialmente
-          return Math.max(0.05, Math.pow(1 - normalizedDistance, 2)); // Mínimo 5%
+          return opacityCache.get(x, y);
         };
 
         // Batch mouse connections with distance-based opacity
@@ -328,7 +405,6 @@ const AnimatedBackground: React.FC = () => {
         let styleOffset = 3;
 
         // Agrupar conexões de propagação por faixas de opacidade para otimizar performance
-        const propagationOpacityBands = 6; // 6 faixas de opacidade (0-5)
         const propagationLinesByOpacity: Array<
           Array<{ cp: Particle; p: Particle; layer: number }>
         > = Array.from({ length: propagationOpacityBands }, () => []);
@@ -379,7 +455,7 @@ const AnimatedBackground: React.FC = () => {
           if (lines.length === 0) continue;
 
           // Calcular opacidade base da banda
-          const bandOpacity = band / (propagationOpacityBands - 1);
+          const bandOpacity = band * invPropagationBands;
 
           // Configurar estilos para esta banda
           connectionBatch.setStyle(
@@ -430,6 +506,9 @@ const AnimatedBackground: React.FC = () => {
 
         // Batch inter-connections between processed particles
         const processedArray = Array.from(processedSet);
+        const processedIndexMap = new Map<Particle, number>();
+        processedArray.forEach((p, index) => processedIndexMap.set(p, index));
+
         const interLines: Array<{ p1: Particle; p2: Particle }> = [];
 
         // Use spatial grid to find inter-connections efficiently
@@ -445,8 +524,8 @@ const AnimatedBackground: React.FC = () => {
 
           for (const p2 of neighbors) {
             if (p2 === p1 || !processedSet.has(p2)) continue;
-            // Avoid duplicate connections by comparing indices
-            const p2Index = processedArray.indexOf(p2);
+            // Avoid duplicate connections by comparing indices - O(1) lookup now
+            const p2Index = processedIndexMap.get(p2)!;
             if (p2Index <= i) continue;
 
             const distSquared = distanceCache.get(p1.x, p1.y, p2.x, p2.y);
@@ -459,9 +538,8 @@ const AnimatedBackground: React.FC = () => {
         // Batch inter-connection drawing with optimized distance-based opacity
         if (interLines.length > 0) {
           // Agrupar por faixas de opacidade para otimizar performance
-          const opacityBands = 8; // 8 faixas de opacidade (0-7)
           const linesByOpacity: Array<Array<{ p1: Particle; p2: Particle }>> =
-            Array.from({ length: opacityBands }, () => []);
+            Array.from({ length: interOpacityBands }, () => []);
 
           for (const line of interLines) {
             const p1Opacity = getOpacityFromMouseDistance(line.p1.x, line.p1.y);
@@ -469,19 +547,19 @@ const AnimatedBackground: React.FC = () => {
             const interOpacity = Math.min(p1Opacity, p2Opacity) * 0.7;
             // Mapear opacidade para banda (0-7)
             const band = Math.min(
-              opacityBands - 1,
-              Math.floor(interOpacity * opacityBands)
+              interOpacityBands - 1,
+              Math.floor(interOpacity * interOpacityBands)
             );
             linesByOpacity[band].push(line);
           }
 
           // Desenhar cada banda com sua opacidade específica
-          for (let band = 0; band < opacityBands; band++) {
+          for (let band = 0; band < interOpacityBands; band++) {
             const lines = linesByOpacity[band];
             if (lines.length === 0) continue;
 
             // Calcular opacidade base da banda
-            const bandOpacity = (band / (opacityBands - 1)) * 0.7;
+            const bandOpacity = band * invInterBands * 0.7;
 
             connectionBatch.setStyle(
               styleOffset,
