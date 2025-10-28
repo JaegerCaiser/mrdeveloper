@@ -1,4 +1,3 @@
-import React from "react";
 import { Github, Mail, ChevronUp } from "lucide-react";
 import "./Footer.scss";
 

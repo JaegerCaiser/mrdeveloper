@@ -1,88 +1,48 @@
-import React, { useEffect } from "react";
+import { useState } from "react";
 import "./Contact.scss";
 
 const Contact: React.FC = () => {
-  useEffect(() => {
-    const formSubmitBtn = document.querySelector(
-      "#form-submit"
-    ) as HTMLButtonElement;
-    const unameInput = document.querySelector(
-      ".contact__form-name"
-    ) as HTMLInputElement;
-    const emailInput = document.querySelector(
-      ".contact__form-email"
-    ) as HTMLInputElement;
-    const msgInput = document.querySelector(
-      ".contact__form-message"
-    ) as HTMLTextAreaElement;
-    const unameError = document.querySelector(
-      ".form-error__name"
-    ) as HTMLElement;
-    const emailError = document.querySelector(
-      ".form-error__email"
-    ) as HTMLElement;
-    const msgError = document.querySelector(".form-error__msg") as HTMLElement;
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    message: "",
+  });
+  const [errors, setErrors] = useState({
+    name: false,
+    email: false,
+    message: false,
+  });
 
-    const re =
-      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  const emailRegex =
+    /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
-    const handleFormSubmit = () => {
-      const uname = unameInput.value;
-      const email = emailInput.value;
-      const msg = msgInput.value;
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    // Clear error when user starts typing
+    if (errors[name as keyof typeof errors]) {
+      setErrors((prev) => ({ ...prev, [name]: false }));
+    }
+  };
 
-      let validUname = false;
-      let validEmail = false;
-      let validMsg = false;
-
-      // Validate name
-      if (!uname) {
-        validUname = false;
-        unameInput.classList.add("input-error");
-        unameError.style.display = "block";
-      } else {
-        validUname = true;
-        unameInput.classList.remove("input-error");
-        unameError.style.display = "none";
-      }
-
-      // Validate email
-      if (!email || !re.test(email)) {
-        validEmail = false;
-        emailInput.classList.add("input-error");
-        emailError.style.display = "block";
-      } else {
-        validEmail = true;
-        emailInput.classList.remove("input-error");
-        emailError.style.display = "none";
-      }
-
-      // Validate message
-      if (!msg) {
-        validMsg = false;
-        msgInput.classList.add("input-error");
-        msgError.style.display = "block";
-      } else {
-        validMsg = true;
-        msgInput.classList.remove("input-error");
-        msgError.style.display = "none";
-      }
-
-      // If all valid, submit form
-      if (validUname && validEmail && validMsg) {
-        const form = document.querySelector(
-          ".contact__form"
-        ) as HTMLFormElement;
-        form.submit();
-      }
+  const validateForm = () => {
+    const newErrors = {
+      name: !formData.name.trim(),
+      email: !formData.email.trim() || !emailRegex.test(formData.email),
+      message: !formData.message.trim(),
     };
+    setErrors(newErrors);
+    return !Object.values(newErrors).some(Boolean);
+  };
 
-    formSubmitBtn.addEventListener("click", handleFormSubmit);
-
-    return () => {
-      formSubmitBtn.removeEventListener("click", handleFormSubmit);
-    };
-  }, []);
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (validateForm()) {
+      e.currentTarget.submit();
+    }
+  };
 
   return (
     <section id="contact" className="contact" aria-label="Contact">
@@ -95,35 +55,48 @@ const Contact: React.FC = () => {
         className="contact__form"
         action="https://formspree.io/f/xdoprgpv"
         method="POST"
+        onSubmit={handleSubmit}
       >
         <input
           type="text"
           name="name"
           placeholder="Name"
-          className="contact__form-name"
+          className={`contact__form-name ${errors.name ? "input-error" : ""}`}
+          value={formData.name}
+          onChange={handleInputChange}
         />
         <input
           type="email"
           name="_replyto"
           placeholder="Email"
-          className="contact__form-email"
+          className={`contact__form-email ${errors.email ? "input-error" : ""}`}
+          value={formData.email}
+          onChange={handleInputChange}
         />
         <textarea
           name="message"
           placeholder="Message"
-          className="contact__form-message"
+          className={`contact__form-message ${
+            errors.message ? "input-error" : ""
+          }`}
+          value={formData.message}
+          onChange={handleInputChange}
         />
         <div className="contact__form-error-submit">
           <div className="form-error">
-            <div className="form-error__name">Please enter your name.</div>
-            <div className="form-error__email">Please enter a valid email.</div>
-            <div className="form-error__msg">Please enter a message.</div>
+            {errors.name && (
+              <div className="form-error__name">Please enter your name.</div>
+            )}
+            {errors.email && (
+              <div className="form-error__email">
+                Please enter a valid email.
+              </div>
+            )}
+            {errors.message && (
+              <div className="form-error__msg">Please enter a message.</div>
+            )}
           </div>
-          <button
-            type="button"
-            className="contact__form-submit"
-            id="form-submit"
-          >
+          <button type="submit" className="contact__form-submit">
             Submit
           </button>
         </div>
