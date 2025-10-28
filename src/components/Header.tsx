@@ -41,10 +41,12 @@ const Header: React.FC = () => {
     // Observe sections
     const heroSection = document.querySelector("#hero");
     const aboutSection = document.querySelector("#about");
+    const experienceSection = document.querySelector("#experience");
     const contactSection = document.querySelector("#contact");
 
     if (heroSection) observerNav.observe(heroSection);
     if (aboutSection) observerNav.observe(aboutSection);
+    if (experienceSection) observerNav.observe(experienceSection);
     if (contactSection) observerNav.observe(contactSection);
 
     return () => {
@@ -79,6 +81,15 @@ const Header: React.FC = () => {
           }`}
         >
           About
+        </a>
+        <a
+          href="#experience"
+          id="nav-experience"
+          className={`navigation__item ${
+            activeSection === "experience" ? "navigation__item--active" : ""
+          }`}
+        >
+          Experience
         </a>
         <a
           href="#contact"

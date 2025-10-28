@@ -1,0 +1,249 @@
+@use "../styles/variables" as *;
+@use "../styles/layout" as *;
+
+.experience {
+  width: 1300px;
+  margin-left: auto;
+  margin-right: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4rem 2rem;
+
+  @media (max-width: 1500px) {
+    width: 1100px;
+  }
+
+  @media (max-width: 1200px) {
+    width: auto;
+  }
+
+  @media (max-width: 770px) {
+    padding: 2rem 1rem;
+  }
+
+  &__heading {
+    &:before {
+      position: absolute;
+      content: "";
+      border-bottom: 18px solid $color-red;
+      width: 25rem;
+      display: block;
+      margin: 0 auto;
+      position: relative;
+      left: 3.5rem;
+      top: 6.3rem;
+      z-index: -1;
+
+      @media (max-width: 770px) {
+        border-bottom: 14px solid $color-red;
+        width: 20rem;
+        left: 2.5rem;
+        top: 5rem;
+      }
+    }
+  }
+
+  &__timeline {
+    position: relative;
+    width: 100%;
+    max-width: 1200px;
+    padding-left: 3rem;
+
+    @media (max-width: 770px) {
+      padding-left: 2rem;
+    }
+  }
+
+  &__item {
+    position: relative;
+    margin-bottom: 4rem;
+    padding-left: 4rem;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    @media (max-width: 770px) {
+      padding-left: 3rem;
+      margin-bottom: 3rem;
+    }
+  }
+
+  &__connector {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(
+      180deg,
+      $color-red 0%,
+      rgba(255, 77, 90, 0.8) 30%,
+      rgba(255, 77, 90, 0.4) 70%,
+      rgba(255, 77, 90, 0.1) 100%
+    );
+    border-radius: 2px;
+    box-shadow: 0 0 20px rgba(255, 77, 90, 0.3);
+  }
+
+  &__dot {
+    position: absolute;
+    left: -0.875rem;
+    top: 2rem;
+    width: 1.75rem;
+    height: 1.75rem;
+    background: radial-gradient(
+      circle,
+      $color-red 0%,
+      rgba(255, 77, 90, 0.8) 70%
+    );
+    border-radius: 50%;
+    box-shadow: 0 0 20px rgba(255, 77, 90, 0.6), 0 0 40px rgba(255, 77, 90, 0.3),
+      inset 0 1px 2px rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    animation: pulse 2s infinite;
+
+    @media (max-width: 770px) {
+      width: 1.4rem;
+      height: 1.4rem;
+      left: -0.7rem;
+      top: 1.5rem;
+    }
+  }
+
+  &__content {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.05) 0%,
+      rgba(255, 255, 255, 0.02) 50%,
+      rgba(255, 77, 90, 0.01) 100%
+    );
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 77, 90, 0.15);
+    border-radius: 16px;
+    padding: 3rem;
+    width: 100%;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, $color-red, transparent);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    &:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 20px 40px rgba(255, 77, 90, 0.15),
+        0 10px 20px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 77, 90, 0.4);
+
+      &::before {
+        opacity: 1;
+      }
+    }
+
+    @media (max-width: 770px) {
+      padding: 2rem;
+      max-width: 100%;
+
+      &:hover {
+        transform: translateY(-4px) scale(1.01);
+      }
+    }
+  }
+
+  &__title {
+    font-size: 2.4rem;
+    font-weight: 700;
+    color: $color-red;
+    margin-bottom: 1rem;
+    background: linear-gradient(
+      135deg,
+      $color-red 0%,
+      rgba(255, 77, 90, 0.8) 100%
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 2px 4px rgba(255, 77, 90, 0.1);
+
+    @media (max-width: 770px) {
+      font-size: 2rem;
+    }
+  }
+
+  &__badge {
+    display: inline-block;
+    background: linear-gradient(
+      135deg,
+      rgba(255, 77, 90, 0.15),
+      rgba(255, 77, 90, 0.08)
+    );
+    color: $color-red;
+    padding: 0.6rem 1.4rem;
+    border-radius: 30px;
+    font-size: 1.2rem;
+    font-weight: 500;
+    font-style: italic;
+    margin-bottom: 1.5rem;
+    border: 1px solid rgba(255, 77, 90, 0.3);
+    box-shadow: 0 2px 8px rgba(255, 77, 90, 0.1);
+    transition: all 0.3s ease;
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(255, 77, 90, 0.2);
+    }
+
+    @media (max-width: 770px) {
+      font-size: 1rem;
+      padding: 0.5rem 1.2rem;
+    }
+  }
+
+  &__description {
+    color: $color-text;
+    line-height: 1.7;
+    font-size: 1.6rem;
+
+    ul {
+      list-style: disc;
+      padding-left: 2rem;
+      margin: 0;
+
+      li {
+        margin-bottom: 1rem;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+    }
+
+    @media (max-width: 770px) {
+      font-size: 1.4rem;
+      line-height: 1.6;
+    }
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+}
