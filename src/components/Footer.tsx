@@ -19,13 +19,13 @@ const Footer: React.FC = () => {
             <Github size={24} />
           </div>
         </a>
-        <a href="mailto:matheus@example.com">
+        <a href="mailto:matheus.caiser@gmail.com">
           <div className="socials__email">
             <Mail size={24} />
           </div>
         </a>
       </div>
-      <p className="copyright">MATHEUS ©{new Date().getFullYear()}</p>
+      <p className="copyright">MATHEUS CAISER ©{new Date().getFullYear()}</p>
     </footer>
   );
 };

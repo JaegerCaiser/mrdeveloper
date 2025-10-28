@@ -1,4 +1,3 @@
-import React from "react";
 import "./App.scss";
 import "./styles/layout.scss";
 
@@ -8,7 +7,7 @@ import Hero from "./sections/Hero";
 import About from "./sections/About";
 import Contact from "./sections/Contact";
 
-function App() {
+const App = () => {
   return (
     <div className="app">
       <main className="main" role="main">
@@ -20,6 +19,6 @@ function App() {
       <Footer />
     </div>
   );
-}
+};
 
 export default App;
