@@ -49,6 +49,8 @@ jobs:
     needs: test-and-lint
     runs-on: ubuntu-latest
     permissions:
+      contents: write
+      pull-requests: write
       deployments: write
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
@@ -88,6 +90,8 @@ jobs:
     needs: test-and-lint
     runs-on: ubuntu-latest
     permissions:
+      contents: write
+      pull-requests: write
       deployments: write
     if: github.event_name == 'pull_request' || (github.ref == 'refs/heads/develop' && github.event_name == 'push')
 
