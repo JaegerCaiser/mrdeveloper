@@ -22,7 +22,7 @@ RUN pnpm run build
 # Use uma imagem do Nginx para servir o aplicativo
 FROM nginx:alpine
 
-# Copie os arquivos de build do React para o diretório padrão do Nginx
+# Copie os arquivos de build do Vite para o diretório padrão do Nginx
 COPY --from=0 /app/build /usr/share/nginx/html
 
 # Exponha a porta 80 para o Nginx
