@@ -31,8 +31,6 @@ const About: React.FC = () => {
             and passion for creating exceptional digital experiences.
             <br />
             <br />
-            When I&apos;m not at my computer I like to spend my time reading,
-            keeping fit and playing guitar.
           </p>
         </div>
         <div className="skills">
