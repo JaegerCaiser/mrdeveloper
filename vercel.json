@@ -1,6 +1,5 @@
 {
-  "buildCommand": "pnpm run build",
+  "buildCommand": "npx react-scripts build",
   "outputDirectory": "build",
-  "framework": null,
-  "installCommand": "pnpm install"
+  "framework": null
 }
