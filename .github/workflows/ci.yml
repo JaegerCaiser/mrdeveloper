@@ -99,6 +99,31 @@ jobs:
       - name: Deploy Project Artifacts to Vercel
         run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
 
+      - name: Get Repo ID
+        if: github.event_name == 'pull_request'
+        run: |
+          REPO_ID=$(curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/${{ github.repository }} | jq -r .id)
+          echo "REPO_ID=$REPO_ID" >> $GITHUB_ENV
+
+      - name: Notify Vercel for PR Comment (if PR)
+        if: github.event_name == 'pull_request'
+        run: |
+          curl -X POST "https://api.vercel.com/v13/deployments" \
+            -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "name": "mrdeveloper",
+              "source": "cli",
+              "gitSource": {
+                "type": "github",
+                "repo": "${{ github.repository }}",
+                "ref": "${{ github.head_ref }}",
+                "sha": "${{ github.sha }}",
+                "repoId": ${{ env.REPO_ID }}
+              },
+              "target": "preview"
+            }'
+
       - name: Notify Vercel for PR Comment (if PR)
         if: github.event_name == 'pull_request'
         run: |
