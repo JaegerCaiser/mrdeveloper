@@ -1,5 +1,5 @@
 {
-  "buildCommand": "pnpm build",
-  "installCommand": "pnpm install",
-  "devCommand": "pnpm dev"
+  "buildCommand": "npx pnpm@10 build",
+  "installCommand": "npx pnpm@10 install",
+  "devCommand": "npx pnpm@10 dev"
 }
