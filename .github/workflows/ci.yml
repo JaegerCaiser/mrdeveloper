@@ -8,10 +8,10 @@ on:
 
 jobs:
   # -----------------------------------------------------------------
-  # JOB 1: Testa, Linta e Constroi o projeto
+  # JOB 1: Testa e Linta (sem build)
   # -----------------------------------------------------------------
-  test-and-build:
-    name: Test & Build
+  test:
+    name: Test & Lint
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -40,25 +40,16 @@ jobs:
 
       - name: Run tests
         run: pnpm run test:ci
-
-      - name: Build project
-        run: pnpm run build
-
-      # --- Passo de debug removido ---
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-artifacts
-          path: build/ # <-- Confirmamos que 'build/' está correto
-          retention-days: 7
+      
+      # Removemos os passos de 'build' e 'upload-artifact' daqui.
+      # Este job é apenas um portão de qualidade.
 
   # -----------------------------------------------------------------
   # JOB 2: Deploy para Produção (Vercel)
   # -----------------------------------------------------------------
   deploy-production:
     name: Deploy to Production
-    needs: test-and-build
+    needs: test # Depende apenas do job de teste
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
@@ -66,11 +57,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
+      # Precisamos instalar o ambiente de build aqui
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
         with:
-          name: build-artifacts
-          path: build/ # <-- ADICIONE ESTA LINHA
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      
+      # Removemos o 'download-artifact'
 
       - name: Deploy to Vercel (Production)
         uses: amondnet/vercel-action@v25
@@ -78,14 +80,15 @@ jobs:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          vercel-args: "build/ --prod" # <-- 'build/' está correto
+          # Deixamos a Vercel Action rodar o build
+          vercel-args: "--prod" 
 
   # -----------------------------------------------------------------
   # JOB 3: Deploy de Preview
   # -----------------------------------------------------------------
   deploy-preview:
     name: Deploy Preview
-    needs: test-and-build
+    needs: test # Depende apenas do job de teste
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request' || (github.ref == 'refs/heads/develop' && github.event_name == 'push')
 
@@ -93,11 +96,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
+      # Precisamos instalar o ambiente de build aqui
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
         with:
-          name: build-artifacts
-          path: build/ # <-- ADICIONE ESTA LINHA
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Removemos o 'download-artifact'
 
       - name: Deploy to Vercel (Preview)
         uses: amondnet/vercel-action@v25
@@ -105,6 +119,6 @@ jobs:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          vercel-args: "build/" # <-- 'build/' está correto
-
+          # Deixamos a Vercel Action rodar o build
+          vercel-args: "" # Argumento vazio para deploy de preview
 
