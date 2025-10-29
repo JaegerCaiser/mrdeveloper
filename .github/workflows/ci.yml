@@ -111,6 +111,9 @@ jobs:
         with:
           name: build-artifacts
 
+      - name: List files to find build folder
+        run: ls -l
+
       # A única diferença é que NÃO usamos a flag '--prod'
       # Isso gera uma URL de preview automática
       - name: Deploy to Vercel (Preview)
