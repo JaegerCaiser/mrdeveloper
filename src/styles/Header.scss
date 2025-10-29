@@ -56,6 +56,15 @@ $profile-glow-size-mobile: 203px; // 169px + 20%
   }
 }
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
 @keyframes blink {
   0%, 50% {
     opacity: 1;
@@ -97,7 +106,6 @@ $profile-glow-size-mobile: 203px; // 169px + 20%
       radial-gradient(circle at 30% 20%, rgba(102, 126, 234, 0.15) 0%, transparent 60%),
       radial-gradient(circle at 70% 80%, rgba(245, 87, 108, 0.12) 0%, transparent 60%),
       radial-gradient(circle at 20% 80%, rgba(79, 172, 254, 0.15) 0%, transparent 60%);
-    animation: gradientShift 20s ease-in-out infinite;
   }
 
   &__particles {
@@ -112,7 +120,6 @@ $profile-glow-size-mobile: 203px; // 169px + 20%
       radial-gradient(0.5px 0.5px at 90px 40px, rgba(120, 219, 255, 0.1), transparent);
     background-repeat: repeat;
     background-size: 300px 200px;
-    animation: particlesFloat 40s linear infinite;
   }
 
   // Navigation
@@ -219,10 +226,9 @@ $profile-glow-size-mobile: 203px; // 169px + 20%
     max-width: 900px;
     width: 100%;
     margin-top: 2rem;
-    animation: fadeInUp 0.8s ease-out;
     z-index: 1;
     // Adiciona espaço no topo para a imagem fixa não sobrepor o texto
-      padding-top: 320px; // Espaço aumentado para a imagem de perfil
+    padding-top: 320px; // Espaço aumentado para a imagem de perfil
   }
 
   // Profile Section
@@ -231,18 +237,16 @@ $profile-glow-size-mobile: 203px; // 169px + 20%
     margin-top: 2rem;
     margin-bottom: 0.5rem;
     
-    // Estado fixo quando rola a página
     &--fixed {
-        position: fixed;
+      position: fixed;
         z-index: 100;
         margin: 0;
-        // Otimizações de performance
-        will-change: transform, left, top; // Prepara o navegador para animações
-        transform: translateZ(0); // Força aceleração de hardware
-        backface-visibility: hidden; // Evita flickering
+      will-change: transform, left, top;
+        backface-visibility: hidden;
+      animation: fadeIn 0.3s ease-out;
       }
-
-    &-glow {
+    }
+    &__profile-glow {
       position: absolute;
       top: 50%;
       left: 50%;
@@ -254,7 +258,6 @@ $profile-glow-size-mobile: 203px; // 169px + 20%
       filter: blur(20px);
       z-index: -1;
       transition: all 0.5s ease;
-    }
   }
 
   &__image {
@@ -269,7 +272,7 @@ $profile-glow-size-mobile: 203px; // 169px + 20%
     position: relative;
     z-index: 1;
     // Otimizações de performance
-      will-change: border-radius; // Apenas border-radius muda
+    will-change: border-radius, border-width, box-shadow; // Propriedades que animam
       transform: translateZ(0); // Força aceleração de hardware
       backface-visibility: hidden; // Evita flickering
   }
@@ -371,7 +374,6 @@ $profile-glow-size-mobile: 203px; // 169px + 20%
 
   &::after {
     content: '|';
-    animation: blink 1s infinite;
     color: var(--text-primary);
   }
 }
