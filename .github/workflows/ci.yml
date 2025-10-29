@@ -73,14 +73,10 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Deploy to Vercel (Production)
-        uses: amondnet/vercel-action@v25
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          github-environment: Production
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          vercel-args: "--prod"
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: pnpm vercel --prod --token=${{ secrets.VERCEL_TOKEN }}
 
   # -----------------------------------------------------------------
   # JOB 3: Deploy de Preview
@@ -114,14 +110,10 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Deploy to Vercel (Preview)
-        uses: amondnet/vercel-action@v25
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          github-environment: Preview
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          vercel-args: ""
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: pnpm vercel --token=${{ secrets.VERCEL_TOKEN }}
 
   # -----------------------------------------------------------------
   # JOB 4: Criar Tag de Versão (Sem mudanças)
