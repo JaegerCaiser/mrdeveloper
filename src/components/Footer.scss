@@ -1,0 +1,86 @@
+@use "../styles/variables" as *;
+
+// Footer - exact match from benscott.dev
+.footer {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 160px;
+  background-color: #282828;
+  width: 100%;
+
+  p {
+    color: $color-text;
+    font-size: 1.4rem;
+    margin: 0;
+    font-weight: 400;
+  }
+
+  .return-home {
+    position: absolute;
+    top: 2rem;
+    right: 2rem;
+    width: 4rem;
+    height: 4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba($color-red, 0.1);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s;
+
+    &:hover {
+      background-color: $color-red;
+      transform: translateY(-2px);
+    }
+
+    svg {
+      color: $color-red;
+      transition: all 0.3s;
+    }
+
+    &:hover svg {
+      color: $color-text;
+    }
+  }
+
+  .socials {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 1rem;
+
+    &__github,
+    &__email {
+      width: 4rem;
+      height: 4rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: rgba($color-text, 0.1);
+      border-radius: 50%;
+      transition: all 0.3s;
+
+      &:hover {
+        background-color: $color-red;
+        transform: translateY(-2px);
+      }
+
+      svg {
+        color: $color-text;
+        transition: all 0.3s;
+      }
+
+      &:hover svg {
+        color: $color-background;
+      }
+    }
+  }
+
+  .copyright {
+    font-size: 1.2rem;
+    color: rgba($color-text, 0.7);
+  }
+}
