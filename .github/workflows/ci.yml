@@ -12,6 +12,7 @@ jobs:
   # -----------------------------------------------------------------
   test-and-build:
     name: Test, Lint & Build
+    # ... (este job está correto, sem mudanças) ...
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -61,7 +62,10 @@ jobs:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     steps:
-      # --- REMOVIDO checkout, setup-node, setup-pnpm, install ---
+      # --- PASSO DA CORREÇÃO ADICIONADO ---
+      # A Vercel Action precisa do .git para ler o commit
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       # --- PASSO CRÍTICO ADICIONADO ---
       - name: Download build artifact
@@ -92,7 +96,10 @@ jobs:
     if: github.event_name == 'pull_request' || (github.ref == 'refs/heads/develop' && github.event_name == 'push')
 
     steps:
-      # --- REMOVIDO checkout, setup-node, setup-pnpm, install ---
+      # --- PASSO DA CORREÇÃO ADICIONADO ---
+      # A Vercel Action precisa do .git para ler o commit
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       # --- PASSO CRÍTICO ADICIONADO ---
       - name: Download build artifact
