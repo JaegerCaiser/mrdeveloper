@@ -120,8 +120,7 @@ jobs:
                 "ref": "${{ github.head_ref }}",
                 "sha": "${{ github.sha }}",
                 "repoId": ${{ env.REPO_ID }}
-              },
-              "target": "${{ github.head_ref }}"
+              }
             }'
 
 
