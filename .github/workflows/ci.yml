@@ -40,16 +40,13 @@ jobs:
 
       - name: Run tests
         run: pnpm run test:ci
-      
-      # --- REMOVIDO 'pnpm run build' ---
-      # --- REMOVIDO 'Upload build artifact' ---
 
   # -----------------------------------------------------------------
   # JOB 2: Deploy para Produção (Vercel)
   # -----------------------------------------------------------------
   deploy-production:
     name: Deploy to Production
-    needs: test-and-lint # Depende do job de teste
+    needs: test-and-lint
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
@@ -57,7 +54,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Adicionamos a instalação aqui, pois a Vercel CLI pode precisar
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
@@ -72,24 +68,22 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # --- REMOVIDO 'Download build artifact' ---
-
       - name: Deploy to Vercel (Production)
         uses: amondnet/vercel-action@v25
         with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-environment: Production
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          # --- MUDANÇA CRÍTICA ---
-          # Deixamos a Vercel fazer o build
-          vercel-args: "--prod" 
+          vercel-args: "--prod"
 
   # -----------------------------------------------------------------
   # JOB 3: Deploy de Preview
   # -----------------------------------------------------------------
   deploy-preview:
     name: Deploy Preview
-    needs: test-and-lint # Depende do job de teste
+    needs: test-and-lint
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request' || (github.ref == 'refs/heads/develop' && github.event_name == 'push')
 
@@ -97,7 +91,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Adicionamos a instalação aqui
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
@@ -111,8 +104,6 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
-      # --- REMOVIDO 'Download build artifact' ---
 
       - name: Deploy to Vercel (Preview)
         uses: amondnet/vercel-action@v25
@@ -122,19 +113,17 @@ jobs:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          # --- MUDANÇA CRÍTICA ---
-          # Deixamos a Vercel fazer o build
-          vercel-args: "" 
+          vercel-args: ""
 
   # -----------------------------------------------------------------
   # JOB 4: Criar Tag de Versão (Sem mudanças)
   # -----------------------------------------------------------------
   tag-release:
     name: Tag Release
-    needs: deploy-production # <-- Roda APÓS o deploy de produção
+    needs: deploy-production
     runs-on: ubuntu-latest
     permissions:
-      contents: write 
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -154,7 +143,7 @@ jobs:
             echo "Tag $TAG_VERSION does not exist. Proceeding..."
             echo "SKIP_TAG=false" >> $GITHUB_ENV
           fi
-      
+
       - name: Create and Push Tag
         if: env.SKIP_TAG == 'false'
         run: |
@@ -162,7 +151,3 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git tag $TAG_VERSION -m "Release $TAG_VERSION"
           git push origin $TAG_VERSION
-
- $TAG_VERSION"
-          git push origin $TAG_VERSION
-
