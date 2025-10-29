@@ -1,4 +1,5 @@
 import React, { memo, useMemo } from "react";
+import { Helmet } from "react-helmet-async";
 import "./Experience.scss";
 import { experienceData, ExperienceItem } from "./experienceData";
 
@@ -64,6 +65,13 @@ const Experience: React.FC = memo(() => {
       itemScope
       itemType="https://schema.org/ItemList"
     >
+      <Helmet>
+        <title>Experiência • Matheus Caiser</title>
+        <meta
+          name="description"
+          content="Linha do tempo da carreira de Matheus Caiser, detalhando sua experiência profissional, projetos e tecnologias utilizadas em cada etapa."
+        />
+      </Helmet>
       <h2 className="experience__heading section-heading">Experience</h2>
       <div
         className="experience__timeline"

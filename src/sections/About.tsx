@@ -1,3 +1,4 @@
+import { Helmet } from "react-helmet-async";
 import "./About.scss";
 import profileImage from "../assets/profile.png";
 import SkillItem from "../components/SkillItem";
@@ -5,13 +6,20 @@ import SkillItem from "../components/SkillItem";
 const About: React.FC = () => {
   return (
     <section id="about" className="about" aria-label="About">
+      <Helmet>
+        <title>Sobre Mim • Matheus Caiser</title>
+        <meta
+          name="description"
+          content="Desenvolvedor Full Stack com mais de 8 anos de experiência, especialista em React, React Native, Node.js, Golang, Linux e Docker. Apaixonado por criar soluções inovadoras e pela filosofia de aprendizado contínuo."
+        />
+      </Helmet>
       <h2 className="about__heading section-heading">About</h2>
       <div className="about__content">
         <div className="profile profile__fade-in">
           <div className="profile__picture">
             <img
               src={profileImage}
-              alt="Profile picture"
+              alt="A headshot of Matheus Caiser"
               className="profile__image"
             />
           </div>
