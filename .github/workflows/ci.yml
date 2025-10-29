@@ -9,7 +9,6 @@ on:
 jobs:
   # -----------------------------------------------------------------
   # JOB 1: Testa, Linta e Constroi o projeto
-  # (Corre e armazena os artefatos de build)
   # -----------------------------------------------------------------
   test-and-build:
     name: Test & Build
@@ -22,21 +21,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # A forma correta de instalar pnpm é usando pnpm/action-setup
-      # Ele funciona em conjunto com o cache do setup-node
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 10
-          # O ideal é remover a linha 'version' acima e definir no seu package.json:
-          # "packageManager": "pnpm@10.x.x"
-          # Assim, a action usa a versão exata do seu projeto.
 
       - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: "pnpm" # O cache agora funcionará corretamente com o pnpm/action-setup
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -50,57 +44,44 @@ jobs:
       - name: Build project
         run: pnpm run build
 
-      # --- ADICIONE O PASSO DE DEBUG AQUI ---
-      # Vamos ver quais arquivos existem DEPOIS do build
-      - name: List files AFTER build
-        run: ls -l
-      # --- FIM DO DEBUG ---
+      # --- Passo de debug removido ---
 
-      # Salva a pasta 'build/' (ou 'dist/', 'out/', etc.) como um artefato
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: build-artifacts # Nome do artefato
-          path: build/ # Caminho para a pasta de build
+          name: build-artifacts
+          path: build/ # <-- Confirmamos que 'build/' está correto
           retention-days: 7
 
   # -----------------------------------------------------------------
   # JOB 2: Deploy para Produção (Vercel)
-  # (Só roda em push para 'main', baixa os artefatos e implanta)
   # -----------------------------------------------------------------
   deploy-production:
     name: Deploy to Production
-    needs: test-and-build # Depende do job acima
+    needs: test-and-build
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     steps:
-      # O checkout é necessário para o vercel-action ler o vercel.json
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Baixa os artefatos que o job 'test-and-build' criou
-      # Isso recria a pasta 'build/' no ambiente atual
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
           name: build-artifacts
-          # O path: '.' (padrão) coloca a pasta 'build/' na raiz
+          path: build/ # <-- ADICIONE ESTA LINHA
 
-      # Não precisamos mais instalar node, pnpm, ou rodar build!
-      # Apenas dizemos ao Vercel para implantar a pasta 'build/'
       - name: Deploy to Vercel (Production)
         uses: amondnet/vercel-action@v25
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          # Passamos a pasta 'build/' e a flag '--prod'
-          vercel-args: "build/ --prod"
+          vercel-args: "build/ --prod" # <-- 'build/' está correto
 
   # -----------------------------------------------------------------
-  # JOB 3: (Opcional, mas recomendado) Deploy de Preview
-  # (Roda em PRs e pushes para 'develop')
+  # JOB 3: Deploy de Preview
   # -----------------------------------------------------------------
   deploy-preview:
     name: Deploy Preview
@@ -116,14 +97,14 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-artifacts
+          path: build/ # <-- ADICIONE ESTA LINHA
 
-      # A única diferença é que NÃO usamos a flag '--prod'
-      # Isso gera uma URL de preview automática
       - name: Deploy to Vercel (Preview)
         uses: amondnet/vercel-action@v25
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          # Apenas o caminho, sem '--prod'
-          vercel-args: "build/"
+          vercel-args: "build/" # <-- 'build/' está correto
+
+
