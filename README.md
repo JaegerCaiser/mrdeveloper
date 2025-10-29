@@ -1,15 +1,14 @@
 <div align="center">
   
-# 🎨 MR.DEVELOPER Portfolio
+# 🎨 Portfolio Website
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
 [![Framer Motion](https://img.shields.io/badge/Framer%20Motion-0055FF?style=for-the-badge&logo=framer&logoColor=white)](https://www.framer.com/motion/)
-[![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://vercel.com)
 
-**Um portfólio moderno e interativo construído com React e TypeScript**
+**A modern, animated portfolio website inspired by [benscott.dev](https://benscott.dev/)**
 
-[🌐 Live Demo](https://mrdeveloper.vercel.app) • [📝 Documentação](#-features) • [🚀 Deploy](#-deploy)
+[🌐 Live Demo](#) • [📝 Documentation](#-features) • [🎨 Customization](#-customization-guide)
 
 </div>
 
@@ -17,89 +16,221 @@
 
 ## ✨ Features
 
-- 🎭 **Animações Suaves** - Transições elegantes com Framer Motion
-- 💎 **Design Glassmorphism** - Interface moderna com efeitos de vidro
-- 📱 **Totalmente Responsivo** - Perfeito em qualquer dispositivo
-- 🎨 **Gradientes Vibrantes** - Paleta de cores dinâmica e atraente
-- ⚡ **Performance Otimizada** - Build otimizado e lazy loading
-- 🔍 **SEO Friendly** - Meta tags e estrutura semântica
-- 🎯 **TypeScript** - Type safety completo
-- 🧪 **Testado** - Cobertura de testes com Jest e React Testing Library
-- 🐳 **Docker Ready** - Containerização completa
+- � **Animated Background** - Canvas-based particle animation in the hero section
+- 🎯 **Smooth Scrolling** - Anchor-based navigation with smooth scroll behavior
+- 📱 **Responsive Design** - Mobile-first approach with optimized layouts
+- ⚡ **Modern Stack** - React 18, TypeScript, SCSS, Framer Motion
+- 📧 **Contact Form** - Integrated form with validation
+- ♿ **Accessibility** - Semantic HTML and ARIA labels throughout
+- � **Custom Theme** - Dark theme with accent colors
+- 🔧 **Easy Customization** - Well-structured and documented code
 
 ## 🛠️ Tech Stack
 
 ### Core
-- **React 18.3.1** - Biblioteca UI moderna
-- **TypeScript 5.9.3** - Superset JavaScript tipado
-- **Framer Motion 12.23.24** - Biblioteca de animações
-- **Lucide React 0.548.0** - Ícones modernos e leves
+- **React 18.3.1** - UI library
+- **TypeScript 5.9.3** - Type safety
+- **SCSS** - Styling with variables
+- **Framer Motion 12.23.24** - Animations
+- **Lucide React 0.548.0** - Modern icons
 
-### Desenvolvimento
-- **React Scripts 5.0.1** - Ferramentas de build
-- **Jest & Testing Library** - Framework de testes
-- **pnpm** - Gerenciador de pacotes rápido
-
-### DevOps
-- **Docker** - Containerização
-- **Vercel** - Deploy e hosting
-- **GitHub Actions** - CI/CD
+### Development
+- **Create React App 5.0.1** - Build tooling
+- **Jest & Testing Library** - Testing framework
+- **pnpm** - Fast, efficient package manager
 
 ## 🚀 Quick Start
 
-### Pré-requisitos
+### Prerequisites
 ```bash
 Node.js >= 16.x
 pnpm >= 8.x (recomendado) ou npm/yarn
 ```
 
-### Instalação
 
-1. **Clone o repositório**
+```bash
+node >= 16.x
+pnpm >= 8.x
+```
+
+### Installation
+
+1. **Clone the repository**
 ```bash
 git clone https://github.com/JaegerCaiser/mrdeveloper.git
 cd mrdeveloper
 ```
 
-2. **Instale as dependências**
+2. **Install dependencies**
 ```bash
 pnpm install
-# ou
-npm install
 ```
 
-3. **Inicie o servidor de desenvolvimento**
+3. **Start development server**
 ```bash
 pnpm start
-# ou
-npm start
 ```
 
-4. **Abra no navegador**
+4. **Open in browser**
 ```
 http://localhost:3000
 ```
 
-## 📦 Scripts Disponíveis
+## 📦 Available Scripts
 
-| Comando | Descrição |
+| Command | Description |
 |---------|-----------|
-| `pnpm start` | Inicia o servidor de desenvolvimento |
-| `pnpm build` | Cria build de produção |
-| `pnpm test` | Executa os testes |
-| `pnpm test:coverage` | Testes com cobertura |
-| `pnpm eject` | Ejeta configuração do CRA (irreversível) |
+| `pnpm start` | Start development server |
+| `pnpm build` | Create production build |
+| `pnpm test` | Run tests |
+| `pnpm lint` | Lint code |
+| `pnpm lint:fix` | Fix linting issues |
+
+## 🎨 Customization Guide
+
+### 1. Personal Information
+
+**Header** (`src/components/Header.tsx`)
+- Change logo initials (currently "BS")
+- Update navigation links
+
+**Hero Section** (`src/sections/Hero.tsx`)
+```typescript
+<h1 className="hero__title">
+  Hello, I'm <span className="hero__name">Your Name</span>.
+  <br />
+  I'm a full stack web developer.
+</h1>
+```
+
+**About Section** (`src/sections/About.tsx`)
+- Replace bio paragraphs
+- Update skills array:
+```typescript
+const skills = [
+  "HTML", "REACT", "JAVASCRIPT", // your skills
+];
+```
+- Replace `src/assets/profile.png` with your photo
+
+**Experience** (`src/sections/Experience.tsx`)
+```typescript
+const items: ExperienceItem[] = [
+  {
+    company: "Your Company",
+    role: "Your Role",
+    period: "2023 — Present",
+    description: "What you did...",
+  },
+];
+```
+
+**Writing** (`src/sections/Writing.tsx`)
+```typescript
+const posts: Post[] = [
+  { title: "Your Article", url: "https://...", date: "2025-01-15" },
+];
+```
+
+**Contact** (`src/sections/Contact.tsx`)
+- Update social media links
+- Integrate form service (Formspree, EmailJS, etc.)
+- Change copyright name
+
+### 2. Colors & Theme
+
+Edit `src/styles/_variables.scss`:
+
+```scss
+$bg: #0a192f;          // Main background
+$bg-light: #112240;    // Card backgrounds
+$text: #8892b0;        // Body text
+$text-bright: #ccd6f6; // Headings
+$accent: #64ffda;      // Accent color
+```
+
+### 3. Fonts
+
+Update Google Fonts import in `src/index.scss` and variables in `src/styles/_variables.scss`.
+
+### 4. Animated Background
+
+Customize in `src/components/AnimatedBackground.tsx`:
+
+```typescript
+const particleCount = 80;           // Number of particles
+const connectionDistance = 150;     // Connection distance
+```
+
+## 📁 Project Structure
+
+```
+src/
+├── components/
+│   ├── AnimatedBackground.tsx  # Canvas particle animation
+│   └── Header.tsx              # Fixed navigation
+├── sections/
+│   ├── Hero.tsx               # Landing with animation
+│   ├── About.tsx              # Bio + skills
+│   ├── Experience.tsx         # Work history
+│   ├── Writing.tsx            # Articles
+│   └── Contact.tsx            # Contact form
+├── styles/
+│   ├── _variables.scss        # Theme variables
+│   └── layout.scss            # Main styles
+├── assets/
+│   └── profile.png            # Profile photo
+├── App.tsx
+└── index.tsx
+```
+
+## 🌐 Deployment
+
+### Vercel
+```bash
+pnpm build
+vercel --prod
+```
+
+### Netlify
+```bash
+pnpm build
+netlify deploy --prod --dir=build
+```
+
+### GitHub Pages
+
+1. Add to `package.json`:
+```json
+"homepage": "https://yourusername.github.io/repo-name"
+```
+
+2. Install gh-pages:
+```bash
+pnpm add -D gh-pages
+```
+
+3. Add scripts:
+```json
+"predeploy": "pnpm build",
+"deploy": "gh-pages -d build"
+```
+
+4. Deploy:
+```bash
+pnpm deploy
+```
 
 ## 🐳 Docker
 
-### Build da imagem
+### Build image
 ```bash
-docker build -t mrdeveloper .
+docker build -t portfolio .
 ```
 
-### Executar container
+### Run container
 ```bash
-docker run -p 3000:3000 mrdeveloper
+docker run -p 3000:3000 portfolio
 ```
 
 ### Docker Compose
@@ -107,138 +238,43 @@ docker run -p 3000:3000 mrdeveloper
 docker-compose up
 ```
 
-## 📁 Estrutura do Projeto
+## � License
 
-```
-mrdeveloper/
-├── public/                 # Arquivos estáticos
-├── src/
-│   ├── assets/            # Imagens e recursos
-│   ├── components/        # Componentes React
-│   │   ├── common/       # Componentes reutilizáveis
-│   │   │   ├── Button.tsx
-│   │   │   ├── Card.tsx
-│   │   │   ├── GradientText.tsx
-│   │   │   ├── Section.tsx
-│   │   │   ├── SocialLinks.tsx
-│   │   │   └── MustacheIcon.tsx
-│   │   ├── Header.tsx
-│   │   ├── About.tsx
-│   │   ├── Projects.tsx
-│   │   ├── Contact.tsx
-│   │   ├── Footer.tsx
-│   │   └── ExampleUsage.tsx
-│   ├── styles/           # Arquivos CSS
-│   ├── App.tsx           # Componente principal
-│   ├── index.tsx         # Entry point
-│   └── react-app-env.d.ts # Type declarations
-├── tsconfig.json         # Configuração TypeScript
-├── package.json
-├── Dockerfile
-└── docker-compose.yml
-```
+MIT License - feel free to use this template for your own portfolio!
 
-## 🎨 Componentes Reutilizáveis
+## 🙏 Credits
 
-O projeto utiliza uma arquitetura de componentes bem estruturada:
+- Design inspiration: [benscott.dev](https://benscott.dev/)
+- Icons: [Lucide React](https://lucide.dev/)
+- Fonts: [Google Fonts](https://fonts.google.com/)
 
-### Button
-```tsx
-import { Button } from './components/common';
+## 🤝 Contributing
 
-<Button 
-  variant="primary" 
-  size="large"
-  onClick={handleClick}
->
-  Click Me
-</Button>
-```
+Contributions, issues, and feature requests are welcome!
 
-### Card
-```tsx
-import { Card } from './components/common';
+1. Fork the project
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add: amazing feature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-<Card variant="glass" hover delay={0.2}>
-  <h3>Title</h3>
-  <p>Content</p>
-</Card>
-```
+## 👨‍💻 Author
 
-### GradientText
-```tsx
-import { GradientText } from './components/common';
-
-<GradientText gradient="primary">
-  Highlighted Text
-</GradientText>
-```
-
-> 📖 Veja mais exemplos em [`src/components/ExampleUsage.tsx`](./src/components/ExampleUsage.tsx)
-
-## 🧪 Testes
-
-```bash
-# Executar todos os testes
-pnpm test
-
-# Testes com cobertura
-pnpm test -- --coverage
-
-# Modo watch
-pnpm test -- --watch
-```
-
-## 🌐 Deploy
-
-### Vercel (Recomendado)
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/JaegerCaiser/mrdeveloper)
-
-1. Conecte seu repositório no [Vercel](https://vercel.com)
-2. Configure as variáveis de ambiente (se necessário)
-3. Deploy automático a cada push na main
-
-### Build Manual
-```bash
-pnpm build
-# Arquivos estarão em ./build/
-```
-
-## 🎯 Roadmap
-
-- [x] Migração para TypeScript
-- [x] Testes unitários
-- [x] Docker setup
-- [ ] Adicionar modo escuro/claro
-- [ ] Implementar i18n (EN/PT)
-- [ ] Blog integrado
-- [ ] Analytics dashboard
-- [ ] Acessibilidade (WCAG AA)
-
-## 🤝 Contribuindo
-
-Contribuições são bem-vindas! Siga os passos:
-
-1. Fork o projeto
-2. Crie uma branch (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'Add: amazing feature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
-5. Abra um Pull Request
-
-## 📄 Licença
-
-Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
-
-## 👨‍💻 Autor
-
-**Matheus Caiser**
+**Your Name**
 
 - GitHub: [@JaegerCaiser](https://github.com/JaegerCaiser)
-- LinkedIn: [Matheus Caiser](https://linkedin.com/in/matheus-caiser)
-- Portfolio: [mrdeveloper.vercel.app](https://mrdeveloper.vercel.app)
+- Portfolio: [Your Portfolio URL](#)
 
 ---
+
+<div align="center">
+  
+Made with ❤️ using React + TypeScript
+
+Inspired by [benscott.dev](https://benscott.dev/)
+
+</div>
+
 
 <div align="center">
 
