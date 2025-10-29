@@ -29,6 +29,9 @@ jobs:
         with:
           version: 10.x
 
+      - name: Verify pnpm installation
+        run: pnpm --version
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
@@ -67,6 +70,9 @@ jobs:
         uses: pnpm/action-setup@v4
         with:
           version: 10.x
+
+      - name: Verify pnpm installation
+        run: pnpm --version
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
