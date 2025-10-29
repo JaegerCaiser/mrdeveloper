@@ -402,25 +402,6 @@ a {
 
 // Experience section
 .experience {
-  &__timeline {
-    list-style: none;
-    display: grid;
-    gap: 40px;
-  }
-
-  &__item {
-    padding: 30px;
-    background: $bg-light;
-    border-left: 3px solid $accent;
-    border-radius: 4px;
-    transition: $transition;
-
-    &:hover {
-      transform: translateX(5px);
-      box-shadow: 0 10px 30px -15px rgba(100, 255, 218, 0.2);
-    }
-  }
-
   &__header {
     margin-bottom: 15px;
   }

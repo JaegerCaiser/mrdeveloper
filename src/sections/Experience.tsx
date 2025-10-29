@@ -1,87 +1,83 @@
-import React from "react";
+import React, { memo, useMemo } from "react";
 import "./Experience.scss";
+import { experienceData, ExperienceItem } from "./experienceData";
 
-interface ExperienceItem {
-  title: string;
-  description: React.ReactNode;
-  badge: string;
-}
+// Componente memoizado para o item individual
+const ExperienceItemComponent = memo<{
+  item: ExperienceItem;
+  index: number;
+}>(({ item, index }) => {
+  // Memoizar classes CSS para evitar recálculos
+  const itemClasses = useMemo(
+    () => `experience__item ${index === 0 ? "experience__item--first" : ""}`,
+    [index]
+  );
 
-const Experience: React.FC = () => {
+  const dotClasses = useMemo(() => "experience__dot", []);
+  const contentClasses = useMemo(() => "experience__content", []);
+  const titleClasses = useMemo(() => "experience__title", []);
+  const badgeClasses = useMemo(() => "experience__badge", []);
+  const descriptionClasses = useMemo(() => "experience__description", []);
+
   return (
-    <section id="experience" className="experience" aria-label="Experience">
-      <h2 className="experience__heading section-heading">Experience</h2>
-      <div className="experience__timeline">
-        {experience.map((item, index) => (
-          <div key={`experience-${index}`} className="experience__item">
-            <div className="experience__connector">
-              <div className="experience__dot"></div>
-            </div>
-            <div className="experience__content">
-              <h3 className="experience__title">{item.title}</h3>
-              <span className="experience__badge">{item.badge}</span>
-              <div className="experience__description">{item.description}</div>
-            </div>
+    <div className={itemClasses}>
+      <div className={dotClasses} aria-hidden="true" />
+      <article className={contentClasses}>
+        <h3 className={titleClasses}>{item.title}</h3>
+        {item.company && item.period && (
+          <div className="experience__meta">
+            <span className="experience__company">{item.company}</span>
+            <span className="experience__period">{item.period}</span>
           </div>
+        )}
+        <span className={badgeClasses}>{item.badge}</span>
+        <div className={descriptionClasses}>{item.description}</div>
+        {item.technologies && item.technologies.length > 0 && (
+          <div className="experience__technologies">
+            {item.technologies.map((tech, techIndex) => (
+              <span
+                key={`${item.id}-tech-${techIndex}`}
+                className="experience__technology"
+              >
+                {tech}
+              </span>
+            ))}
+          </div>
+        )}
+      </article>
+    </div>
+  );
+});
+
+ExperienceItemComponent.displayName = "ExperienceItemComponent";
+
+// Componente principal otimizado
+const Experience: React.FC = memo(() => {
+  // Memoizar dados para evitar re-renders desnecessários
+  const memoizedExperienceData = useMemo(() => experienceData, []);
+
+  return (
+    <section
+      id="experience"
+      className="experience"
+      aria-label="Professional Experience Timeline"
+      itemScope
+      itemType="https://schema.org/ItemList"
+    >
+      <h2 className="experience__heading section-heading">Experience</h2>
+      <div
+        className="experience__timeline"
+        role="list"
+        aria-label="Experience timeline"
+      >
+        {memoizedExperienceData.map((item, index) => (
+          <ExperienceItemComponent key={item.id} item={item} index={index} />
         ))}
       </div>
     </section>
   );
-};
+});
 
-const experience: ExperienceItem[] = [
-  {
-    title: "Full Stack Developer",
-    description: (
-      <ul>
-        <li>
-          Developed modern web applications using React, TypeScript, and Node.js
-        </li>
-        <li>
-          Implemented responsive designs with SCSS and component-based
-          architecture
-        </li>
-        <li>
-          Collaborated with cross-functional teams to deliver high-quality
-          software solutions
-        </li>
-        <li>Optimized application performance and user experience</li>
-      </ul>
-    ),
-    badge: "Current Position",
-  },
-  {
-    title: "Frontend Developer",
-    description: (
-      <ul>
-        <li>
-          Built interactive user interfaces with React and modern JavaScript
-        </li>
-        <li>Integrated RESTful APIs and managed application state</li>
-        <li>
-          Implemented accessibility standards and responsive design principles
-        </li>
-        <li>Participated in code reviews and mentored junior developers</li>
-      </ul>
-    ),
-    badge: "Previous Role",
-  },
-  {
-    title: "Junior Developer",
-    description: (
-      <ul>
-        <li>Developed web applications using HTML, CSS, and JavaScript</li>
-        <li>
-          Learned modern development practices and version control with Git
-        </li>
-        <li>
-          Contributed to open-source projects and personal portfolio development
-        </li>
-        <li>Gained experience with various frameworks and libraries</li>
-      </ul>
-    ),
-    badge: "Entry Level",
-  },
-];
+Experience.displayName = "Experience";
 
 export default Experience;

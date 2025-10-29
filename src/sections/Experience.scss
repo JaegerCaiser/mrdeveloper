@@ -1,7 +1,21 @@
 @use "../styles/variables" as *;
 @use "../styles/layout" as *;
 
+// CSS Custom Properties para melhor performance e manutenção
 .experience {
+  --experience-primary-color: #{$color-red};
+  --experience-secondary-color: #{rgba(255, 77, 90, 0.8)};
+  --experience-accent-color: #{rgba(255, 77, 90, 0.4)};
+  --experience-bg-primary: #{rgba(255, 255, 255, 0.05)};
+  --experience-bg-secondary: #{rgba(255, 255, 255, 0.02)};
+  --experience-border-color: #{rgba(255, 77, 90, 0.15)};
+  --experience-shadow-color: #{rgba(255, 77, 90, 0.6)};
+  --experience-text-color: #{$color-text};
+
+  // Performance optimizations
+  will-change: transform;
+  contain: layout style paint;
+
   width: 1300px;
   margin-left: auto;
   margin-right: auto;
@@ -16,10 +30,13 @@
 
   @media (max-width: 1200px) {
     width: auto;
+    max-width: 1100px;
   }
 
   @media (max-width: 770px) {
     padding: 2rem 1rem;
+    --experience-dot-size: 1.4rem;
+    --experience-spacing: 3rem;
   }
 
   &__heading {
@@ -44,89 +61,144 @@
     }
   }
 
-  &__timeline {
+    &__timeline {
     position: relative;
     width: 100%;
     max-width: 1200px;
     padding-left: 3rem;
 
+    // Performance optimization
+    contain: layout style;
+    will-change: transform;
+
+    // LINHA CONTÍNUA CONECTANDO TODOS OS PONTOS
+    &::before {
+      content: "";
+      position: absolute;
+      left: -0.875rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 2px;
+      height: calc(100% - 3.5rem);
+      background: linear-gradient(
+        to bottom,
+        var(--experience-shadow-color) 0%,
+        var(--experience-accent-color) 50%,
+        rgba(255, 77, 90, 0.2) 100%
+      );
+      border-radius: 1px;
+      z-index: 0;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    // Efeito hover na linha contínua
+    &:hover::before {
+      background: linear-gradient(
+        to bottom,
+        var(--experience-primary-color) 0%,
+        var(--experience-secondary-color) 50%,
+        var(--experience-accent-color) 100%
+      );
+      box-shadow: 0 0 15px var(--experience-accent-color);
+    }
+
     @media (max-width: 770px) {
       padding-left: 2rem;
+
+      &::before {
+        left: -0.7rem;
+        top: 50%;
+        transform: translateY(-50%);
+        height: calc(100% - 2.8rem);
+      }
     }
   }
 
-  &__item {
+    &__item {
     position: relative;
     margin-bottom: 4rem;
-    padding-left: 4rem;
+    padding-left: 30px;
+    background: transparent;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    // Performance optimization
+    will-change: transform;
+    contain: layout style;
 
     &:last-child {
       margin-bottom: 0;
     }
 
+    // Efeito hover nos pontos - MAIS VISÍVEL
+    &:hover .experience__dot {
+      transform: scale(1.3) translateY(-50%);
+      box-shadow:
+        0 0 30px var(--experience-shadow-color),
+        0 0 60px var(--experience-accent-color),
+        inset 0 1px 2px rgba(255, 255, 255, 0.3);
+      animation-duration: 0.8s;
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
     @media (max-width: 770px) {
       padding-left: 3rem;
-      margin-bottom: 3rem;
+      margin-bottom: var(--experience-spacing, 3rem);
     }
-  }
-
-  &__connector {
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 4px;
-    background: linear-gradient(
-      180deg,
-      $color-red 0%,
-      rgba(255, 77, 90, 0.8) 30%,
-      rgba(255, 77, 90, 0.4) 70%,
-      rgba(255, 77, 90, 0.1) 100%
-    );
-    border-radius: 2px;
-    box-shadow: 0 0 20px rgba(255, 77, 90, 0.3);
   }
 
   &__dot {
     position: absolute;
     left: -0.875rem;
-    top: 2rem;
+    top: 50%;
+    transform: translateY(-50%);
     width: 1.75rem;
     height: 1.75rem;
     background: radial-gradient(
       circle,
-      $color-red 0%,
-      rgba(255, 77, 90, 0.8) 70%
+      var(--experience-primary-color) 0%,
+      var(--experience-secondary-color) 70%
     );
     border-radius: 50%;
-    box-shadow: 0 0 20px rgba(255, 77, 90, 0.6), 0 0 40px rgba(255, 77, 90, 0.3),
+    box-shadow:
+      0 0 20px var(--experience-shadow-color),
+      0 0 40px var(--experience-accent-color),
       inset 0 1px 2px rgba(255, 255, 255, 0.2);
     border: 2px solid rgba(255, 255, 255, 0.1);
     animation: pulse 2s infinite;
+    z-index: 2;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    // Performance optimization
+    will-change: transform, box-shadow;
 
     @media (max-width: 770px) {
-      width: 1.4rem;
-      height: 1.4rem;
+      width: var(--experience-dot-size, 1.4rem);
+      height: var(--experience-dot-size, 1.4rem);
       left: -0.7rem;
-      top: 1.5rem;
+      top: 50%;
+      transform: translateY(-50%);
     }
   }
 
   &__content {
     background: linear-gradient(
       135deg,
-      rgba(255, 255, 255, 0.05) 0%,
-      rgba(255, 255, 255, 0.02) 50%,
+      var(--experience-bg-primary) 0%,
+      var(--experience-bg-secondary) 50%,
       rgba(255, 77, 90, 0.01) 100%
     );
     backdrop-filter: blur(15px);
-    border: 1px solid rgba(255, 77, 90, 0.15);
+    border: 1px solid var(--experience-border-color);
     border-radius: 16px;
     padding: 3rem;
     width: 100%;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
+
+    // Performance optimization
+    will-change: transform, box-shadow;
+    contain: layout style paint;
 
     &::before {
       content: "";
@@ -135,16 +207,18 @@
       left: 0;
       right: 0;
       height: 2px;
-      background: linear-gradient(90deg, transparent, $color-red, transparent);
+      background: linear-gradient(90deg, transparent, var(--experience-primary-color), transparent);
       opacity: 0;
       transition: opacity 0.3s ease;
     }
 
     &:hover {
       transform: translateY(-8px) scale(1.02);
-      box-shadow: 0 20px 40px rgba(255, 77, 90, 0.15),
-        0 10px 20px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-      border-color: rgba(255, 77, 90, 0.4);
+      box-shadow:
+        0 20px 40px rgba(255, 77, 90, 0.15),
+        0 10px 20px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      border-color: var(--experience-accent-color);
 
       &::before {
         opacity: 1;
@@ -164,17 +238,17 @@
   &__title {
     font-size: 2.4rem;
     font-weight: 700;
-    color: $color-red;
+    color: var(--experience-primary-color);
     margin-bottom: 1rem;
     background: linear-gradient(
       135deg,
-      $color-red 0%,
-      rgba(255, 77, 90, 0.8) 100%
+      var(--experience-primary-color) 0%,
+      var(--experience-secondary-color) 100%
     );
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    text-shadow: 0 2px 4px rgba(255, 77, 90, 0.1);
+    text-shadow: 0 2px 4px var(--experience-accent-color);
 
     @media (max-width: 770px) {
       font-size: 2rem;
@@ -188,7 +262,7 @@
       rgba(255, 77, 90, 0.15),
       rgba(255, 77, 90, 0.08)
     );
-    color: $color-red;
+    color: var(--experience-primary-color);
     padding: 0.6rem 1.4rem;
     border-radius: 30px;
     font-size: 1.2rem;
@@ -196,12 +270,15 @@
     font-style: italic;
     margin-bottom: 1.5rem;
     border: 1px solid rgba(255, 77, 90, 0.3);
-    box-shadow: 0 2px 8px rgba(255, 77, 90, 0.1);
-    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px var(--experience-accent-color);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    // Performance optimization
+    will-change: transform, box-shadow;
 
     &:hover {
       transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(255, 77, 90, 0.2);
+      box-shadow: 0 4px 12px var(--experience-accent-color);
     }
 
     @media (max-width: 770px) {
@@ -210,8 +287,59 @@
     }
   }
 
+  &__meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    font-size: 1.4rem;
+    color: var(--experience-text-color);
+    opacity: 0.8;
+
+    @media (max-width: 770px) {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+      font-size: 1.2rem;
+    }
+  }
+
+  &__company {
+    font-weight: 600;
+    color: var(--experience-primary-color);
+  }
+
+  &__period {
+    font-style: italic;
+    opacity: 0.7;
+  }
+
+  &__technologies {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    margin-top: 1.5rem;
+  }
+
+  &__technology {
+    display: inline-block;
+    background: rgba(255, 77, 90, 0.1);
+    color: var(--experience-primary-color);
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    border: 1px solid rgba(255, 77, 90, 0.2);
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: var(--experience-accent-color);
+      transform: translateY(-1px);
+    }
+  }
+
   &__description {
-    color: $color-text;
+    color: var(--experience-text-color);
     line-height: 1.7;
     font-size: 1.6rem;
 
@@ -239,11 +367,11 @@
 @keyframes pulse {
   0%,
   100% {
-    transform: scale(1);
+    transform: translateY(-50%) scale(1);
     opacity: 1;
   }
   50% {
-    transform: scale(1.1);
+    transform: translateY(-50%) scale(1.1);
     opacity: 0.8;
   }
 }
