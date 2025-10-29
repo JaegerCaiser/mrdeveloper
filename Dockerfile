@@ -11,7 +11,7 @@ WORKDIR /app
 COPY package*.json pnpm-lock.yaml ./
 
 # Instale as dependências do projeto
-RUN pnpm install
+RUN pnpm install --ignore-scripts
 
 # Copie o restante do código do projeto para o diretório de trabalho
 COPY . .
