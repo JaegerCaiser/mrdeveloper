@@ -16,11 +16,19 @@ const About: React.FC = () => {
             />
           </div>
           <p className="profile__blurb">
-            Fully committed to the philosophy of life-long learning, I&apos;m a
-            full stack developer with a deep passion for JavaScript, React and
-            all things web development. The unique combination of creativity,
-            logic, technology and never running out of new things to discover,
-            drives my excitement and passion for web development.
+            Dynamic and seasoned Full Stack Developer with over 8 years of
+            comprehensive experience in web development and software
+            engineering. Proficient in an array of modern technologies including
+            React, React Native, Node.js, Golang, Linux, and Docker. Known for a
+            solution-oriented approach, adept at tackling complex challenges and
+            delivering innovative solutions that drive business success.
+            <br />
+            <br />
+            Fully committed to the philosophy of life-long learning, I&apos;m
+            deeply passionate about JavaScript, React and all things web
+            development. The unique combination of creativity, logic, technology
+            and never running out of new things to discover drives my excitement
+            and passion for creating exceptional digital experiences.
             <br />
             <br />
             When I&apos;m not at my computer I like to spend my time reading,
