@@ -118,6 +118,7 @@ jobs:
         uses: amondnet/vercel-action@v25
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-environment: Preview
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
@@ -160,5 +161,8 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git tag $TAG_VERSION -m "Release $TAG_VERSION"
+          git push origin $TAG_VERSION
+
+ $TAG_VERSION"
           git push origin $TAG_VERSION
 
