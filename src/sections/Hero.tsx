@@ -1,4 +1,4 @@
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Download } from "lucide-react";
 import AnimatedBackground from "../components/AnimatedBackground";
 import "./Hero.scss";
 
@@ -16,10 +16,20 @@ const Hero: React.FC = () => {
               I&apos;m a full stack web developer.
             </div>
           </div>
-          <a href="#about" className="hero__cta">
-            View my work
-            <ArrowRight size={20} />
-          </a>
+          <div className="hero__cta-group">
+            <a href="#about" className="hero__cta hero__cta--primary">
+              View my work
+              <ArrowRight size={20} />
+            </a>
+            <a
+              href="/Matheus Caiser CV.pdf"
+              className="hero__cta hero__cta--secondary"
+              download
+            >
+              Download CV
+              <Download size={20} />
+            </a>
+          </div>
         </div>
       </div>
     </section>

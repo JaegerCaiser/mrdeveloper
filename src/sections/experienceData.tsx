@@ -12,67 +12,151 @@ export interface ExperienceItem {
 
 export const experienceData: ExperienceItem[] = [
   {
-    id: "fullstack-developer",
-    title: "Full Stack Developer",
-    company: "Tech Company",
-    period: "2023 - Present",
+    id: "frontend-dev-dbc-unicred",
+    title: "Front-end Developer",
+    company: "DBC Company (Unicred)",
+    period: "January 2022 - Present",
     description: (
       <ul>
         <li>
-          Developed modern web applications using React, TypeScript, and Node.js
+          Working as front-end developer building products for Unicred&apos;s
+          internet banking cooperative
         </li>
         <li>
-          Implemented responsive designs with SCSS and component-based
+          Serving as the team&apos;s technical reference, helping other
+          developers improve their skills
+        </li>
+        <li>
+          Building products using React with Single Page Application (SPA)
           architecture
         </li>
-        <li>
-          Collaborated with cross-functional teams to deliver high-quality
-          software solutions
-        </li>
-        <li>Optimized application performance and user experience</li>
+        <li>Each menu item is an individual project within the application</li>
       </ul>
     ),
     badge: "Current Position",
-    technologies: ["React", "TypeScript", "Node.js", "SCSS", "PostgreSQL"],
+    technologies: [
+      "React",
+      "TypeScript",
+      "JavaScript",
+      "SPA",
+      "Internet Banking",
+    ],
   },
   {
-    id: "frontend-developer",
-    title: "Frontend Developer",
-    company: "Digital Agency",
-    period: "2021 - 2023",
+    id: "software-engineer-tc-tradersclub",
+    title: "Software Engineer",
+    company: "TC Tradersclub",
+    period: "July 2021 - November 2022",
     description: (
       <ul>
         <li>
-          Built interactive user interfaces with React and modern JavaScript
+          Contributing to all product phases from design to deployment and
+          monitoring
         </li>
-        <li>Integrated RESTful APIs and managed application state</li>
         <li>
-          Implemented accessibility standards and responsive design principles
+          Building scalable web applications with React and mobile apps with
+          React Native
         </li>
-        <li>Participated in code reviews and mentored junior developers</li>
+        <li>Developing and maintaining backend services using Golang</li>
+        <li>Working in a full-stack development environment</li>
       </ul>
     ),
     badge: "Previous Role",
-    technologies: ["React", "JavaScript", "Redux", "CSS3", "REST APIs"],
+    technologies: [
+      "React",
+      "React Native",
+      "Golang",
+      "Web Development",
+      "Mobile Development",
+    ],
   },
   {
-    id: "junior-developer",
-    title: "Junior Developer",
-    company: "Startup",
-    period: "2020 - 2021",
+    id: "fullstack-developer-qualirede",
+    title: "Full Stack Developer",
+    company: "Qualirede",
+    period: "March 2020 - July 2021",
     description: (
       <ul>
-        <li>Developed web applications using HTML, CSS, and JavaScript</li>
         <li>
-          Learned modern development practices and version control with Git
+          Building healthcare application for the government of Bahia-Brazil to
+          control beneficiary appointments
         </li>
         <li>
-          Contributed to open-source projects and personal portfolio development
+          Developing reliable and scalable web applications with Angular,
+          Golang, and TypeScript
         </li>
-        <li>Gained experience with various frameworks and libraries</li>
+        <li>
+          Working with Docker, Node.js, Oracle, MongoDB, and Git for version
+          control
+        </li>
+        <li>Contributing to government healthcare technology solutions</li>
       </ul>
     ),
-    badge: "Entry Level",
-    technologies: ["HTML5", "CSS3", "JavaScript", "Git", "jQuery"],
+    badge: "Healthcare Tech",
+    technologies: [
+      "Angular",
+      "Golang",
+      "TypeScript",
+      "Docker",
+      "Node.js",
+      "Oracle",
+      "MongoDB",
+    ],
+  },
+  {
+    id: "software-developer-stairs",
+    title: "Software Developer",
+    company: "Stairs Creative Studio",
+    period: "May 2019 - March 2020",
+    description: (
+      <ul>
+        <li>
+          Designing and building API that serves a mobile app focused on health
+          systems
+        </li>
+        <li>
+          Working as backend developer for both providers and customers
+          platforms
+        </li>
+        <li>
+          Building with Golang, AWS services (API Gateway, Lambda), MongoDB, and
+          Git
+        </li>
+        <li>Developing serverless architecture solutions</li>
+      </ul>
+    ),
+    badge: "Backend Focus",
+    technologies: ["Golang", "AWS", "API Gateway", "Lambda", "MongoDB", "Git"],
+  },
+  {
+    id: "fullstack-developer-4effect",
+    title: "Full Stack Developer",
+    company: "4Effect Technology",
+    period: "October 2017 - May 2019",
+    description: (
+      <ul>
+        <li>
+          Working on diverse projects for health providers as full stack
+          developer
+        </li>
+        <li>
+          Building microservices applications using Java with Spring framework
+        </li>
+        <li>
+          Developing frontend components with Angular and working with SQL
+          databases
+        </li>
+        <li>Using Git for version control and collaborative development</li>
+      </ul>
+    ),
+    badge: "Microservices",
+    technologies: [
+      "Java",
+      "Spring Framework",
+      "Angular",
+      "SQL",
+      "Git",
+      "Microservices",
+    ],
   },
 ];
