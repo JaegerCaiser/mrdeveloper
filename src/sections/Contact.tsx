@@ -42,14 +42,69 @@ const Contact: React.FC = () => {
     return !Object.values(newErrors).some(Boolean);
   }, [formData, emailRegex]);
 
+  const [isSending, setIsSending] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<null | { type: "success" | "error"; text: string }>(
+    null
+  );
+
   const handleSubmit = useCallback(
-    (e: React.FormEvent<HTMLFormElement>) => {
+    async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
-      if (validateForm()) {
-        e.currentTarget.submit();
+      setStatusMessage(null);
+      if (!validateForm()) return;
+
+      // Try sending via FormSubmit (AJAX endpoint). This forwards to the provided email.
+      // If blocked or not configured, fallback will open the user's mail client.
+      const endpoint = `https://formsubmit.co/ajax/matheus.caiser@gmail.com`;
+
+      const payload = {
+        name: formData.name,
+        email: formData.email,
+        message: formData.message,
+      };
+
+      try {
+        setIsSending(true);
+        const res = await fetch(endpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(text || "Failed to send message");
+        }
+
+        const data = await res.json();
+        if (data.success === "true" || data.success === true || res.status === 200) {
+          setStatusMessage({ type: "success", text: "Message sent — I will reply shortly." });
+          setFormData({ name: "", email: "", message: "" });
+        } else {
+          // Some providers return different shapes — treat as success if status OK
+          setStatusMessage({ type: "success", text: "Message sent — I will reply shortly." });
+          setFormData({ name: "", email: "", message: "" });
+        }
+      } catch (err) {
+        console.error("Contact form send error:", err);
+        // Fallback: open user's mail client with prefilled fields
+        setStatusMessage({
+          type: "error",
+          text: "Could not send via web service. Opening your mail client as fallback.",
+        });
+
+        // Open mailto as fallback (user will send manually)
+        const subject = encodeURIComponent(`Contact from portfolio: ${formData.name}`);
+        const body = encodeURIComponent(`Name: ${formData.name}%0AEmail: ${formData.email}%0A%0A${formData.message}`);
+        window.location.href = `mailto:matheus.caiser@gmail.com?subject=${subject}&body=${body}`;
+      } finally {
+        setIsSending(false);
       }
     },
-    [validateForm]
+    [formData, validateForm]
   );
 
   return (
@@ -59,12 +114,13 @@ const Contact: React.FC = () => {
         Have a question or want to work together? Leave your details and
         I&apos;ll get back to you as soon as possible.
       </p>
-      <form
-        className="contact__form"
-        action="https://formspree.io/f/xdoprgpv"
-        method="POST"
-        onSubmit={handleSubmit}
-      >
+      <form className="contact__form" onSubmit={handleSubmit} noValidate>
+        {statusMessage && (
+          <div
+            className={`contact__status contact__status--${statusMessage.type}`}>
+            {statusMessage.text}
+          </div>
+        )}
         <input
           type="text"
           name="name"
@@ -90,22 +146,24 @@ const Contact: React.FC = () => {
           value={formData.message}
           onChange={handleInputChange}
         />
-        <div className="contact__form-error-submit">
+          <div className="contact__form-error-submit">
           <div className="form-error">
             {errors.name && (
               <div className="form-error__name">Please enter your name.</div>
             )}
             {errors.email && (
-              <div className="form-error__email">
-                Please enter a valid email.
-              </div>
+              <div className="form-error__email">Please enter a valid email.</div>
             )}
             {errors.message && (
               <div className="form-error__msg">Please enter a message.</div>
             )}
           </div>
-          <button type="submit" className="contact__form-submit">
-            Submit
+          <button
+            type="submit"
+            className="contact__form-submit"
+            disabled={isSending}
+          >
+            {isSending ? "Sending..." : "Submit"}
           </button>
         </div>
       </form>

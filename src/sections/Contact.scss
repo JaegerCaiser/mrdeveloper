@@ -191,10 +191,12 @@
     font-size: 1.6rem;
     font-weight: 500;
     line-height: 1.5;
+    color: $color-red;
 
-    // all form error messages
+    // Show error messages when they exist
     & > * {
-      display: none;
+      display: block;
+      margin-bottom: 0.5rem;
     }
   }
 
