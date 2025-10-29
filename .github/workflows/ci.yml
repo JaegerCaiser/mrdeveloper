@@ -29,9 +29,6 @@ jobs:
         with:
           version: 10.x
 
-      - name: Add pnpm to PATH
-        run: echo "$(pnpm bin)" >> $GITHUB_PATH
-
       - name: Verify pnpm installation
         run: pnpm --version
 
@@ -73,9 +70,6 @@ jobs:
         uses: pnpm/action-setup@v4
         with:
           version: 10.x
-
-      - name: Add pnpm to PATH
-        run: echo "$(pnpm bin)" >> $GITHUB_PATH
 
       - name: Verify pnpm installation
         run: pnpm --version
