@@ -50,6 +50,12 @@ jobs:
       - name: Build project
         run: pnpm run build
 
+      # --- ADICIONE O PASSO DE DEBUG AQUI ---
+      # Vamos ver quais arquivos existem DEPOIS do build
+      - name: List files AFTER build
+        run: ls -l
+      # --- FIM DO DEBUG ---
+
       # Salva a pasta 'build/' (ou 'dist/', 'out/', etc.) como um artefato
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -110,9 +116,6 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-artifacts
-
-      - name: List files to find build folder
-        run: ls -l
 
       # A única diferença é que NÃO usamos a flag '--prod'
       # Isso gera uma URL de preview automática
