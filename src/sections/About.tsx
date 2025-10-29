@@ -10,7 +10,7 @@ const About: React.FC = () => {
         <title>Sobre Mim • Matheus Caiser</title>
         <meta
           name="description"
-          content="Desenvolvedor Full Stack com mais de 8 anos de experiência, especialista em React, React Native, Node.js, Golang, Linux e Docker. Apaixonado por criar soluções inovadoras e pela filosofia de aprendizado contínuo."
+          content="Desenvolvedor Full Stack com mais de 13 anos de experiência, especialista em React, React Native, Node.js, Golang, Linux e Docker. Apaixonado por criar soluções inovadoras e pela filosofia de aprendizado contínuo."
         />
       </Helmet>
       <h2 className="about__heading section-heading">About</h2>
@@ -24,7 +24,7 @@ const About: React.FC = () => {
             />
           </div>
           <p className="profile__blurb">
-            Dynamic and seasoned Full Stack Developer with over 8 years of
+            Dynamic and seasoned Full Stack Developer with over 13 years of
             comprehensive experience in web development and software
             engineering. Proficient in an array of modern technologies including
             React, React Native, Node.js, Golang, Linux, and Docker. Known for a
