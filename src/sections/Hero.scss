@@ -190,12 +190,12 @@
 }
 
 .hero__cta--secondary {
-  background-color: rgba($color-red, 0.1);
-  border-color: rgba($color-red, 0.5);
+  background-color: rgba($color-red, 0.4);
+  border-color: rgba($color-red, 0.8);
   color: $color-red;
 
   &:hover {
-    background-color: rgba($color-red, 0.2);
+    background-color: rgba($color-red, 0.6);
   }
 }
 
