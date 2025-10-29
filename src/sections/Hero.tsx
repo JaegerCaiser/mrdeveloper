@@ -1,6 +1,5 @@
 import { ArrowRight, Download } from "lucide-react";
 import { Helmet } from "react-helmet-async";
-import AnimatedBackground from "../components/AnimatedBackground";
 import "./Hero.scss";
 
 const Hero: React.FC = () => {
@@ -13,7 +12,6 @@ const Hero: React.FC = () => {
           content="Portfólio de Matheus Caiser, desenvolvedor web Full Stack especialista em criar soluções modernas e performáticas com React, Node.js, TypeScript e outras tecnologias de ponta."
         />
       </Helmet>
-      <AnimatedBackground />
       <div className="hero__content">
         <div className="hero__inner">
           <h1 className="hero__title">

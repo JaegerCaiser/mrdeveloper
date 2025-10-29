@@ -222,7 +222,6 @@ const AnimatedBackground: React.FC = () => {
     const particleCount = 500;
     const gridSize = 50; // Spatial partitioning grid size
     const mouseRadius = 800;
-    const mouseRadiusSquared = mouseRadius * mouseRadius;
     const maxLineLength = 95;
     const maxLineLengthSquared = maxLineLength * maxLineLength;
     const propagationRadius = 40; // Valor mais realista para propagação visível
@@ -242,20 +241,49 @@ const AnimatedBackground: React.FC = () => {
     const opacityCache = new OpacityCache();
 
     const mouse = { x: -1000, y: -1000 };
+    let globalOpacity = 0;
+    let targetOpacity = 0;
+    const opacitySpeed = 0.01; // Velocidade suave de fade
+    let effectiveRadius = 0;
+    let targetRadius = 0;
+    const radiusSpeed = 0.005; // Velocidade de shrink/implode mais lenta
+
+    const checkMouseInHero = (x: number, y: number) => {
+      if (x === -1000 || y === -1000) return false;
+      const elementUnderMouse = document.elementFromPoint(x, y);
+      return elementUnderMouse?.closest(".hero") !== null;
+    };
 
     const handleMouseMove = (e: MouseEvent) => {
-      mouse.x = e.clientX;
-      mouse.y = e.clientY;
-      opacityCache.updateMouse(mouse.x, mouse.y, mouseRadius);
+      const isInHero = checkMouseInHero(e.clientX, e.clientY);
+      if (isInHero) {
+        mouse.x = e.clientX;
+        mouse.y = e.clientY;
+        opacityCache.updateMouse(mouse.x, mouse.y, mouseRadius);
+        targetOpacity = 1;
+        targetRadius = mouseRadius;
+      } else {
+        // Não setar mouse.x = -1000 imediatamente, deixar o raio controlar
+        targetOpacity = 0;
+        targetRadius = 0;
+      }
     };
 
     const handleMouseLeave = () => {
-      mouse.x = -1000;
-      mouse.y = -1000;
+      targetOpacity = 0;
+      targetRadius = 0;
+    };
+
+    const handleScroll = () => {
+      if (!checkMouseInHero(mouse.x, mouse.y)) {
+        targetOpacity = 0;
+        targetRadius = 0;
+      }
     };
 
     window.addEventListener("mousemove", handleMouseMove, { passive: true });
     window.addEventListener("mouseleave", handleMouseLeave, { passive: true });
+    window.addEventListener("scroll", handleScroll, { passive: true });
 
     const particles: Particle[] = [];
     for (let i = 0; i < particleCount; i++) {
@@ -267,6 +295,16 @@ const AnimatedBackground: React.FC = () => {
 
     const animate = () => {
       frameCount++;
+
+      // Update global opacity and effective radius for smooth transitions
+      globalOpacity += (targetOpacity - globalOpacity) * opacitySpeed;
+      effectiveRadius += (targetRadius - effectiveRadius) * radiusSpeed;
+
+      // Stop animation when radius reaches zero
+      if (effectiveRadius <= 1) {
+        mouse.x = -1000;
+        mouse.y = -1000;
+      }
 
       // Clear canvas
       ctx.fillStyle = "#000000";
@@ -293,11 +331,12 @@ const AnimatedBackground: React.FC = () => {
           ? spatialGrid.getNeighbors(mouseGridX, mouseGridY, mouseRadius)
           : [];
 
-      // Filter particles within mouse radius
+      // Filter particles within effective radius
+      const effectiveRadiusSquared = effectiveRadius * effectiveRadius;
       const connectedParticles: Particle[] = [];
       for (const p of nearbyParticles) {
         const distSquared = distanceCache.get(mouse.x, mouse.y, p.x, p.y);
-        if (distSquared < mouseRadiusSquared) {
+        if (distSquared < effectiveRadiusSquared) {
           p.layer = 0; // Partículas conectadas diretamente ao mouse = camada 0
           connectedParticles.push(p);
         }
@@ -306,6 +345,7 @@ const AnimatedBackground: React.FC = () => {
       if (connectedParticles.length > 0) {
         ctx.save();
         ctx.globalCompositeOperation = "lighter";
+        ctx.globalAlpha = globalOpacity;
 
         const processedSet = new Set<Particle>(connectedParticles);
 
@@ -565,12 +605,24 @@ const AnimatedBackground: React.FC = () => {
       window.removeEventListener("resize", resize);
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseleave", handleMouseLeave);
+      window.removeEventListener("scroll", handleScroll);
       cancelAnimationFrame(animationFrameId);
     };
   }, []);
 
   return (
-    <div className="canvas">
+    <div
+      className="canvas"
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100vw",
+        height: "100vh",
+        zIndex: -1,
+        pointerEvents: "none",
+      }}
+    >
       <canvas ref={canvasRef} className="connecting-dots" />
     </div>
   );

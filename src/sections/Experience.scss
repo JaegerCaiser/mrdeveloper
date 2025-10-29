@@ -19,6 +19,9 @@
   width: 1300px;
   margin-left: auto;
   margin-right: auto;
+  background: rgba(0, 0, 0, 0.85); // Contraste com o background animado
+  padding: 2rem;
+  border-radius: 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
