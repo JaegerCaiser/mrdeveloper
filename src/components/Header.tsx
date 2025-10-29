@@ -57,11 +57,7 @@ const Header: React.FC = () => {
   return (
     <nav className="navigation-bar">
       <a href="#hero" className="navigation-bar__logo">
-        <img
-          src={logoSvg}
-          alt="Logo"
-          className="navigation-bar__logo-svg"
-        />
+        <img src={logoSvg} alt="Logo" className="navigation-bar__logo-svg" />
       </a>
       <div className="navigation">
         <a
