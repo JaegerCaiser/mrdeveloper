@@ -124,24 +124,7 @@ jobs:
               "target": "preview"
             }'
 
-      - name: Notify Vercel for PR Comment (if PR)
-        if: github.event_name == 'pull_request'
-        run: |
-          DEPLOY_URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} | grep -o 'https://[^ ]*')
-          curl -X POST "https://api.vercel.com/v13/deployments" \
-            -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            -d '{
-              "name": "mrdeveloper",
-              "source": "cli",
-              "gitSource": {
-                "type": "github",
-                "repo": "JaegerCaiser/mrdeveloper",
-                "ref": "${{ github.head_ref }}",
-                "sha": "${{ github.sha }}"
-              },
-              "target": "preview"
-            }'
+
 
   # -----------------------------------------------------------------
   # JOB 4: Criar Tag de Versão (Sem mudanças)
