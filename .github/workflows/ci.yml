@@ -48,6 +48,8 @@ jobs:
     name: Deploy to Production
     needs: test-and-lint
     runs-on: ubuntu-latest
+    permissions:
+      deployments: write
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     steps:
@@ -85,6 +87,8 @@ jobs:
     name: Deploy Preview
     needs: test-and-lint
     runs-on: ubuntu-latest
+    permissions:
+      deployments: write
     if: github.event_name == 'pull_request' || (github.ref == 'refs/heads/develop' && github.event_name == 'push')
 
     steps:
