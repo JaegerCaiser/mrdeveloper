@@ -1,4 +1,4 @@
-name: CI/CD Pipeline
+name: CI/CD Pipeline com Tagging
 
 on:
   push:
@@ -8,10 +8,10 @@ on:
 
 jobs:
   # -----------------------------------------------------------------
-  # JOB 1: Testa e Linta (sem build)
+  # JOB 1: Testa, Linta, Constroi e Faz Upload do Artefato
   # -----------------------------------------------------------------
-  test:
-    name: Test & Lint
+  test-and-build:
+    name: Test, Lint & Build
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -24,7 +24,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 10
+          version: 10 # Você pode remover se definir "packageManager" no package.json
 
       - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
@@ -41,38 +41,38 @@ jobs:
       - name: Run tests
         run: pnpm run test:ci
       
-      # Removemos os passos de 'build' e 'upload-artifact' daqui.
-      # Este job é apenas um portão de qualidade.
+      - name: Build project
+        run: pnpm run build
+      
+      # --- PASSO CRÍTICO ADICIONADO ---
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: build/ # <-- O nome da pasta que seu build cria
 
   # -----------------------------------------------------------------
   # JOB 2: Deploy para Produção (Vercel)
   # -----------------------------------------------------------------
   deploy-production:
     name: Deploy to Production
-    needs: test # Depende apenas do job de teste
+    needs: test-and-build # Depende do job de teste e build
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      # --- REMOVIDO checkout, setup-node, setup-pnpm, install ---
 
-      # Precisamos instalar o ambiente de build aqui
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      # --- PASSO CRÍTICO ADICIONADO ---
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
         with:
-          version: 10
+          name: build-artifacts
+          path: build # <-- Baixa os arquivos para uma pasta 'build'
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22.x"
-          cache: "pnpm"
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-      
-      # Removemos o 'download-artifact'
+      # Lista os arquivos (para debug, pode remover depois)
+      - name: List files
+        run: ls -lR
 
       - name: Deploy to Vercel (Production)
         uses: amondnet/vercel-action@v25
@@ -80,38 +80,30 @@ jobs:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          # Deixamos a Vercel Action rodar o build
-          vercel-args: "--prod" 
+          vercel-args: "build/ --prod" # <-- Publica a pasta 'build/'
 
   # -----------------------------------------------------------------
   # JOB 3: Deploy de Preview
   # -----------------------------------------------------------------
   deploy-preview:
     name: Deploy Preview
-    needs: test # Depende apenas do job de teste
+    needs: test-and-build # Depende do job de teste e build
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request' || (github.ref == 'refs/heads/develop' && github.event_name == 'push')
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      # --- REMOVIDO checkout, setup-node, setup-pnpm, install ---
 
-      # Precisamos instalar o ambiente de build aqui
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      # --- PASSO CRÍTICO ADICIONADO ---
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
         with:
-          version: 10
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22.x"
-          cache: "pnpm"
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      # Removemos o 'download-artifact'
+          name: build-artifacts
+          path: build # <-- Baixa os arquivos para uma pasta 'build'
+      
+      # Lista os arquivos (para debug, pode remover depois)
+      - name: List files
+        run: ls -lR
 
       - name: Deploy to Vercel (Preview)
         uses: amondnet/vercel-action@v25
@@ -119,6 +111,42 @@ jobs:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          # Deixamos a Vercel Action rodar o build
-          vercel-args: "" # Argumento vazio para deploy de preview
+          vercel-args: "build/" # <-- Publica a pasta 'build/'
+
+  # -----------------------------------------------------------------
+  # JOB 4: Criar Tag de Versão (Mantido como estava)
+  # -----------------------------------------------------------------
+  tag-release:
+    name: Tag Release
+    needs: deploy-production # <-- Roda APÓS o deploy de produção
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write 
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get version from package.json
+        id: get_version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "TAG_VERSION=v$VERSION" >> $GITHUB_ENV
+
+      - name: Check if tag already exists
+        run: |
+          if git ls-remote --tags origin | grep -q "refs/tags/${TAG_VERSION}"; then
+            echo "Tag $TAG_VERSION already exists. Skipping..."
+            echo "SKIP_TAG=true" >> $GITHUB_ENV
+          else
+            echo "Tag $TAG_VERSION does not exist. Proceeding..."
+            echo "SKIP_TAG=false" >> $GITHUB_ENV
+          fi
+      
+      - name: Create and Push Tag
+        if: env.SKIP_TAG == 'false'
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git tag $TAG_VERSION -m "Release $TAG_VERSION"
+          git push origin $TAG_VERSION
 
