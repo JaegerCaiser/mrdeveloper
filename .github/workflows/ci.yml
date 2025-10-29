@@ -121,7 +121,7 @@ jobs:
                 "sha": "${{ github.sha }}",
                 "repoId": ${{ env.REPO_ID }}
               },
-              "target": "preview"
+              "target": "${{ github.head_ref }}"
             }'
 
 
