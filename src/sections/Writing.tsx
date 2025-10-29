@@ -1,4 +1,5 @@
 import React, { useMemo } from "react";
+import { Helmet } from "react-helmet-async";
 
 type Post = { title: string; url: string; date: string };
 
@@ -19,6 +20,13 @@ const Writing: React.FC = () => {
 
   return (
     <section id="writing" className="section writing" aria-label="Escritos">
+      <Helmet>
+        <title>Blog • Matheus Caiser</title>
+        <meta
+          name="description"
+          content="Artigos e tutoriais sobre desenvolvimento de software, React, TypeScript, Node.js e boas práticas de programação."
+        />
+      </Helmet>
       <h3 className="section__title">Escritos</h3>
       <ul className="writing__list">
         {formattedPosts.map((post) => (

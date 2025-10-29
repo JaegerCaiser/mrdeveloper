@@ -1,4 +1,5 @@
 import { useState, useCallback, useMemo } from "react";
+import { Helmet } from "react-helmet-async";
 import "./Contact.scss";
 
 const Contact: React.FC = () => {
@@ -109,6 +110,13 @@ const Contact: React.FC = () => {
 
   return (
     <section id="contact" className="contact" aria-label="Contact">
+      <Helmet>
+        <title>Contato • Matheus Caiser</title>
+        <meta
+          name="description"
+          content="Entre em contato com Matheus Caiser para discutir projetos, oportunidades de trabalho ou para tirar dúvidas. Envie uma mensagem através do formulário de contato."
+        />
+      </Helmet>
       <h2 className="contact__heading section-heading">Contact</h2>
       <p className="contact__text">
         Have a question or want to work together? Leave your details and
