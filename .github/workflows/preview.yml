@@ -40,7 +40,7 @@ jobs:
     runs-on: ubuntu-latest
     # Define o ambiente para o job
     environment:
-      name: preview
+      name: Preview
       # A URL será preenchida dinamicamente
       url: ${{ steps.deploy_step.outputs.preview_url }}
     
