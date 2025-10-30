@@ -150,7 +150,7 @@ jobs:
           if [ "${{ github.ref }}" == "refs/heads/main" ]; then
             echo "deployment_url=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})" >> $GITHUB_OUTPUT
           else
-            echo "deployment_url=$(vercel deploy --target=development --prebuilt --token=${{ secrets.VERCEL_TOKEN }})" >> $GITHUB_OUTPUT
+            echo "deployment_url=$(vercel deploy --target=development --token=${{ secrets.VERCEL_TOKEN }})" >> $GITHUB_OUTPUT
           fi
 
       # --- FASE 3: ATUALIZAR O STATUS FINAL DO DEPLOYMENT (SUCESSO OU FALHA) ---
