@@ -124,7 +124,7 @@ jobs:
             const { data: deployment } = await github.rest.repos.createDeployment({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              ref: context.sha,
+              ref: context.ref,
               environment: environment,
               transient_environment: transient,
               auto_merge: false,
