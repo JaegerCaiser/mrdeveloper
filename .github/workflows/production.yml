@@ -110,7 +110,6 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            # --- LÓGICA AJUSTADA AQUI ---
             const ref = context.ref;
             let environment;
             if (ref === 'refs/heads/main') {
@@ -143,8 +142,6 @@ jobs:
           if [ "${{ github.ref }}" == "refs/heads/main" ]; then
             vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
           else
-            # Para 'develop' e 'release/' (Preview), usamos o pull padrão (development)
-            # A Vercel vai mapear 'Preview' para um branch environment automaticamente
             vercel pull --yes --token=${{ secrets.VERCEL_TOKEN }}
           fi
 
@@ -169,8 +166,7 @@ jobs:
             # Vercel CLI vai lidar com branches 'develop' e 'release/*' automaticamente
             DEPLOY_COMMAND="vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}"
           fi
-
-          # Execute Vercel deploy e capture sua saída e status
+          
           if DEPLOY_URL=$($DEPLOY_COMMAND); then
             echo "Deployment successful."
             echo "deployment_url=$DEPLOY_URL" >> $GITHUB_OUTPUT
