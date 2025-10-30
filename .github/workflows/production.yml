@@ -142,8 +142,6 @@ jobs:
           if [ "${{ github.ref }}" == "refs/heads/main" ]; then
             vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
           else
-            # Para 'develop' e 'release/' (Preview), usamos o pull padrão (development)
-            # A Vercel vai mapear 'Preview' para um branch environment automaticamente
             vercel pull --yes --token=${{ secrets.VERCEL_TOKEN }}
           fi
 
@@ -165,7 +163,6 @@ jobs:
           if [ "${{ github.ref }}" == "refs/heads/main" ]; then
             DEPLOY_COMMAND="vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}"
           else
-            # Vercel CLI vai lidar com branches 'develop' e 'release/*' automaticamente
             DEPLOY_COMMAND="vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}"
           fi
 
