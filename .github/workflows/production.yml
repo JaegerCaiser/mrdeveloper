@@ -138,6 +138,7 @@ jobs:
 
       - name: Build Project Artifacts
         run: |
+          set -x
           if [ "${{ github.ref }}" == "refs/heads/main" ]; then
             vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
           else
@@ -148,6 +149,8 @@ jobs:
       - name: Deploy to Vercel and Capture URL
         id: deploy_step
         run: |
+          set -x
+          echo "VERCEL_ENV: $VERCEL_ENV"
           if [ "${{ github.ref }}" == "refs/heads/main" ]; then
             echo "deployment_url=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})" >> $GITHUB_OUTPUT
           else
