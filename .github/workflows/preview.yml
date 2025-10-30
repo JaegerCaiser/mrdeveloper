@@ -81,7 +81,9 @@ jobs:
       # --- FASE 2: EXECUTAR O DEPLOY NA VERCEL ---
       - name: Deploy to Vercel and Capture URL
         id: deploy_step
-        run: echo "preview_url=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})" >> $GITHUB_OUTPUT
+        run: |
+          set -eo pipefail
+          echo "preview_url=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})" >> $GITHUB_OUTPUT
 
       - name: Find Previous Comment
         uses: peter-evans/find-comment@v3
