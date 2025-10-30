@@ -82,7 +82,6 @@ jobs:
       - name: Deploy to Vercel and Capture URL
         id: deploy_step
         run: |
-          set -x
 
           DEPLOY_COMMAND="vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}"
 
