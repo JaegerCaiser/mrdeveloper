@@ -9,7 +9,7 @@ on:
     branches:
       - main
       - develop
-      - 'release/**'
+      - "release/**"
 
 jobs:
   test-and-lint:
@@ -57,7 +57,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22.x'
+          node-version: "22.x"
           cache: "pnpm"
 
       - name: Get version from release branch
@@ -119,7 +119,7 @@ jobs:
             } else {
               environment = 'Develop';
             }
-            
+
             const { data: deployment } = await github.rest.repos.createDeployment({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -142,6 +142,8 @@ jobs:
           if [ "${{ github.ref }}" == "refs/heads/main" ]; then
             vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
           else
+            # Para 'develop' e 'release/' (Preview), usamos o pull padrão (development)
+            # A Vercel vai mapear 'Preview' para um branch environment automaticamente
             vercel pull --yes --token=${{ secrets.VERCEL_TOKEN }}
           fi
 
@@ -166,7 +168,7 @@ jobs:
             # Vercel CLI vai lidar com branches 'develop' e 'release/*' automaticamente
             DEPLOY_COMMAND="vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}"
           fi
-          
+
           if DEPLOY_URL=$($DEPLOY_COMMAND); then
             echo "Deployment successful."
             echo "deployment_url=$DEPLOY_URL" >> $GITHUB_OUTPUT
