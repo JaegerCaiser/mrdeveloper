@@ -82,8 +82,19 @@ jobs:
       - name: Deploy to Vercel and Capture URL
         id: deploy_step
         run: |
-          set -eo pipefail
-          echo "preview_url=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})" >> $GITHUB_OUTPUT
+          set -x
+
+          DEPLOY_COMMAND="vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}"
+
+          # Execute Vercel deploy e capture sua saída e status
+          if DEPLOY_URL=$($DEPLOY_COMMAND); then
+            echo "Deployment successful."
+            echo "preview_url=$DEPLOY_URL" >> $GITHUB_OUTPUT
+          else
+            DEPLOY_STATUS=$?
+            echo "Error: Vercel deploy failed with exit code $DEPLOY_STATUS."
+            exit $DEPLOY_STATUS
+          fi
 
       - name: Find Previous Comment
         uses: peter-evans/find-comment@v3
