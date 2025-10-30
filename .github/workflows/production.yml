@@ -91,7 +91,7 @@ jobs:
 
   deploy-environment:
     name: Deploy to Environment
-    needs: [test-and-lint, update-version]
+    needs: test-and-lint
     runs-on: ubuntu-latest
     # Define o ambiente dinamicamente com base na branch
     environment:
@@ -132,7 +132,7 @@ jobs:
           if [ "${{ github.ref }}" == "refs/heads/main" ]; then
             vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
           else
-            vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+            vercel pull --yes --environment=development --token=${{ secrets.VERCEL_TOKEN }}
           fi
 
       - name: Build Project Artifacts
