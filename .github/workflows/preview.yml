@@ -77,7 +77,7 @@ jobs:
             A pré-visualização para este PR foi atualizada.
             | Recurso | Link |
             |---|---|
-            | **🔗 URL de Preview** | [${{ steps.deploy_step.outputs.preview_url }}](${{ steps.deploy_step.outputs.preview_url }}) |
+            | **🔗 URL de Preview** | [Preview URL](${{ steps.deploy_step.outputs.preview_url }}) |
             | **📜 Logs do Deploy** | [Ver logs da Action](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) |
             ---
             *Commit: `${{ github.event.pull_request.head.sha }}`*
