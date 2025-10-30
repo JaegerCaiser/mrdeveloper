@@ -63,7 +63,7 @@ jobs:
               ref: context.ref,
               environment: environment,
               auto_merge: false,
-              production_environment: environment === 'production'
+              production_environment: environment === 'Production'
             });
             core.setOutput('deployment_id', deployment.id);
 
