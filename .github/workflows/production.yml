@@ -1,14 +1,18 @@
-name: CI/CD Pipeline com Tagging
+name: Vercel Production Deployment and Tagging
+
+# Variáveis de ambiente para os jobs da Vercel
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
 on:
   push:
-    branches: [main, develop]
-  pull_request:
-    branches: [main, develop]
+    branches:
+      - main
 
 jobs:
   # -----------------------------------------------------------------
-  # JOB 1: Apenas Testa e Linta
+  # JOB 1: Testa e Linta o código
   # -----------------------------------------------------------------
   test-and-lint:
     name: Test & Lint
@@ -48,11 +52,6 @@ jobs:
     name: Deploy to Production
     needs: test-and-lint
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
-      deployments: write
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     steps:
       - name: Checkout code
@@ -71,62 +70,7 @@ jobs:
         run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
 
   # -----------------------------------------------------------------
-  # JOB 3: Deploy de Preview
-  # -----------------------------------------------------------------
-  deploy-preview:
-    name: Deploy Preview
-    needs: test-and-lint
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
-      deployments: write
-    if: github.event_name == 'pull_request' || (github.ref == 'refs/heads/develop' && github.event_name == 'push')
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install Vercel CLI
-        run: npm install --global vercel@latest
-
-      - name: Pull Vercel Environment Information
-        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Build Project Artifacts
-        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Deploy Project Artifacts to Vercel
-        run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Get Repo ID
-        if: github.event_name == 'pull_request'
-        run: |
-          REPO_ID=$(curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/${{ github.repository }} | jq -r .id)
-          echo "REPO_ID=$REPO_ID" >> $GITHUB_ENV
-
-      - name: Notify Vercel for PR Comment (if PR)
-        if: github.event_name == 'pull_request'
-        run: |
-          curl -X POST "https://api.vercel.com/v13/deployments" \
-            -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            -d '{
-              "name": "mrdeveloper",
-              "source": "cli",
-              "gitSource": {
-                "type": "github",
-                "repo": "${{ github.repository }}",
-                "ref": "${{ github.head_ref }}",
-                "sha": "${{ github.sha }}",
-                "repoId": ${{ env.REPO_ID }}
-              }
-            }'
-
-
-
-  # -----------------------------------------------------------------
-  # JOB 4: Criar Tag de Versão (Sem mudanças)
+  # JOB 3: Criar Tag de Versão
   # -----------------------------------------------------------------
   tag-release:
     name: Tag Release
@@ -137,6 +81,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          # Necessário para buscar tags existentes
+          fetch-depth: 0
 
       - name: Get version from package.json
         id: get_version
@@ -145,12 +92,13 @@ jobs:
           echo "TAG_VERSION=v$VERSION" >> $GITHUB_ENV
 
       - name: Check if tag already exists
+        id: check_tag
         run: |
-          if git ls-remote --tags origin | grep -q "refs/tags/${TAG_VERSION}"; then
-            echo "Tag $TAG_VERSION already exists. Skipping..."
+          if git rev-parse "refs/tags/${{ env.TAG_VERSION }}" >/dev/null 2>&1; then
+            echo "Tag ${{ env.TAG_VERSION }} already exists. Skipping..."
             echo "SKIP_TAG=true" >> $GITHUB_ENV
           else
-            echo "Tag $TAG_VERSION does not exist. Proceeding..."
+            echo "Tag ${{ env.TAG_VERSION }} does not exist. Proceeding..."
             echo "SKIP_TAG=false" >> $GITHUB_ENV
           fi
 
@@ -159,5 +107,5 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git tag $TAG_VERSION -m "Release $TAG_VERSION"
-          git push origin $TAG_VERSION
+          git tag ${{ env.TAG_VERSION }} -m "Release ${{ env.TAG_VERSION }}"
+          git push origin ${{ env.TAG_VERSION }}
