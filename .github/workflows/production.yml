@@ -11,7 +11,6 @@ on:
       - develop
 
 jobs:
-  # O job de teste e linting é idêntico ao do preview
   test-and-lint:
     name: Test & Lint
     runs-on: ubuntu-latest
@@ -37,43 +36,85 @@ jobs:
       - name: Run tests
         run: pnpm run test:ci
 
-  # Job para fazer o deploy e atualizar os ambientes
   deploy-environment:
     name: Deploy to Environment
     needs: test-and-lint
     runs-on: ubuntu-latest
+    # Define o ambiente dinamicamente com base na branch
+    environment:
+      name: ${{ github.ref == 'refs/heads/main' && 'production' || 'develop' }}
+      url: ${{ steps.deploy_step.outputs.deployment_url }}
+
+    permissions:
+      deployments: write
+      contents: read # Para o checkout
+
     steps:
+      # --- FASE 1: CRIAR O DEPLOYMENT NO GITHUB (STATUS "PENDING") ---
+      - name: Create GitHub Deployment
+        id: create_deployment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const environment = context.ref === 'refs/heads/main'? 'production' : 'develop';
+            const { data: deployment } = await github.rest.repos.createDeployment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: context.ref,
+              environment: environment,
+              auto_merge: false,
+              required_contexts:,
+              production_environment: environment === 'production'
+            });
+            core.setOutput('deployment_id', deployment.id);
+
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
 
-      - name: Pull Vercel Environment Information (Production)
-        if: github.ref == 'refs/heads/main'
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Pull Vercel Environment Information
+        run: |
+          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+          else
+            vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+          fi
 
-      - name: Pull Vercel Environment Information (Preview for Develop)
-        if: github.ref == 'refs/heads/develop'
-        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Build Project Artifacts
+        run: |
+          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+          else
+            vercel build --token=${{ secrets.VERCEL_TOKEN }}
+          fi
 
-      - name: Build Project Artifacts (Production)
-        if: github.ref == 'refs/heads/main'
-        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+      # --- FASE 2: EXECUTAR O DEPLOY NA VERCEL ---
+      - name: Deploy to Vercel and Capture URL
+        id: deploy_step
+        run: |
+          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            echo "deployment_url=https://$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})" >> $GITHUB_OUTPUT
+          else
+            echo "deployment_url=https://$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})" >> $GITHUB_OUTPUT
+          fi
 
-      - name: Build Project Artifacts (Preview for Develop)
-        if: github.ref == 'refs/heads/develop'
-        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+      # --- FASE 3: ATUALIZAR O STATUS FINAL DO DEPLOYMENT (SUCESSO OU FALHA) ---
+      - name: Update GitHub Deployment Status
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const finalState = '${{ job.status }}' === 'success'? 'success' : 'failure';
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: ${{ steps.create_deployment.outputs.deployment_id }},
+              state: finalState,
+              environment_url: '${{ steps.deploy_step.outputs.deployment_url }}'
+            });
 
-      - name: Deploy to Production and Update Environment
-        if: github.ref == 'refs/heads/main'
-        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Deploy to Develop and Update Environment
-        if: github.ref == 'refs/heads/develop'
-        run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
-
-  # Seu job de versionamento, que depende do deploy em produção
   tag-release:
     name: Tag Release
     needs: deploy-environment
@@ -82,6 +123,7 @@ jobs:
     permissions:
       contents: write
     steps:
+      # Seu job de tag-release continua o mesmo, sem alterações
       - name: Checkout code
         uses: actions/checkout@v4
         with:
