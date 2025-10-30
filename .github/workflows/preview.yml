@@ -43,7 +43,7 @@ jobs:
       name: Preview
       # A URL será preenchida dinamicamente
       url: ${{ steps.deploy_step.outputs.preview_url }}
-    
+
     # Permissão necessária para criar e atualizar deployments
     permissions:
       deployments: write
@@ -88,8 +88,8 @@ jobs:
         id: find_comment
         with:
           issue-number: ${{ github.event.pull_request.number }}
-          comment-author: 'github-actions[bot]'
-          body-includes: '🚀 Vercel Preview Deployment'
+          comment-author: "github-actions[bot]"
+          body-includes: "🚀 Vercel Preview Deployment"
 
       - name: Create or Update PR Comment
         uses: peter-evans/create-or-update-comment@v5
