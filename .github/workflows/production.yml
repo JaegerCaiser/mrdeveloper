@@ -63,7 +63,7 @@ jobs:
       - name: Get version from release branch
         id: get_version
         run: |
-          VERSION=$(echo "${{ github.ref }}" | sed -e 's/refs\\/heads\\/release\\///')
+          VERSION=$(echo "${{ github.ref }}" | sed 's|refs/heads/release/||')
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "TAG_VERSION=v$VERSION" >> $GITHUB_ENV
 
@@ -211,7 +211,7 @@ jobs:
       - name: Get version from release branch
         id: get_version
         run: |
-          VERSION=$(echo "${{ github.ref }}" | sed -e 's/refs\\/heads\\/release\\///')
+          VERSION=$(echo "${{ github.ref }}" | sed 's|refs/heads/release/||')
           echo "TAG_VERSION=v$VERSION" >> $GITHUB_ENV
 
       - name: Check if tag already exists
