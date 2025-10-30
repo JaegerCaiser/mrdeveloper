@@ -64,8 +64,7 @@ jobs:
               environment: environment,
               auto_merge: false,
               production_environment: environment === 'Production',
-              required_contexts: [],
-              transient_environment: false
+              required_contexts: []
             });
             core.setOutput('deployment_id', deployment.id);
 
