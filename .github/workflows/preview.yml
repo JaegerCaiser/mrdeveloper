@@ -1,60 +1,45 @@
 name: Vercel Preview Deployment
 
-# Variáveis de ambiente para os jobs da Vercel
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
 on:
-  push:
-    branches:
-      - develop
   pull_request:
-    branches: [main, develop]
+    types: [opened, synchronize, reopened]
 
 jobs:
-  # -----------------------------------------------------------------
-  # JOB 1: Testa e Linta o código
-  # -----------------------------------------------------------------
+  # O job de teste e linting é executado primeiro
   test-and-lint:
     name: Test & Lint
     runs-on: ubuntu-latest
     strategy:
       matrix:
         node-version: [22.x]
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 10
-
       - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
           cache: "pnpm"
-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
       - name: Run linter
         run: pnpm run lint
-
       - name: Run tests
         run: pnpm run test:ci
 
-  # -----------------------------------------------------------------
-  # JOB 2: Deploy de Preview (Vercel)
-  # -----------------------------------------------------------------
+  # Job para fazer o deploy e comentar no PR
   deploy-preview:
-    name: Deploy Preview
+    name: Deploy Preview and Comment on PR
     needs: test-and-lint
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -68,6 +53,33 @@ jobs:
       - name: Build Project Artifacts
         run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
 
-      - name: Deploy Project Artifacts to Vercel
-        # A Vercel CLI detecta o contexto de PR e posta o comentário automaticamente
-        run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Deploy Project Artifacts to Vercel and Capture URL
+        id: deploy_step
+        # O comando 'vercel deploy' imprime a URL na saída padrão (stdout), que capturamos para o próximo passo
+        run: echo "preview_url=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})" >> $GITHUB_OUTPUT
+
+      - name: Find Previous Comment
+        uses: peter-evans/find-comment@v3
+        id: find_comment
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          # Usamos um cabeçalho único para que a action possa encontrar seu próprio comentário para atualizar
+          body-includes: '🚀 Vercel Preview Deployment'
+
+      - name: Create or Update PR Comment
+        uses: peter-evans/create-or-update-comment@v5
+        with:
+          comment-id: ${{ steps.find_comment.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            ### 🚀 Vercel Preview Deployment
+            A pré-visualização para este PR foi atualizada.
+            | Recurso | Link |
+            |---|---|
+            | **🔗 URL de Preview** | [${{ steps.deploy_step.outputs.preview_url }}](https://${{ steps.deploy_step.outputs.preview_url }}) |
+            | **📜 Logs do Deploy** | [Ver logs da Action](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) |
+            ---
+            *Commit: `${{ github.event.pull_request.head.sha }}`*
+          # 'replace' garante que o comentário antigo seja substituído, evitando spam no PR
+          edit-mode: replace
