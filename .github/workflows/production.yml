@@ -95,10 +95,7 @@ jobs:
     runs-on: ubuntu-latest
     # Define o ambiente dinamicamente com base na branch
     environment:
-      # --- LINHA MODIFICADA ---
-      # Lê-se: Se a ref é 'main', use 'Production'. 
-      # Senão, se a ref começa com 'release/', use 'Preview'.
-      # Senão (para 'develop' ou outras), use 'Develop'.
+      # --- AJUSTADO ---
       name: ${{ github.ref == 'refs/heads/main' && 'Production' || (startsWith(github.ref, 'refs/heads/release/') && 'Preview' || 'Develop') }}
       url: ${{ steps.deploy_step.outputs.deployment_url }}
 
@@ -113,7 +110,7 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            // Esta lógica também precisa ser atualizada para bater com a de cima!
+            # --- LÓGICA AJUSTADA AQUI ---
             const ref = context.ref;
             let environment;
             if (ref === 'refs/heads/main') {
@@ -134,9 +131,54 @@ jobs:
               required_contexts: []
             });
             core.setOutput('deployment_id', deployment.id);
-      
-      # ... (O resto do seu job continua igual)
-      # ... (Checkout, Install Vercel, Pull, Build, Deploy, Update Status) ...
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Pull Vercel Environment Information
+        run: |
+          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+          else
+            # Para 'develop' e 'release/' (Preview), usamos o pull padrão (development)
+            # A Vercel vai mapear 'Preview' para um branch environment automaticamente
+            vercel pull --yes --token=${{ secrets.VERCEL_TOKEN }}
+          fi
+
+      - name: Build Project Artifacts
+        run: |
+          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+          else
+            vercel build --token=${{ secrets.VERCEL_TOKEN }}
+          fi
+
+      # --- FASE 2: EXECUTAR O DEPLOY NA VERCEL ---
+      - name: Deploy to Vercel and Capture URL
+        id: deploy_step
+        run: |
+          echo "VERCEL_ENV: $VERCEL_ENV"
+
+          DEPLOY_COMMAND=""
+          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            DEPLOY_COMMAND="vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}"
+          else
+            # Vercel CLI vai lidar com branches 'develop' e 'release/*' automaticamente
+            DEPLOY_COMMAND="vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}"
+          fi
+
+          # Execute Vercel deploy e capture sua saída e status
+          if DEPLOY_URL=$($DEPLOY_COMMAND); then
+            echo "Deployment successful."
+            echo "deployment_url=$DEPLOY_URL" >> $GITHUB_OUTPUT
+          else
+            DEPLOY_STATUS=$?
+            echo "Error: Vercel deploy failed with exit code $DEPLOY_STATUS."
+            exit $DEPLOY_STATUS
+          fi
 
       # --- FASE 3: ATUALIZAR O STATUS FINAL DO DEPLOYMENT (SUCESSO OU FALHA) ---
       - name: Update GitHub Deployment Status
@@ -157,6 +199,7 @@ jobs:
   tag-release:
     name: Create Git Tag
     needs: deploy-environment
+    # Só roda se for uma branch 'release/' E o deploy tiver sido um sucesso
     if: startsWith(github.ref, 'refs/heads/release/') && needs.deploy-environment.result == 'success'
     runs-on: ubuntu-latest
     permissions:
