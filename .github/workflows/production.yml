@@ -104,7 +104,6 @@ jobs:
       contents: read # Para o checkout
 
     steps:
-      # --- FASE 1: CRIAR O DEPLOYMENT NO GITHUB (STATUS "PENDING") ---
       - name: Create GitHub Deployment
         id: create_deployment
         uses: actions/github-script@v7
@@ -112,19 +111,23 @@ jobs:
           script: |
             const ref = context.ref;
             let environment;
+            let transient = false;
             if (ref === 'refs/heads/main') {
               environment = 'Production';
             } else if (ref.startsWith('refs/heads/release/')) {
               environment = 'Preview';
+              transient = true;
             } else {
               environment = 'Develop';
+              transient = true;
             }
 
             const { data: deployment } = await github.rest.repos.createDeployment({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              ref: context.ref,
+              ref: context.sha,
               environment: environment,
+              transient_environment: transient,
               auto_merge: false,
               production_environment: environment === 'Production',
               required_contexts: []
