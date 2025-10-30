@@ -149,6 +149,7 @@ jobs:
       - name: Deploy to Vercel and Capture URL
         id: deploy_step
         run: |
+          set -eo pipefail
           set -x
           echo "VERCEL_ENV: $VERCEL_ENV"
           if [ "${{ github.ref }}" == "refs/heads/main" ]; then
