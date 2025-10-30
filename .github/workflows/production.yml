@@ -1,6 +1,5 @@
-name: Vercel Production Deployment and Tagging
+name: Vercel Environment Deployment and Tagging
 
-# Variáveis de ambiente para os jobs da Vercel
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
@@ -9,51 +8,66 @@ on:
   push:
     branches:
       - main
+      - develop
 
 jobs:
-  # -----------------------------------------------------------------
-  # JOB 1: Testa e Linta o código
-  # -----------------------------------------------------------------
   test-and-lint:
     name: Test & Lint
     runs-on: ubuntu-latest
     strategy:
       matrix:
         node-version: [22.x]
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 10
-
       - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
           cache: "pnpm"
-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
       - name: Run linter
         run: pnpm run lint
-
       - name: Run tests
         run: pnpm run test:ci
 
-  # -----------------------------------------------------------------
-  # JOB 2: Deploy para Produção (Vercel)
-  # -----------------------------------------------------------------
-  deploy-production:
-    name: Deploy to Production
+  deploy-environment:
+    name: Deploy to Environment
     needs: test-and-lint
     runs-on: ubuntu-latest
+    # Define o ambiente dinamicamente com base na branch
+    environment:
+      name: ${{ github.ref == 'refs/heads/main' && 'production' || 'develop' }}
+      url: ${{ steps.deploy_step.outputs.deployment_url }}
+
+    permissions:
+      deployments: write
+      contents: read # Para o checkout
 
     steps:
+      # --- FASE 1: CRIAR O DEPLOYMENT NO GITHUB (STATUS "PENDING") ---
+      - name: Create GitHub Deployment
+        id: create_deployment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const environment = context.ref === 'refs/heads/main'? 'production' : 'develop';
+            const { data: deployment } = await github.rest.repos.createDeployment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: context.ref,
+              environment: environment,
+              auto_merge: false,
+              required_contexts:,
+              production_environment: environment === 'production'
+            });
+            core.setOutput('deployment_id', deployment.id);
+
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -61,38 +75,65 @@ jobs:
         run: npm install --global vercel@latest
 
       - name: Pull Vercel Environment Information
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        run: |
+          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+          else
+            vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+          fi
 
       - name: Build Project Artifacts
-        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        run: |
+          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+          else
+            vercel build --token=${{ secrets.VERCEL_TOKEN }}
+          fi
 
-      - name: Deploy Project Artifacts to Vercel
-        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+      # --- FASE 2: EXECUTAR O DEPLOY NA VERCEL ---
+      - name: Deploy to Vercel and Capture URL
+        id: deploy_step
+        run: |
+          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            echo "deployment_url=https://$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})" >> $GITHUB_OUTPUT
+          else
+            echo "deployment_url=https://$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})" >> $GITHUB_OUTPUT
+          fi
 
-  # -----------------------------------------------------------------
-  # JOB 3: Criar Tag de Versão
-  # -----------------------------------------------------------------
+      # --- FASE 3: ATUALIZAR O STATUS FINAL DO DEPLOYMENT (SUCESSO OU FALHA) ---
+      - name: Update GitHub Deployment Status
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const finalState = '${{ job.status }}' === 'success'? 'success' : 'failure';
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: ${{ steps.create_deployment.outputs.deployment_id }},
+              state: finalState,
+              environment_url: '${{ steps.deploy_step.outputs.deployment_url }}'
+            });
+
   tag-release:
     name: Tag Release
-    needs: deploy-production
+    needs: deploy-environment
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
+      # Seu job de tag-release continua o mesmo, sem alterações
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          # Necessário para buscar tags existentes
           fetch-depth: 0
-
       - name: Get version from package.json
         id: get_version
         run: |
           VERSION=$(node -p "require('./package.json').version")
           echo "TAG_VERSION=v$VERSION" >> $GITHUB_ENV
-
       - name: Check if tag already exists
-        id: check_tag
         run: |
           if git rev-parse "refs/tags/${{ env.TAG_VERSION }}" >/dev/null 2>&1; then
             echo "Tag ${{ env.TAG_VERSION }} already exists. Skipping..."
@@ -101,7 +142,6 @@ jobs:
             echo "Tag ${{ env.TAG_VERSION }} does not exist. Proceeding..."
             echo "SKIP_TAG=false" >> $GITHUB_ENV
           fi
-
       - name: Create and Push Tag
         if: env.SKIP_TAG == 'false'
         run: |
