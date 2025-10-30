@@ -129,6 +129,7 @@ jobs:
 
       - name: Pull Vercel Environment Information
         run: |
+          set -x
           if [ "${{ github.ref }}" == "refs/heads/main" ]; then
             vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
           else
