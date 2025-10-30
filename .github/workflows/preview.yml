@@ -61,7 +61,6 @@ jobs:
               repo: context.repo.repo,
               ref: context.payload.pull_request.head.sha,
               environment: 'preview',
-              required_contexts:,
               transient_environment: true,
               description: 'Deploying Preview from PR'
             });
