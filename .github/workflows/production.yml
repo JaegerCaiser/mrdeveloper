@@ -63,7 +63,7 @@ jobs:
       - name: Get version from release branch
         id: get_version
         run: |
-          VERSION=$(echo "${{ github.ref }}" | sed 's|refs/heads/release/||')
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's/refs\\/heads\\/release\\///')
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "TAG_VERSION=v$VERSION" >> $GITHUB_ENV
 
@@ -95,8 +95,7 @@ jobs:
     runs-on: ubuntu-latest
     # Define o ambiente dinamicamente com base na branch
     environment:
-      # --- AJUSTADO ---
-      name: ${{ github.ref == 'refs/heads/main' && 'Production' || (startsWith(github.ref, 'refs/heads/release/') && 'Preview' || 'Develop') }}
+      name: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Develop' }}
       url: ${{ steps.deploy_step.outputs.deployment_url }}
 
     permissions:
