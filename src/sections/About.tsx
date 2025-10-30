@@ -1,3 +1,4 @@
+import { Helmet } from "react-helmet-async";
 import "./About.scss";
 import profileImage from "../assets/profile.png";
 import SkillItem from "../components/SkillItem";
@@ -5,18 +6,25 @@ import SkillItem from "../components/SkillItem";
 const About: React.FC = () => {
   return (
     <section id="about" className="about" aria-label="About">
+      <Helmet>
+        <title>Sobre Mim • Matheus Caiser</title>
+        <meta
+          name="description"
+          content="Desenvolvedor Full Stack com mais de 13 anos de experiência, especialista em React, React Native, Node.js, Golang, Linux e Docker. Apaixonado por criar soluções inovadoras e pela filosofia de aprendizado contínuo."
+        />
+      </Helmet>
       <h2 className="about__heading section-heading">About</h2>
       <div className="about__content">
         <div className="profile profile__fade-in">
           <div className="profile__picture">
             <img
               src={profileImage}
-              alt="Profile picture"
+              alt="A headshot of Matheus Caiser"
               className="profile__image"
             />
           </div>
           <p className="profile__blurb">
-            Dynamic and seasoned Full Stack Developer with over 8 years of
+            Dynamic and seasoned Full Stack Developer with over 13 years of
             comprehensive experience in web development and software
             engineering. Proficient in an array of modern technologies including
             React, React Native, Node.js, Golang, Linux, and Docker. Known for a
@@ -31,8 +39,6 @@ const About: React.FC = () => {
             and passion for creating exceptional digital experiences.
             <br />
             <br />
-            When I&apos;m not at my computer I like to spend my time reading,
-            keeping fit and playing guitar.
           </p>
         </div>
         <div className="skills">

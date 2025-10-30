@@ -1,6 +1,7 @@
 import "./App.scss";
 import "./styles/layout.scss";
 
+import AnimatedBackground from "./components/AnimatedBackground";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import Hero from "./sections/Hero";
@@ -11,6 +12,7 @@ import Contact from "./sections/Contact";
 const App = () => {
   return (
     <div className="app">
+      <AnimatedBackground />
       <main className="main" role="main">
         <Hero />
         <Header />

@@ -1,5 +1,8 @@
 {
   "buildCommand": "npx pnpm@10 build",
   "installCommand": "npx pnpm@10 install",
-  "devCommand": "npx pnpm@10 dev"
+  "devCommand": "npx pnpm@10 dev",
+  "git": {
+    "deploymentEnabled": false
+  }
 }
