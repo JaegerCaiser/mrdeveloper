@@ -196,8 +196,8 @@ jobs:
   tag-release:
     name: Create Git Tag
     needs: deploy-environment
-    # Só roda se for uma branch 'release/' E o deploy tiver sido um sucesso
-    if: startsWith(github.ref, 'refs/heads/release/') && needs.deploy-environment.result == 'success'
+    # Só roda se for a branch 'main' E o deploy tiver sido um sucesso
+    if: github.ref == 'refs/heads/main' && needs.deploy-environment.result == 'success'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -207,10 +207,11 @@ jobs:
         with:
           fetch-depth: 0 # Needed to get the commit history and tags
 
-      - name: Get version from release branch
+      - name: Get version from package.json
         id: get_version
         run: |
-          VERSION=$(echo "${{ github.ref }}" | sed 's|refs/heads/release/||')
+          VERSION=$(node -p "require('./package.json').version")
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "TAG_VERSION=v$VERSION" >> $GITHUB_ENV
 
       - name: Check if tag already exists
