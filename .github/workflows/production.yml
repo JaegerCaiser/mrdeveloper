@@ -129,51 +129,42 @@ jobs:
 
       - name: Pull Vercel Environment Information
         run: |
-          set -x
           if [ "${{ github.ref }}" == "refs/heads/main" ]; then
             vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
           else
-            vercel pull --yes --environment=development --token=${{ secrets.VERCEL_TOKEN }}
+            vercel pull --yes --token=${{ secrets.VERCEL_TOKEN }}
           fi
 
       - name: Build Project Artifacts
         run: |
-          set -x
           if [ "${{ github.ref }}" == "refs/heads/main" ]; then
             vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
           else
-            vercel build --target=development --token=${{ secrets.VERCEL_TOKEN }}
+            vercel build --token=${{ secrets.VERCEL_TOKEN }}
           fi
 
       # --- FASE 2: EXECUTAR O DEPLOY NA VERCEL ---
       - name: Deploy to Vercel and Capture URL
         id: deploy_step
         run: |
-          set -eo pipefail
-          set -x
           echo "VERCEL_ENV: $VERCEL_ENV"
 
           DEPLOY_COMMAND=""
           if [ "${{ github.ref }}" == "refs/heads/main" ]; then
             DEPLOY_COMMAND="vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}"
           else
-            DEPLOY_COMMAND="vercel deploy --target=development --prebuilt --token=${{ secrets.VERCEL_TOKEN }}"
+            DEPLOY_COMMAND="vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}"
           fi
 
           # Execute Vercel deploy e capture sua saída e status
-          DEPLOY_OUTPUT=$(eval "$DEPLOY_COMMAND" 2>&1)
-          DEPLOY_STATUS=$?
-
-          # Verifique se o deploy do Vercel falhou
-          if [ $DEPLOY_STATUS -ne 0 ]; then
+          if DEPLOY_URL=$($DEPLOY_COMMAND); then
+            echo "Deployment successful."
+            echo "deployment_url=$DEPLOY_URL" >> $GITHUB_OUTPUT
+          else
+            DEPLOY_STATUS=$?
             echo "Error: Vercel deploy failed with exit code $DEPLOY_STATUS."
-            echo "Output: $DEPLOY_OUTPUT"
-            exit $DEPLOY_STATUS # Falha explicitamente a etapa
+            exit $DEPLOY_STATUS
           fi
-
-          # Se bem-sucedido, extraia a URL (assumindo que é a última linha da saída)
-          DEPLOY_URL=$(echo "$DEPLOY_OUTPUT" | tail -n 1)
-          echo "deployment_url=$DEPLOY_URL" >> $GITHUB_OUTPUT
 
       # --- FASE 3: ATUALIZAR O STATUS FINAL DO DEPLOYMENT (SUCESSO OU FALHA) ---
       - name: Update GitHub Deployment Status
