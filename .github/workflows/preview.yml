@@ -53,7 +53,7 @@ jobs:
       # --- FASE 1: CRIAR O DEPLOYMENT NO GITHUB (STATUS "PENDING") ---
       - name: Create GitHub Deployment
         id: deployment
-        uses: bobheadxi/deployments@v1.0.0
+        uses: bobheadxi/deployments@v1.5.0
         with:
           step: start
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -120,7 +120,7 @@ jobs:
       - name: Update GitHub Deployment Status
         # if: always() garante que este passo rode mesmo se o deploy falhar
         if: always()
-        uses: bobheadxi/deployments@v1.0.0
+        uses: bobheadxi/deployments@v1.5.0
         with:
           step: finish
           token: ${{ secrets.GITHUB_TOKEN }}
