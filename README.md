@@ -4,9 +4,9 @@
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
-[![Framer Motion](https://img.shields.io/badge/Framer%20Motion-0055FF?style=for-the-badge&logo=framer&logoColor=white)](https://www.framer.com/motion/)
+[![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
 
-**A modern, animated portfolio website inspired by [benscott.dev](https://benscott.dev/)**
+**A modern, animated portfolio website showcasing Matheus Caiser's work as a Full Stack Developer**
 
 [🌐 Live Demo](#) • [📝 Documentation](#-features) • [🎨 Customization](#-customization-guide)
 
@@ -19,8 +19,8 @@
 - � **Animated Background** - Canvas-based particle animation in the hero section
 - 🎯 **Smooth Scrolling** - Anchor-based navigation with smooth scroll behavior
 - 📱 **Responsive Design** - Mobile-first approach with optimized layouts
-- ⚡ **Modern Stack** - React 18, TypeScript, SCSS, Framer Motion
-- 📧 **Contact Form** - Integrated form with validation
+- ⚡ **Modern Stack** - React 18, TypeScript, SCSS, Vite
+- 📧 **Contact Form** - Integrated form with validation and email integration
 - ♿ **Accessibility** - Semantic HTML and ARIA labels throughout
 - � **Custom Theme** - Dark theme with accent colors
 - 🔧 **Easy Customization** - Well-structured and documented code
@@ -31,12 +31,13 @@
 - **React 18.3.1** - UI library
 - **TypeScript 5.9.3** - Type safety
 - **SCSS** - Styling with variables
-- **Framer Motion 12.23.24** - Animations
+- **Vite 7.1.12** - Build tool and dev server
 - **Lucide React 0.548.0** - Modern icons
+- **React Helmet Async 2.0.5** - Document head management
 
 ### Development
-- **Create React App 5.0.1** - Build tooling
-- **Jest & Testing Library** - Testing framework
+- **ESLint 9.38.0** - Code linting
+- **Prettier** - Code formatting
 - **pnpm** - Fast, efficient package manager
 
 ## 🚀 Quick Start
@@ -44,13 +45,7 @@
 ### Prerequisites
 ```bash
 Node.js >= 16.x
-pnpm >= 8.x (recomendado) ou npm/yarn
-```
-
-
-```bash
-node >= 16.x
-pnpm >= 8.x
+pnpm >= 8.x (recommended) or npm/yarn
 ```
 
 ### Installation
@@ -68,7 +63,7 @@ pnpm install
 
 3. **Start development server**
 ```bash
-pnpm start
+pnpm dev
 ```
 
 4. **Open in browser**
@@ -80,9 +75,9 @@ http://localhost:3000
 
 | Command | Description |
 |---------|-----------|
-| `pnpm start` | Start development server |
+| `pnpm dev` | Start development server |
 | `pnpm build` | Create production build |
-| `pnpm test` | Run tests |
+| `pnpm preview` | Preview production build locally |
 | `pnpm lint` | Lint code |
 | `pnpm lint:fix` | Fix linting issues |
 
@@ -97,18 +92,18 @@ http://localhost:3000
 **Hero Section** (`src/sections/Hero.tsx`)
 ```typescript
 <h1 className="hero__title">
-  Hello, I'm <span className="hero__name">Your Name</span>.
+  Hello, I'm <span>Matheus</span>.
   <br />
   I'm a full stack web developer.
 </h1>
 ```
 
 **About Section** (`src/sections/About.tsx`)
-- Replace bio paragraphs
+- Replace bio paragraphs with personal description
 - Update skills array:
 ```typescript
 const skills = [
-  "HTML", "REACT", "JAVASCRIPT", // your skills
+  "HTML", "REACT", "EXPRESS.JS", "JAVASCRIPT", "CSS", "MONGODB", "GIT", "SASS", "NEXT.JS", "NODE.JS"
 ];
 ```
 - Replace `src/assets/profile.png` with your photo
@@ -117,25 +112,19 @@ const skills = [
 ```typescript
 const items: ExperienceItem[] = [
   {
-    company: "Your Company",
-    role: "Your Role",
-    period: "2023 — Present",
-    description: "What you did...",
+    company: "DBC Company (Unicred)",
+    role: "Front-end Developer",
+    period: "January 2022 — Present",
+    description: "Working as front-end developer building products for Unicred's internet banking cooperative...",
   },
-];
-```
-
-**Writing** (`src/sections/Writing.tsx`)
-```typescript
-const posts: Post[] = [
-  { title: "Your Article", url: "https://...", date: "2025-01-15" },
+  // Add other experiences from experienceData.tsx
 ];
 ```
 
 **Contact** (`src/sections/Contact.tsx`)
-- Update social media links
+- Update social media links in Footer component
 - Integrate form service (Formspree, EmailJS, etc.)
-- Change copyright name
+- Change copyright name to "MATHEUS CAISER"
 
 ### 2. Colors & Theme
 
@@ -168,12 +157,12 @@ const connectionDistance = 150;     // Connection distance
 src/
 ├── components/
 │   ├── AnimatedBackground.tsx  # Canvas particle animation
-│   └── Header.tsx              # Fixed navigation
+│   ├── Header.tsx              # Fixed navigation
+│   └── Footer.tsx              # Social links and copyright
 ├── sections/
 │   ├── Hero.tsx               # Landing with animation
 │   ├── About.tsx              # Bio + skills
 │   ├── Experience.tsx         # Work history
-│   ├── Writing.tsx            # Articles
 │   └── Contact.tsx            # Contact form
 ├── styles/
 │   ├── _variables.scss        # Theme variables
@@ -181,7 +170,7 @@ src/
 ├── assets/
 │   └── profile.png            # Profile photo
 ├── App.tsx
-└── index.tsx
+└── main.tsx
 ```
 
 ## 🌐 Deployment
@@ -260,26 +249,27 @@ Contributions, issues, and feature requests are welcome!
 
 ## 👨‍💻 Author
 
-**Your Name**
+**Matheus Caiser**
 
 - GitHub: [@JaegerCaiser](https://github.com/JaegerCaiser)
-- Portfolio: [Your Portfolio URL](#)
+- Email: [matheus.caiser@gmail.com](mailto:matheus.caiser@gmail.com)
+- Portfolio: [Live Demo](#)
 
 ---
 
 <div align="center">
   
-Made with ❤️ using React + TypeScript
+Made with ❤️ using React + TypeScript + Vite
 
-Inspired by [benscott.dev](https://benscott.dev/)
+Portfolio of Matheus Caiser - Full Stack Developer
 
 </div>
 
 
 <div align="center">
 
-**⭐ Se este projeto te ajudou, deixe uma estrela!**
+**⭐ If this project helped you, leave a star!**
 
-Made with ❤️ and ☕ by [MR.DEVELOPER](https://github.com/JaegerCaiser)
+Made with ❤️ and ☕ by [Matheus Caiser](https://github.com/JaegerCaiser)
 
 </div>
