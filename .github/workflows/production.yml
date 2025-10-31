@@ -105,7 +105,7 @@ jobs:
     steps:
       - name: Create GitHub Deployment
         id: deployment
-        uses: bobheadxi/deployments@v1.0.0
+        uses: bobheadxi/deployments@v1.5.0
         with:
           step: start
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -160,7 +160,7 @@ jobs:
       # --- FASE 3: ATUALIZAR O STATUS FINAL DO DEPLOYMENT (SUCESSO OU FALHA) ---
       - name: Update GitHub Deployment Status
         if: always()
-        uses: bobheadxi/deployments@v1.0.0
+        uses: bobheadxi/deployments@v1.5.0
         with:
           step: finish
           token: ${{ secrets.GITHUB_TOKEN }}
