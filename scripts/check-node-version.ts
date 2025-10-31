@@ -1,20 +1,38 @@
 #!/usr/bin/env node
 /* eslint-env node */
-/* eslint-disable import/no-commonjs */
-const fs = require("fs");
-const path = require("path");
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 
-function logError(msg) {
-  console.error("\n\x1b[31m[ERROR]\x1b[0m " + msg + "\n");
+function logError(msg: string) {
+  // red
+  console.error(`\n\x1b[31m[ERROR]\x1b[0m ${msg}\n`);
 }
 
-function logInfo(msg) {
-  console.log("\n\x1b[32m[OK]\x1b[0m " + msg + "\n");
+function logInfo(msg: string) {
+  // green
+  console.warn(`\n\x1b[32m[OK]\x1b[0m ${msg}\n`);
 }
 
 try {
-  const repoRoot = path.resolve(__dirname, "..");
+  const __filename = fileURLToPath(import.meta.url);
+  const repoRoot = path.resolve(path.dirname(__filename), "..");
   const nvmrcPath = path.join(repoRoot, ".nvmrc");
+
+  // Skip this check when running in CI environments — prebuild is intended for local dev only
+  // Detect common CI environment variables (CI, GITHUB_ACTIONS, GITLAB_CI, AZURE_PIPELINES)
+  if (
+    process.env.CI ||
+    process.env.GITHUB_ACTIONS ||
+    process.env.GITLAB_CI ||
+    process.env.AZURE_PIPELINES
+  ) {
+    logInfo(
+      "CI environment detected — skipping local-only Node version check."
+    );
+    // exit 0 so CI builds are not blocked
+    process.exit(0);
+  }
 
   if (!fs.existsSync(nvmrcPath)) {
     // No .nvmrc - nothing to check
@@ -28,7 +46,7 @@ try {
   const target = targetRaw.replace(/^v/, "");
   const current = process.version.replace(/^v/, "");
 
-  const normalize = (v) => {
+  const normalize = (v: string) => {
     const parts = v.split(".");
     // keep only major.minor.patch (pad with zeros if needed)
     while (parts.length < 3) parts.push("0");
@@ -42,21 +60,21 @@ try {
     logError(
       `Versão do Node incompatível: o projeto pede ${target} (arquivo .nvmrc), mas você está usando ${current}.`
     );
-    console.log(
+    console.warn(
       "Por favor altere a versão do Node para a requerida e tente novamente. Exemplo:"
     );
-    console.log("  nvm install " + target);
-    console.log("  nvm use " + target + "\n");
-    console.log(
+    console.warn("  nvm install " + target);
+    console.warn("  nvm use " + target + "\n");
+    console.warn(
       "Se preferir apenas executar temporariamente com essa versão (sem mudar a padrão):"
     );
-    console.log("  nvm exec " + target + " pnpm build\n");
+    console.warn("  nvm exec " + target + " pnpm build\n");
     process.exit(1);
   }
 
   logInfo(`Node version ${current} matches .nvmrc (${target}).`);
   process.exit(0);
-} catch (err) {
+} catch (err: unknown) {
   logError("Erro ao verificar .nvmrc: " + String(err));
   process.exit(1);
 }
