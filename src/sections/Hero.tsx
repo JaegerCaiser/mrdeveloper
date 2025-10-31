@@ -17,7 +17,7 @@ const Hero: React.FC = () => {
           <h1 className="hero__title">
             <span className="hero__line-1">
               Hello, I&apos;m <span>Matheus</span>.
-            </span>
+            </span>{" "}
             <span className="hero__line-2">
               I&apos;m a full stack web developer.
             </span>

@@ -15,12 +15,14 @@
   background-color: $color-background-light;
   backdrop-filter: blur(8px);
   box-shadow: 0 4px 4px rgba(0, 0, 0, 0.3);
-  z-index: 99999999999;
+  z-index: 10001; /* above .section-heading (z-index: 9999) so title doesn't overlap nav */
 
   @media (max-width: 700px) {
-    justify-content: center;
+    /* keep layout spaced so logo stays left; only adjust padding for narrow screens */
     padding: 0 2rem;
   }
+
+  /* mobile menu button removed to keep reference-like inline nav */
 
   &__logo {
     color: $color-red;
@@ -43,8 +45,8 @@
       &:hover {
         transform: scale(1.1);
         filter: drop-shadow(0 0 8px rgba(255, 77, 90, 0.6))
-                drop-shadow(0 0 16px rgba(255, 77, 90, 0.4))
-                drop-shadow(0 0 24px rgba(255, 77, 90, 0.2));
+          drop-shadow(0 0 16px rgba(255, 77, 90, 0.4))
+          drop-shadow(0 0 24px rgba(255, 77, 90, 0.2));
       }
     }
   }
@@ -52,12 +54,21 @@
 
 .navigation {
   display: flex;
-  font-size: 1.6rem;
+  font-size: 2rem; /* align with reference site */
   font-weight: 500;
   letter-spacing: 1px;
+  flex-wrap: wrap; /* allow items to wrap on small screens */
+
+  @media (max-width: 1200px) {
+    font-size: 1.9rem;
+  }
 
   @media (max-width: 700px) {
-    display: none;
+    /* center the navigation visually while keeping the logo left
+     by positioning the navigation absolutely across the full width
+     and centering its contents. This prevents the logo SVG from
+     being pushed off-center while keeping nav items centered. */
+    /* Note: .navigation is positioned below (full-width absolute) */
   }
 
   &__item {
@@ -67,7 +78,7 @@
     transition: all 0.3s;
 
     &:not(:last-child) {
-      margin-right: 2rem;
+      margin-right: 3rem; /* match spacing from reference */
     }
 
     &--active {
@@ -94,5 +105,57 @@
     &--active::after {
       width: 100%;
     }
+  }
+}
+
+/* mobile overlay removed to keep the inline nav behavior like the reference */
+
+/* Show menu button on small screens */
+/* no mobile button/overlay styles — keep inline nav responsive like reference */
+
+/* Note: navigation centering on small screens handled above (absolute centering),
+   so no separate block is required here. */
+
+/* Small-screen navigation: place nav full-width and center its items while
+   keeping the logo at the left. Use nowrap to avoid visual wrapping. */
+@media (max-width: 700px) {
+  .navigation {
+    /* keep navigation inside the sticky header (relative) so the
+       entire header remains sticky as before. Use flex:1 so the
+       nav occupies remaining space and can be centered while the
+       logo stays left. */
+    position: relative;
+    display: flex;
+    flex: 1 1 auto;
+    justify-content: center;
+    gap: 1rem;
+    font-size: 1.8rem;
+    white-space: nowrap; /* prevent wrapping of links */
+    padding: 0 2rem; /* horizontal padding to avoid touching edges */
+    z-index: 1001;
+  }
+
+  .navigation__item {
+    white-space: nowrap;
+  }
+
+  .navigation-bar__logo {
+    position: relative;
+    z-index: 1002; /* keep logo above centered nav */
+    margin-left: 0.5rem;
+  }
+}
+
+/* (Removed hide-over-hero rules; navigation is always visible) */
+
+/* Tweak for very narrow phones (e.g. Galaxy S20 412px wide) to avoid wrap/overflow */
+@media (max-width: 420px) {
+  .navigation {
+    font-size: 1.6rem;
+    gap: 0.6rem;
+  }
+
+  .navigation__item:not(:last-child) {
+    margin-right: 1rem;
   }
 }
