@@ -100,7 +100,7 @@ jobs:
 
     permissions:
       deployments: write
-      contents: read # Para o checkout
+      contents: read
 
     steps:
       - name: Create GitHub Deployment
@@ -181,7 +181,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Needed to get the commit history and tags
+          fetch-depth: 0
 
       - name: Get version from package.json
         id: get_version
