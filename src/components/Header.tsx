@@ -54,49 +54,55 @@ const Header: React.FC = () => {
     };
   }, []);
 
+  const navLinks = (
+    <>
+      <a
+        href="#hero"
+        id="nav-hero"
+        className={`navigation__item ${
+          activeSection === "hero" ? "navigation__item--active" : ""
+        }`}
+      >
+        Home
+      </a>
+      <a
+        href="#about"
+        id="nav-about"
+        className={`navigation__item ${
+          activeSection === "about" ? "navigation__item--active" : ""
+        }`}
+      >
+        About
+      </a>
+      <a
+        href="#experience"
+        id="nav-experience"
+        className={`navigation__item ${
+          activeSection === "experience" ? "navigation__item--active" : ""
+        }`}
+      >
+        Experience
+      </a>
+      <a
+        href="#contact"
+        id="nav-contact"
+        className={`navigation__item ${
+          activeSection === "contact" ? "navigation__item--active" : ""
+        }`}
+      >
+        Contact
+      </a>
+    </>
+  );
+
   return (
     <nav className="navigation-bar">
       <a href="#hero" className="navigation-bar__logo">
         <img src={logoSvg} alt="Logo" className="navigation-bar__logo-svg" />
       </a>
-      <div className="navigation">
-        <a
-          href="#hero"
-          id="nav-hero"
-          className={`navigation__item ${
-            activeSection === "hero" ? "navigation__item--active" : ""
-          }`}
-        >
-          Home
-        </a>
-        <a
-          href="#about"
-          id="nav-about"
-          className={`navigation__item ${
-            activeSection === "about" ? "navigation__item--active" : ""
-          }`}
-        >
-          About
-        </a>
-        <a
-          href="#experience"
-          id="nav-experience"
-          className={`navigation__item ${
-            activeSection === "experience" ? "navigation__item--active" : ""
-          }`}
-        >
-          Experience
-        </a>
-        <a
-          href="#contact"
-          id="nav-contact"
-          className={`navigation__item ${
-            activeSection === "contact" ? "navigation__item--active" : ""
-          }`}
-        >
-          Contact
-        </a>
-      </div>
+
+      {/* Desktop navigation (hidden on small screens via CSS) */}
+      <div className="navigation">{navLinks}</div>
     </nav>
   );
 };

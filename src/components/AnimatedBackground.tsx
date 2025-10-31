@@ -211,31 +211,61 @@ const AnimatedBackground: React.FC = () => {
     canvas.style.backgroundColor = "transparent";
     canvas.style.pointerEvents = "none";
 
-    const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    };
-    resize();
-    window.addEventListener("resize", resize);
+    // Responsive configuration computed from viewport and device capabilities
+    // sensible defaults so TS knows variables are initialized
+    let particleCount: number = 500;
+    let gridSize: number = 50;
+    let mouseRadius: number = 800;
+    let maxLineLength: number = 95;
+    let maxLineLengthSquared: number = maxLineLength * maxLineLength;
+    let propagationRadius: number = 40;
+    let propagationRadiusSquared: number =
+      propagationRadius * propagationRadius;
+    let maxLayers: number = 6;
 
-    // Optimized configuration with pre-computed constants
-    const particleCount = 500;
-    const gridSize = 50; // Spatial partitioning grid size
-    const mouseRadius = 800;
-    const maxLineLength = 95;
-    const maxLineLengthSquared = maxLineLength * maxLineLength;
-    const propagationRadius = 40; // Valor mais realista para propagação visível
-    const propagationRadiusSquared = propagationRadius * propagationRadius;
-    const maxLayers = 6;
-
-    // Pre-computed constants for opacity calculations
+    // Pre-computed constants for opacity calculations (kept static)
     const propagationOpacityBands = 6; // 6 faixas de opacidade (0-5)
     const interOpacityBands = 8; // 8 faixas de opacidade (0-7)
     const invPropagationBands = 1 / (propagationOpacityBands - 1);
     const invInterBands = 1 / (interOpacityBands - 1);
 
-    // Initialize systems
-    const spatialGrid = new SpatialGrid(gridSize, canvas.width, canvas.height);
+    // Declare spatial grid early (will be assigned in resize)
+    let spatialGrid!: SpatialGrid;
+
+    const resize = () => {
+      // Use visualViewport when available for accurate mobile viewport height
+      const win = window as unknown as { visualViewport?: VisualViewport };
+      const vv = win.visualViewport;
+      const cssWidth =
+        vv && vv.width ? Math.round(vv.width) : window.innerWidth;
+      const cssHeight =
+        vv && vv.height ? Math.round(vv.height) : window.innerHeight;
+
+      const dpr = Math.max(1, window.devicePixelRatio || 1);
+
+      // Set CSS size (what layout uses)
+      canvas.style.width = cssWidth + "px";
+      canvas.style.height = cssHeight + "px";
+
+      // Set backing store size for high-DPI crispness
+      canvas.width = Math.round(cssWidth * dpr);
+      canvas.height = Math.round(cssHeight * dpr);
+
+      // Ensure drawing operations use CSS pixel coordinates by applying transform
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      // Recompute responsive config and rebuild spatial grid/particles if needed
+      const cfg = computeConfig(cssWidth, cssHeight);
+      if (cfg) {
+        spatialGrid = new SpatialGrid(gridSize, cssWidth, cssHeight);
+      }
+    };
+
+    resize();
+    window.addEventListener("resize", resize);
+
+    // Initialize systems (will be assigned later after config computation)
+    // spatialGrid is created in resize()/computeConfig to match CSS size
     const distanceCache = new DistanceCache();
     const connectionBatch = new ConnectionBatch();
     const opacityCache = new OpacityCache();
@@ -253,6 +283,55 @@ const AnimatedBackground: React.FC = () => {
       const elementUnderMouse = document.elementFromPoint(x, y);
       return elementUnderMouse?.closest(".hero") !== null;
     };
+
+    // Compute per-viewport configuration for responsiveness
+    function computeConfig(w: number, h: number) {
+      const dpr =
+        typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1;
+      const area = w * h;
+
+      // Base particle number scaled by viewport area and devicePixelRatio
+      const base = Math.max(
+        60,
+        Math.min(800, Math.round((area / 6000) * (dpr / 1)))
+      );
+
+      if (w <= 420) {
+        particleCount = Math.max(60, Math.round(base * 0.25));
+        gridSize = 36;
+        maxLineLength = 60;
+        propagationRadius = 28;
+        maxLayers = 4;
+      } else if (w <= 900) {
+        particleCount = Math.max(120, Math.round(base * 0.6));
+        gridSize = 44;
+        maxLineLength = 80;
+        propagationRadius = 34;
+        maxLayers = 5;
+      } else {
+        particleCount = Math.max(300, Math.round(base));
+        gridSize = 50;
+        maxLineLength = 95;
+        propagationRadius = 40;
+        maxLayers = 6;
+      }
+
+      // Mouse radius proportional to the smaller viewport dimension
+      mouseRadius = Math.max(200, Math.round(Math.min(w, h) * 0.55));
+
+      // Derived squared values
+      maxLineLengthSquared = maxLineLength * maxLineLength;
+      propagationRadiusSquared = propagationRadius * propagationRadius;
+
+      return {
+        particleCount,
+        gridSize,
+        mouseRadius,
+        maxLineLength,
+        propagationRadius,
+        maxLayers,
+      };
+    }
 
     const handleMouseMove = (e: MouseEvent) => {
       const isInHero = checkMouseInHero(e.clientX, e.clientY);
@@ -285,16 +364,45 @@ const AnimatedBackground: React.FC = () => {
     window.addEventListener("mouseleave", handleMouseLeave, { passive: true });
     window.addEventListener("scroll", handleScroll, { passive: true });
 
+    // Pause/resume when tab visibility changes to save resources
+    const handleVisibility = (): void => {
+      if (document.hidden) {
+        targetOpacity = 0;
+        targetRadius = 0;
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibility, {
+      passive: true,
+    });
+
+    // compute initial config and create particle set accordingly
+    computeConfig(canvas.width, canvas.height);
     const particles: Particle[] = [];
     for (let i = 0; i < particleCount; i++) {
       particles.push(new Particle(canvas.width, canvas.height));
     }
 
+    // Recreate spatial grid with configured gridSize
+    spatialGrid = new SpatialGrid(gridSize, canvas.width, canvas.height);
+
     let animationFrameId: number;
     let frameCount = 0;
 
+    // Performance-adaptive animation loop
+    let lastFrameTime = performance.now();
+
     const animate = () => {
       frameCount++;
+
+      const now = performance.now();
+      const dt = now - lastFrameTime;
+      lastFrameTime = now;
+
+      // If we're running slow (dt > 40ms) and particleCount is large, gradually reduce particleCount
+      if (dt > 40 && particles.length > 200) {
+        const reduceBy = Math.min(20, Math.round(particles.length * 0.02));
+        particles.splice(0, reduceBy);
+      }
 
       // Update global opacity and effective radius for smooth transitions
       globalOpacity += (targetOpacity - globalOpacity) * opacitySpeed;
@@ -310,9 +418,9 @@ const AnimatedBackground: React.FC = () => {
       ctx.fillStyle = "#000000";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Update spatial grid
+      // Update spatial grid and draw particles
       spatialGrid.clear();
-      for (let i = 0; i < particleCount; i++) {
+      for (let i = 0; i < particles.length; i++) {
         particles[i].update(gridSize);
         particles[i].draw(ctx);
         spatialGrid.add(particles[i]);
@@ -606,6 +714,7 @@ const AnimatedBackground: React.FC = () => {
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseleave", handleMouseLeave);
       window.removeEventListener("scroll", handleScroll);
+      document.removeEventListener("visibilitychange", handleVisibility);
       cancelAnimationFrame(animationFrameId);
     };
   }, []);

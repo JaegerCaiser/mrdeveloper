@@ -37,10 +37,12 @@
   flex-direction: column;
   align-items: center;
   line-height: normal;
-  width: fit-content;
+  width: 100%;
+  max-width: $max-width; /* keep content readable on very large screens */
   height: auto;
   margin-left: auto;
   margin-right: auto;
+  padding: 0 2rem; /* ensure consistent horizontal spacing on small screens */
 
   color: $color-text;
   font-weight: 300;
@@ -55,6 +57,7 @@
 }
 
 .hero__title {
+  text-align: center;
   .hero__line-1,
   .hero__line-2 {
     font-size: 6rem;
@@ -66,8 +69,6 @@
     @media (max-width: 700px) {
       font-size: 5rem;
       text-align: center;
-      margin-left: 4rem;
-      margin-right: 4rem;
     }
 
     @media (max-width: 550px) {

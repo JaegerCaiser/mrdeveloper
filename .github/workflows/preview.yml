@@ -38,22 +38,19 @@ jobs:
     name: Deploy Preview and Update GitHub Status
     needs: test-and-lint
     runs-on: ubuntu-latest
-    # Define o ambiente para o job
     environment:
       name: Preview
-      # A URL será preenchida dinamicamente
       url: ${{ steps.deploy_step.outputs.preview_url }}
 
-    # Permissão necessária para criar e atualizar deployments
     permissions:
       deployments: write
-      pull-requests: write # Para o comentário
+      pull-requests: write
 
     steps:
       # --- FASE 1: CRIAR O DEPLOYMENT NO GITHUB (STATUS "PENDING") ---
       - name: Create GitHub Deployment
         id: deployment
-        uses: bobheadxi/deployments@v1.0.0
+        uses: bobheadxi/deployments@v1.5.0
         with:
           step: start
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -77,10 +74,8 @@ jobs:
       - name: Deploy to Vercel and Capture URL
         id: deploy_step
         run: |
-
           DEPLOY_COMMAND="vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}"
 
-          # Execute Vercel deploy e capture sua saída e status
           if DEPLOY_URL=$($DEPLOY_COMMAND); then
             echo "Deployment successful."
             echo "preview_url=$DEPLOY_URL" >> $GITHUB_OUTPUT
@@ -118,9 +113,8 @@ jobs:
 
       # --- FASE 3: ATUALIZAR O STATUS FINAL DO DEPLOYMENT (SUCESSO OU FALHA) ---
       - name: Update GitHub Deployment Status
-        # if: always() garante que este passo rode mesmo se o deploy falhar
         if: always()
-        uses: bobheadxi/deployments@v1.0.0
+        uses: bobheadxi/deployments@v1.5.0
         with:
           step: finish
           token: ${{ secrets.GITHUB_TOKEN }}
