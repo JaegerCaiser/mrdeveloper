@@ -12,9 +12,10 @@
   },
   "scripts": {
     "dev": "vite",
+    "prebuild": "node ./scripts/check-node-version.js",
     "build": "tsc && vite build",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "lint:fix": "eslint . --ext ts,tsx --fix",
+    "lint": "eslint . --ext ts,tsx --ignore-pattern scripts/** --report-unused-disable-directives --max-warnings 0",
+    "lint:fix": "eslint . --ext ts,tsx --ignore-pattern scripts/** --fix",
     "preview": "vite preview",
     "test:ci": "echo 'No tests configured yet - add tests to this script'"
   },

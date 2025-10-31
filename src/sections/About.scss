@@ -30,7 +30,7 @@
 
     &:before {
       position: absolute;
-      content: '';
+      content: "";
       border-bottom: 18px solid $color-red;
       width: 16rem;
       display: block;
@@ -78,6 +78,36 @@
   @media (max-width: 1000px) {
     margin-bottom: 3rem;
     margin-top: -150px; // Também aumentado
+  }
+
+  /* Responsive fix: when layout stacks (column), ensure the profile
+     sits below the heading instead of overlapping it. Make the profile
+     participate in normal flow and respect heading padding/margins. */
+  @media (max-width: 1300px) {
+    position: static;
+    left: 0;
+    margin-top: 0;
+    margin-bottom: 2rem;
+    opacity: 1;
+    transform: none;
+
+    &__picture {
+      justify-content: center;
+      margin-bottom: 1.5rem;
+
+      & .profile__image {
+        height: 18rem;
+        width: auto;
+        display: block;
+        margin: 0 auto;
+      }
+    }
+
+    &__blurb {
+      width: 100%;
+      padding: 0 1rem;
+      box-sizing: border-box;
+    }
   }
 
   &__picture {
