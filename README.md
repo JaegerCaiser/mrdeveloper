@@ -253,7 +253,6 @@ Contributions, issues, and feature requests are welcome!
 
 - GitHub: [@JaegerCaiser](https://github.com/JaegerCaiser)
 - Email: [matheus.caiser@gmail.com](mailto:matheus.caiser@gmail.com)
-- Portfolio: [Live Demo](#)
 
 ---
 
