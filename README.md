@@ -18,11 +18,21 @@
 
 - � **Animated Background** - Canvas-based particle animation in the hero section
 - 🎯 **Smooth Scrolling** - Anchor-based navigation with smooth scroll behavior
-- 📱 **Responsive Design** - Mobile-first approach with optimized layouts
+## ✨ Features
+
+- **Responsive Design**: Mobile-first approach with adaptive layouts
+- **Dark Theme**: Modern dark color scheme with smooth transitions
+- **Interactive Animations**: Canvas-based particle system and scroll animations
+- **Clean Architecture**: Separation of concerns with services, hooks, and components layers
+- **Type-Safe Contact Form**: Form validation and submission with TypeScript
+- **SEO Optimized**: Meta tags and structured data for better search visibility
+- **Performance Focused**: Optimized bundle size and lazy loading
+- **Accessibility**: ARIA labels and keyboard navigation support
 - ⚡ **Modern Stack** - React 18, TypeScript, SCSS, Vite
-- 📧 **Contact Form** - Integrated form with validation and email integration
+- 📧 **Contact Form** - Integrated form with validation, services layer, and email integration
 - ♿ **Accessibility** - Semantic HTML and ARIA labels throughout
 - � **Custom Theme** - Dark theme with accent colors
+- 🏗️ **Clean Architecture** - Services, hooks, and components layered approach
 - 🔧 **Easy Customization** - Well-structured and documented code
 
 ## 🛠️ Tech Stack
@@ -163,7 +173,13 @@ src/
 │   ├── Hero.tsx               # Landing with animation
 │   ├── About.tsx              # Bio + skills
 │   ├── Experience.tsx         # Work history
-│   └── Contact.tsx            # Contact form
+│   └── Contact.tsx            # Contact form (UI only)
+├── services/
+│   ├── contactService.ts      # Contact form business logic
+│   └── index.ts               # Service exports
+├── hooks/
+│   ├── useContactForm.ts      # Contact form state management
+│   └── index.ts               # Hook exports
 ├── styles/
 │   ├── _variables.scss        # Theme variables
 │   └── layout.scss            # Main styles
@@ -173,7 +189,24 @@ src/
 └── main.tsx
 ```
 
-## 🌐 Deployment
+## �️ Architecture
+
+This project follows **Clean Architecture** principles with clear separation of concerns:
+
+### Services Layer (`src/services/`)
+- **Business Logic**: API calls, data validation, and external integrations
+- **contactService.ts**: Handles contact form submission to FormSubmit API
+- **Error Handling**: Centralized error management and user feedback
+
+### Hooks Layer (`src/hooks/`)
+- **State Management**: Custom hooks for component logic
+- **useContactForm.ts**: Manages form state, validation, and submission flow
+- **Reusability**: Logic can be reused across multiple components
+
+### Components Layer (`src/components/`, `src/sections/`)
+- **UI Only**: Pure presentation components focused on rendering
+- **Props Interface**: Clear data contracts with TypeScript interfaces
+- **Separation**: No business logic, only JSX and styling
 
 ### Vercel
 ```bash
