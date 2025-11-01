@@ -10,8 +10,52 @@ on:
       - develop
 
 jobs:
+  test-and-lint:
+    name: Test & Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Ensure build cache directories exist
+        run: mkdir -p .vite node_modules/.cache && touch .eslintcache
+
+      - name: Cache build artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            .vite
+            node_modules/.cache
+            .eslintcache
+          key: build-${{ runner.os }}-node-22-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            build-${{ runner.os }}-node-22-
+
+      - name: Run linting
+        run: pnpm run lint
+        env:
+          ESLINT_CACHE: .eslintcache
+
+      - name: Run tests
+        run: pnpm run test:ci
+
   deploy-develop:
     name: Deploy to Develop Environment
+    needs: test-and-lint
     runs-on: ubuntu-latest
     environment: develop
     permissions:
@@ -30,36 +74,6 @@ jobs:
 
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-          cache: "pnpm"
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-      - name: Cache build artifacts
-        uses: actions/cache@v4
-        with:
-          path: |
-            .vite
-            node_modules/.cache
-            .eslintcache
-          key: build-${{ runner.os }}-node-22-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            build-${{ runner.os }}-node-22-
-      - name: Run linting
-        run: pnpm run lint
-        env:
-          ESLINT_CACHE: .eslintcache
-
-      - name: Run tests
-        run: pnpm run test:ci
 
       - name: Build project
         run: pnpm run build
@@ -109,7 +123,7 @@ jobs:
 
   upload-error-logs:
     name: Upload Error Logs
-    needs: deploy-develop
+    needs: [test-and-lint, deploy-develop]
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -118,32 +132,38 @@ jobs:
 
       - name: Generate error logs
         run: |
-          echo "=== GitHub Actions Run Summary ===" > error-logs.txt
-          echo "Repository: ${{ github.repository }}" >> error-logs.txt
-          echo "Workflow: ${{ github.workflow }}" >> error-logs.txt
-          echo "Run ID: ${{ github.run_id }}" >> error-logs.txt
-          echo "Run Number: ${{ github.run_number }}" >> error-logs.txt
-          echo "Branch: ${{ github.ref }}" >> error-logs.txt
-          echo "SHA: ${{ github.sha }}" >> error-logs.txt
-          echo "Actor: ${{ github.actor }}" >> error-logs.txt
-          echo "Event: ${{ github.event_name }}" >> error-logs.txt
-          echo "Status: ${{ job.status }}" >> error-logs.txt
-          echo "" >> error-logs.txt
-          echo "=== Job Status ===" >> error-logs.txt
-          echo "deploy-develop: ${{ needs.deploy-develop.result }}" >> error-logs.txt
-          echo "" >> error-logs.txt
-          echo "=== Environment Variables ===" >> error-logs.txt
-          env | grep -E "(NODE|PNPM|VERCEL|GITHUB)" | sort >> error-logs.txt || true
-          echo "" >> error-logs.txt
-          echo "=== System Information ===" >> error-logs.txt
-          uname -a >> error-logs.txt
-          node --version >> error-logs.txt 2>&1 || echo "Node.js not available" >> error-logs.txt
-          pnpm --version >> error-logs.txt 2>&1 || echo "pnpm not available" >> error-logs.txt
+          mkdir -p debug-logs
+          
+          # Collect npm logs
+          find ~/.npm/_logs/ -type f -name "*.log" -exec cp {} debug-logs/ \; 2>/dev/null || true
+          
+          # Collect pnpm logs
+          find ~/.pnpm/ -type f -name "*.log" -exec cp {} debug-logs/ \; 2>/dev/null || true
+          find ~/.pnpm/ -type f -name "*debug*" -exec cp {} debug-logs/ \; 2>/dev/null || true
+          
+          # Collect vercel logs
+          find ~/.vercel/ -type f -name "*.log" -exec cp {} debug-logs/ \; 2>/dev/null || true
+          
+          # Collect temporary logs from /tmp
+          find /tmp -type f -name "node-*" -exec cp {} debug-logs/ \; 2>/dev/null || true
+          find /tmp -type f -name "npm-*" -exec cp {} debug-logs/ \; 2>/dev/null || true
+          find /tmp -type f -name "pnpm-*" -exec cp {} debug-logs/ \; 2>/dev/null || true
+          find /tmp -type f -name "vercel-*" -exec cp {} debug-logs/ \; 2>/dev/null || true
+          
+          # If no logs found, create a placeholder
+          if [ -z "$(ls -A debug-logs 2>/dev/null)" ]; then
+            echo "No log files found in common locations" > debug-logs/no-logs-found.txt
+            echo "Checked locations:" >> debug-logs/no-logs-found.txt
+            echo "- ~/.npm/_logs/" >> debug-logs/no-logs-found.txt
+            echo "- ~/.pnpm/" >> debug-logs/no-logs-found.txt
+            echo "- ~/.vercel/" >> debug-logs/no-logs-found.txt
+            echo "- /tmp/ (node-*, npm-*, pnpm-*, vercel-*)" >> debug-logs/no-logs-found.txt
+          fi
 
       - name: Upload error logs
-        if: needs.deploy-develop.result == 'failure'
+        if: needs.test-and-lint.result == 'failure' || needs.deploy-develop.result == 'failure'
         uses: actions/upload-artifact@v4
         with:
-          name: error-logs-develop-${{ github.run_number }}
-          path: error-logs.txt
+          name: error-debug-logs-develop-${{ github.run_number }}
+          path: debug-logs/
           retention-days: 30
