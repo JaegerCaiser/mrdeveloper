@@ -1,0 +1,30 @@
+name: Develop Environment
+
+# Workflow para deploy do ambiente de desenvolvimento
+# Executado quando há push na branch develop
+# Realiza testes, linting, build e deploy para Vercel (ambiente develop)
+
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  test-and-lint:
+    uses: ./.github/workflows/reusable-test-and-lint.yml
+    with:
+      node-version: "22"
+
+  deploy-develop:
+    uses: ./.github/workflows/reusable-deploy-vercel.yml
+    with:
+      environment: develop
+      ref: ${{ github.ref }}
+      prebuilt: true
+    secrets:
+      vercel-token: ${{ secrets.VERCEL_TOKEN }}
+      github-token: ${{ secrets.GITHUB_TOKEN }}
