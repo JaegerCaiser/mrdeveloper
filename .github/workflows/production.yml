@@ -142,6 +142,9 @@ jobs:
             vercel pull --yes --token=${{ secrets.VERCEL_TOKEN }}
           fi
 
+      - name: Ensure Vercel cache directory exists
+        run: mkdir -p ~/.vercel && touch ~/.vercel/.gitkeep
+
       - name: Cache Vercel CLI
         uses: actions/cache@v4
         with:
