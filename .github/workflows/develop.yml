@@ -23,7 +23,8 @@ jobs:
     uses: ./.github/workflows/reusable-deploy-vercel.yml
     with:
       environment: develop
-      vercel-token: ${{ secrets.VERCEL_TOKEN }}
-      github-token: ${{ secrets.GITHUB_TOKEN }}
       ref: ${{ github.ref }}
       prebuilt: true
+    secrets:
+      vercel-token: ${{ secrets.VERCEL_TOKEN }}
+      github-token: ${{ secrets.GITHUB_TOKEN }}
