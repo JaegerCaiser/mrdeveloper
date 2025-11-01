@@ -31,14 +31,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Cache Vercel CLI
-        uses: actions/cache@v4
-        with:
-          path: ~/.vercel
-          key: vercel-cli-${{ runner.os }}
-          restore-keys: |
-            vercel-cli-${{ runner.os }}
-
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
@@ -74,6 +66,14 @@ jobs:
 
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
+
+      - name: Cache Vercel CLI
+        uses: actions/cache@v4
+        with:
+          path: ~/.vercel
+          key: vercel-cli-${{ runner.os }}
+          restore-keys: |
+            vercel-cli-${{ runner.os }}
 
       - name: Pull Vercel Environment Information
         run: vercel pull --yes --token=${{ secrets.VERCEL_TOKEN }}
