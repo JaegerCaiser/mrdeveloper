@@ -8,6 +8,7 @@ import Hero from "./sections/Hero";
 import About from "./sections/About";
 import Experience from "./sections/Experience";
 import Contact from "./sections/Contact";
+import { Analytics } from "@vercel/analytics/react";
 
 const App = () => {
   return (
@@ -21,6 +22,7 @@ const App = () => {
         <Contact />
       </main>
       <Footer />
+      <Analytics />
     </div>
   );
 };
