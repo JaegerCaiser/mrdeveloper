@@ -1,0 +1,119 @@
+name: Develop Environment
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  deploy-develop:
+    name: Deploy to Develop Environment
+    runs-on: ubuntu-latest
+    environment: develop
+    permissions:
+      deployments: write
+      contents: read
+
+    steps:
+      - name: Create GitHub Deployment
+        id: deployment
+        uses: bobheadxi/deployments@v1.5.0
+        with:
+          step: start
+          token: ${{ secrets.GITHUB_TOKEN }}
+          env: Develop
+          ref: ${{ github.ref }}
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run linting
+        run: pnpm run lint
+
+      - name: Run tests
+        run: pnpm run test:ci
+
+      - name: Build project
+        run: pnpm run build
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Pull Vercel Environment Information
+        run: vercel pull --yes --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build Project Artifacts
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy to Vercel Develop Environment
+        id: deploy_step
+        run: |
+          if DEPLOY_URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}); then
+            echo "Deployment successful."
+            echo "deployment_url=$DEPLOY_URL" >> $GITHUB_OUTPUT
+          else
+            DEPLOY_STATUS=$?
+            echo "Error: Vercel deploy failed with exit code $DEPLOY_STATUS."
+            exit $DEPLOY_STATUS
+          fi
+
+      - name: Update GitHub Deployment Status
+        if: always()
+        uses: bobheadxi/deployments@v1.5.0
+        with:
+          step: finish
+          token: ${{ secrets.GITHUB_TOKEN }}
+          env: Develop
+          status: ${{ job.status }}
+          deployment_id: ${{ steps.deployment.outputs.deployment_id }}
+          env_url: ${{ steps.deploy_step.outputs.deployment_url }}
+
+  upload-error-logs:
+    name: Upload Error Logs
+    needs: deploy-develop
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Generate error logs
+        run: |
+          echo "=== GitHub Actions Run Summary ===" > error-logs.txt
+          echo "Repository: ${{ github.repository }}" >> error-logs.txt
+          echo "Workflow: ${{ github.workflow }}" >> error-logs.txt
+          echo "Run ID: ${{ github.run_id }}" >> error-logs.txt
+          echo "Run Number: ${{ github.run_number }}" >> error-logs.txt
+          echo "Branch: ${{ github.ref }}" >> error-logs.txt
+          echo "SHA: ${{ github.sha }}" >> error-logs.txt
+          echo "Actor: ${{ github.actor }}" >> error-logs.txt
+          echo "Event: ${{ github.event_name }}" >> error-logs.txt
+          echo "Status: ${{ job.status }}" >> error-logs.txt
+          echo "" >> error-logs.txt
+          echo "=== Job Status ===" >> error-logs.txt
+          echo "deploy-develop: ${{ needs.deploy-develop.result }}" >> error-logs.txt
+          echo "" >> error-logs.txt
+          echo "=== Environment Variables ===" >> error-logs.txt
+          env | grep -E "(NODE|PNPM|VERCEL|GITHUB)" | sort >> error-logs.txt || true
+          echo "" >> error-logs.txt
+          echo "=== System Information ===" >> error-logs.txt
+          uname -a >> error-logs.txt
+          node --version >> error-logs.txt 2>&1 || echo "Node.js not available" >> error-logs.txt
+          pnpm --version >> error-logs.txt 2>&1 || echo "pnpm not available" >> error-logs.txt
+
+      - name: Upload error logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: error-logs-develop-${{ github.run_number }}
+          path: error-logs.txt
+          retention-days: 30

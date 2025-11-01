@@ -19,3 +19,42 @@ jobs:
           else
             echo "Source branch '$SOURCE_BRANCH' is a valid release branch."
           fi
+
+  upload-error-logs:
+    name: Upload Error Logs
+    needs: check-branch
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Generate error logs
+        run: |
+          echo "=== GitHub Actions Run Summary ===" > error-logs.txt
+          echo "Repository: ${{ github.repository }}" >> error-logs.txt
+          echo "Workflow: ${{ github.workflow }}" >> error-logs.txt
+          echo "Run ID: ${{ github.run_id }}" >> error-logs.txt
+          echo "Run Number: ${{ github.run_number }}" >> error-logs.txt
+          echo "Branch: ${{ github.ref }}" >> error-logs.txt
+          echo "SHA: ${{ github.sha }}" >> error-logs.txt
+          echo "Actor: ${{ github.actor }}" >> error-logs.txt
+          echo "Event: ${{ github.event_name }}" >> error-logs.txt
+          echo "PR Number: ${{ github.event.number }}" >> error-logs.txt
+          echo "" >> error-logs.txt
+          echo "=== Job Status ===" >> error-logs.txt
+          echo "check-branch: ${{ needs.check-branch.result }}" >> error-logs.txt
+          echo "" >> error-logs.txt
+          echo "=== Environment Variables ===" >> error-logs.txt
+          env | grep -E "(GITHUB)" | sort >> error-logs.txt || true
+          echo "" >> error-logs.txt
+          echo "=== System Information ===" >> error-logs.txt
+          uname -a >> error-logs.txt
+
+      - name: Upload error logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: error-logs-check-release-${{ github.run_number }}
+          path: error-logs.txt
+          retention-days: 30
