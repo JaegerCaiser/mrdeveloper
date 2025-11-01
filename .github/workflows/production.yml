@@ -35,6 +35,8 @@ jobs:
           cache: "pnpm"
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      - name: Ensure build cache directories exist
+        run: mkdir -p .vite node_modules/.cache && touch .eslintcache
       - name: Cache build artifacts
         uses: actions/cache@v4
         with:
@@ -51,6 +53,22 @@ jobs:
           ESLINT_CACHE: .eslintcache
       - name: Run tests
         run: pnpm run test:ci
+
+      - name: Upload debug logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-and-lint-debug-logs-${{ github.run_number }}
+          path: |
+            ~/.npm/_logs/
+            ~/.pnpm-debug.log
+            ~/.pnpm/
+            /home/runner/.pnpm-debug.log
+            /home/runner/.pnpm/
+            .eslintcache
+            /tmp/node-*
+            /tmp/npm-*
+            /tmp/pnpm-*
 
   update-version:
     name: Update Version in Release Branch
@@ -183,6 +201,24 @@ jobs:
             exit $DEPLOY_STATUS
           fi
 
+      - name: Upload debug logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: deploy-environment-debug-logs-${{ github.run_number }}
+          path: |
+            ~/.vercel/
+            /home/runner/.vercel/
+            ~/.npm/_logs/
+            ~/.pnpm-debug.log
+            ~/.pnpm/
+            /home/runner/.pnpm-debug.log
+            /home/runner/.pnpm/
+            /tmp/vercel-*
+            /tmp/node-*
+            /tmp/npm-*
+            /tmp/pnpm-*
+
       # --- FASE 3: ATUALIZAR O STATUS FINAL DO DEPLOYMENT (SUCESSO OU FALHA) ---
       - name: Update GitHub Deployment Status
         if: always()
@@ -235,45 +271,3 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git tag ${{ env.TAG_VERSION }} -m "Release ${{ env.TAG_VERSION }}"
           git push origin ${{ env.TAG_VERSION }}
-
-  upload-error-logs:
-    name: Upload Error Logs
-    needs: [test-and-lint, deploy-environment, tag-release]
-    if: always()
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Generate error logs
-        run: |
-          echo "=== GitHub Actions Run Summary ===" > error-logs.txt
-          echo "Repository: ${{ github.repository }}" >> error-logs.txt
-          echo "Workflow: ${{ github.workflow }}" >> error-logs.txt
-          echo "Run ID: ${{ github.run_id }}" >> error-logs.txt
-          echo "Run Number: ${{ github.run_number }}" >> error-logs.txt
-          echo "Branch: ${{ github.ref }}" >> error-logs.txt
-          echo "SHA: ${{ github.sha }}" >> error-logs.txt
-          echo "Actor: ${{ github.actor }}" >> error-logs.txt
-          echo "Event: ${{ github.event_name }}" >> error-logs.txt
-          echo "" >> error-logs.txt
-          echo "=== Job Status ===" >> error-logs.txt
-          echo "test-and-lint: ${{ needs.test-and-lint.result }}" >> error-logs.txt
-          echo "deploy-environment: ${{ needs.deploy-environment.result }}" >> error-logs.txt
-          echo "tag-release: ${{ needs.tag-release.result }}" >> error-logs.txt
-          echo "" >> error-logs.txt
-          echo "=== Environment Variables ===" >> error-logs.txt
-          env | grep -E "(NODE|PNPM|VERCEL|GITHUB)" | sort >> error-logs.txt || true
-          echo "" >> error-logs.txt
-          echo "=== System Information ===" >> error-logs.txt
-          uname -a >> error-logs.txt
-          node --version >> error-logs.txt 2>&1 || echo "Node.js not available" >> error-logs.txt
-          pnpm --version >> error-logs.txt 2>&1 || echo "pnpm not available" >> error-logs.txt
-
-      - name: Upload error logs
-        if: needs.test-and-lint.result == 'failure' || needs.deploy-environment.result == 'failure' || needs.tag-release.result == 'failure'
-        uses: actions/upload-artifact@v4
-        with:
-          name: error-logs-production-${{ github.run_number }}
-          path: error-logs.txt
-          retention-days: 30
