@@ -4,6 +4,10 @@ name: Develop Environment
 # Executado quando há push na branch develop
 # Realiza testes, linting, build e deploy para Vercel (ambiente develop)
 
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
 on:
   push:
     branches:
@@ -11,146 +15,15 @@ on:
 
 jobs:
   test-and-lint:
-    name: Test & Lint
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-          cache: "pnpm"
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Ensure build cache directories exist
-        run: mkdir -p .vite node_modules/.cache && touch .eslintcache
-
-      - name: Cache build artifacts
-        uses: actions/cache@v4
-        with:
-          path: |
-            .vite
-            node_modules/.cache
-            .eslintcache
-          key: build-${{ runner.os }}-node-22-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            build-${{ runner.os }}-node-22-
-
-      - name: Run linting
-        run: pnpm run lint
-        env:
-          ESLINT_CACHE: .eslintcache
-
-      - name: Run tests
-        run: pnpm run test:ci
-
-      - name: Upload debug logs on failure
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-and-lint-debug-logs-${{ github.run_number }}
-          path: |
-            ~/.npm/_logs/
-            ~/.pnpm-debug.log
-            ~/.pnpm/
-            /home/runner/.pnpm-debug.log
-            /home/runner/.pnpm/
-            .eslintcache
-            /tmp/node-*
-            /tmp/npm-*
-            /tmp/pnpm-*
+    uses: ./.github/workflows/reusable-test-and-lint.yml
+    with:
+      node-version: "22"
 
   deploy-develop:
-    name: Deploy to Develop Environment
-    needs: test-and-lint
-    runs-on: ubuntu-latest
-    environment: develop
-    permissions:
-      deployments: write
-      contents: read
-
-    steps:
-      - name: Create GitHub Deployment
-        id: deployment
-        uses: bobheadxi/deployments@v1.5.0
-        with:
-          step: start
-          token: ${{ secrets.GITHUB_TOKEN }}
-          env: Develop
-          ref: ${{ github.ref }}
-
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Build project
-        run: pnpm run build
-
-      - name: Install Vercel CLI
-        run: npm install --global vercel@latest
-
-      - name: Pull Vercel Environment Information
-        run: vercel pull --yes --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Ensure Vercel cache directory exists
-        run: mkdir -p ~/.vercel && touch ~/.vercel/.gitkeep
-
-      - name: Cache Vercel CLI
-        uses: actions/cache@v4
-        with:
-          path: ~/.vercel
-          key: vercel-cli-${{ runner.os }}
-          restore-keys: |
-            vercel-cli-${{ runner.os }}
-
-      - name: Build Project Artifacts
-        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Deploy to Vercel Develop Environment
-        id: deploy_step
-        run: |
-          if DEPLOY_URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}); then
-            echo "Deployment successful."
-            echo "deployment_url=$DEPLOY_URL" >> $GITHUB_OUTPUT
-          else
-            DEPLOY_STATUS=$?
-            echo "Error: Vercel deploy failed with exit code $DEPLOY_STATUS."
-            exit $DEPLOY_STATUS
-          fi
-
-      - name: Upload debug logs on failure
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: deploy-develop-debug-logs-${{ github.run_number }}
-          path: |
-            ~/.vercel/
-            /home/runner/.vercel/
-            ~/.npm/_logs/
-            ~/.pnpm-debug.log
-            ~/.pnpm/
-            /home/runner/.pnpm-debug.log
-            /home/runner/.pnpm/
-            /tmp/vercel-*
-            /tmp/node-*
-            /tmp/npm-*
-            /tmp/pnpm-*
-
-      - name: Update GitHub Deployment Status
-        if: always()
-        uses: bobheadxi/deployments@v1.5.0
-        with:
-          step: finish
-          token: ${{ secrets.GITHUB_TOKEN }}
-          env: Develop
-          status: ${{ job.status }}
-          deployment_id: ${{ steps.deployment.outputs.deployment_id }}
-          env_url: ${{ steps.deploy_step.outputs.deployment_url }}
+    uses: ./.github/workflows/reusable-deploy-vercel.yml
+    with:
+      environment: develop
+      vercel-token: ${{ secrets.VERCEL_TOKEN }}
+      github-token: ${{ secrets.GITHUB_TOKEN }}
+      ref: ${{ github.ref }}
+      prebuilt: true

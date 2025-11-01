@@ -21,140 +21,27 @@ on:
 
 jobs:
   test-and-lint:
-    name: Test & Lint
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [22.x]
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10
-      - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: "pnpm"
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-      - name: Ensure build cache directories exist
-        run: mkdir -p .vite node_modules/.cache && touch .eslintcache
-      - name: Cache build artifacts
-        uses: actions/cache@v4
-        with:
-          path: |
-            .vite
-            node_modules/.cache
-            .eslintcache
-          key: build-${{ runner.os }}-node-${{ matrix.node-version }}-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            build-${{ runner.os }}-node-${{ matrix.node-version }}-
-      - name: Run linter
-        run: pnpm run lint
-        env:
-          ESLINT_CACHE: .eslintcache
-      - name: Run tests
-        run: pnpm run test:ci
-
-      - name: Upload debug logs on failure
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-and-lint-debug-logs-${{ github.run_number }}
-          path: |
-            ~/.npm/_logs/
-            ~/.pnpm-debug.log
-            ~/.pnpm/
-            /home/runner/.pnpm-debug.log
-            /home/runner/.pnpm/
-            .eslintcache
-            /tmp/node-*
-            /tmp/npm-*
-            /tmp/pnpm-*
+    uses: ./.github/workflows/reusable-test-and-lint.yml
+    with:
+      node-version: "22.x"
 
   deploy-preview:
-    name: Deploy Preview and Update GitHub Status
-    needs: test-and-lint
+    uses: ./.github/workflows/reusable-deploy-vercel.yml
+    with:
+      environment: preview
+      vercel-token: ${{ secrets.VERCEL_TOKEN }}
+      github-token: ${{ secrets.GITHUB_TOKEN }}
+      ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+      prebuilt: true
+
+  update-pr-comment:
+    if: github.event_name == 'pull_request'
+    name: Update PR Comment
+    needs: deploy-preview
     runs-on: ubuntu-latest
-    environment:
-      name: Preview
-      url: ${{ steps.deploy_step.outputs.preview_url }}
-
     permissions:
-      deployments: write
       pull-requests: write
-
     steps:
-      # --- FASE 1: CRIAR O DEPLOYMENT NO GITHUB (STATUS "PENDING") ---
-      - name: Create GitHub Deployment
-        id: deployment
-        uses: bobheadxi/deployments@v1.5.0
-        with:
-          step: start
-          token: ${{ secrets.GITHUB_TOKEN }}
-          env: Preview
-          ref: ${{ github.event.pull_request.head.sha }}
-          override: true
-
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install Vercel CLI
-        run: npm install --global vercel@latest
-
-      - name: Pull Vercel Environment Information
-        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Ensure Vercel cache directory exists
-        run: mkdir -p ~/.vercel && touch ~/.vercel/.gitkeep
-
-      - name: Cache Vercel CLI
-        uses: actions/cache@v4
-        with:
-          path: ~/.vercel
-          key: vercel-cli-${{ runner.os }}
-          restore-keys: |
-            vercel-cli-${{ runner.os }}
-
-      - name: Build Project Artifacts
-        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
-
-      # --- FASE 2: EXECUTAR O DEPLOY NA VERCEL ---
-      - name: Deploy to Vercel and Capture URL
-        id: deploy_step
-        run: |
-          DEPLOY_COMMAND="vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}"
-
-          if DEPLOY_URL=$($DEPLOY_COMMAND); then
-            echo "Deployment successful."
-            echo "preview_url=$DEPLOY_URL" >> $GITHUB_OUTPUT
-          else
-            DEPLOY_STATUS=$?
-            echo "Error: Vercel deploy failed with exit code $DEPLOY_STATUS."
-            exit $DEPLOY_STATUS
-          fi
-
-      - name: Upload debug logs on failure
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: deploy-preview-debug-logs-${{ github.run_number }}
-          path: |
-            ~/.vercel/
-            /home/runner/.vercel/
-            ~/.npm/_logs/
-            ~/.pnpm-debug.log
-            ~/.pnpm/
-            /home/runner/.pnpm-debug.log
-            /home/runner/.pnpm/
-            /tmp/vercel-*
-            /tmp/node-*
-            /tmp/npm-*
-            /tmp/pnpm-*
-
       - name: Find Previous Comment
         uses: peter-evans/find-comment@v3
         id: find_comment
@@ -174,21 +61,16 @@ jobs:
 
             | Recurso | Link |
             |---|---|
-            | **🔗 URL de Preview** | [URL de Preview](${{ steps.deploy_step.outputs.preview_url }}) |
+            | **🔗 URL de Preview** | [URL de Preview](${{ needs.deploy-preview.outputs.deployment_url }}) |
             | **📜 Logs do Deploy** | [Ver logs da Action](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) |
 
             ---
             *Commit: `${{ github.event.pull_request.head.sha }}`*
           edit-mode: replace
 
-      # --- FASE 3: ATUALIZAR O STATUS FINAL DO DEPLOYMENT (SUCESSO OU FALHA) ---
-      - name: Update GitHub Deployment Status
-        if: always()
-        uses: bobheadxi/deployments@v1.5.0
-        with:
-          step: finish
-          token: ${{ secrets.GITHUB_TOKEN }}
-          env: Preview
-          status: ${{ job.status }}
-          deployment_id: ${{ steps.deployment.outputs.deployment_id }}
-          env_url: ${{ steps.deploy_step.outputs.preview_url }}
+  update-version:
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/release/')
+    uses: ./.github/workflows/reusable-release.yml
+    with:
+      version: $(echo "${{ github.ref }}" | sed 's|refs/heads/release/||')
+      node-version: "22.x"
