@@ -54,6 +54,22 @@ jobs:
       - name: Run tests
         run: pnpm run test:ci
 
+      - name: Upload debug logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-and-lint-debug-logs-${{ github.run_number }}
+          path: |
+            ~/.npm/_logs/
+            ~/.pnpm-debug.log
+            ~/.pnpm/
+            /home/runner/.pnpm-debug.log
+            /home/runner/.pnpm/
+            .eslintcache
+            /tmp/node-*
+            /tmp/npm-*
+            /tmp/pnpm-*
+
   update-version:
     name: Update Version in Release Branch
     if: startsWith(github.ref, 'refs/heads/release/')
@@ -185,6 +201,24 @@ jobs:
             exit $DEPLOY_STATUS
           fi
 
+      - name: Upload debug logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: deploy-environment-debug-logs-${{ github.run_number }}
+          path: |
+            ~/.vercel/
+            /home/runner/.vercel/
+            ~/.npm/_logs/
+            ~/.pnpm-debug.log
+            ~/.pnpm/
+            /home/runner/.pnpm-debug.log
+            /home/runner/.pnpm/
+            /tmp/vercel-*
+            /tmp/node-*
+            /tmp/npm-*
+            /tmp/pnpm-*
+
       # --- FASE 3: ATUALIZAR O STATUS FINAL DO DEPLOYMENT (SUCESSO OU FALHA) ---
       - name: Update GitHub Deployment Status
         if: always()
@@ -237,50 +271,3 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git tag ${{ env.TAG_VERSION }} -m "Release ${{ env.TAG_VERSION }}"
           git push origin ${{ env.TAG_VERSION }}
-
-  upload-error-logs:
-    name: Upload Error Logs
-    needs: [test-and-lint, deploy-environment, tag-release]
-    if: always()
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Generate error logs
-        run: |
-          mkdir -p debug-logs
-          
-          # Collect npm logs
-          find ~/.npm/_logs/ -type f -name "*.log" -exec cp {} debug-logs/ \; 2>/dev/null || true
-          
-          # Collect pnpm logs
-          find ~/.pnpm/ -type f -name "*.log" -exec cp {} debug-logs/ \; 2>/dev/null || true
-          find ~/.pnpm/ -type f -name "*debug*" -exec cp {} debug-logs/ \; 2>/dev/null || true
-          
-          # Collect vercel logs
-          find ~/.vercel/ -type f -name "*.log" -exec cp {} debug-logs/ \; 2>/dev/null || true
-          
-          # Collect temporary logs from /tmp
-          find /tmp -type f -name "node-*" -exec cp {} debug-logs/ \; 2>/dev/null || true
-          find /tmp -type f -name "npm-*" -exec cp {} debug-logs/ \; 2>/dev/null || true
-          find /tmp -type f -name "pnpm-*" -exec cp {} debug-logs/ \; 2>/dev/null || true
-          find /tmp -type f -name "vercel-*" -exec cp {} debug-logs/ \; 2>/dev/null || true
-          
-          # If no logs found, create a placeholder
-          if [ -z "$(ls -A debug-logs 2>/dev/null)" ]; then
-            echo "No log files found in common locations" > debug-logs/no-logs-found.txt
-            echo "Checked locations:" >> debug-logs/no-logs-found.txt
-            echo "- ~/.npm/_logs/" >> debug-logs/no-logs-found.txt
-            echo "- ~/.pnpm/" >> debug-logs/no-logs-found.txt
-            echo "- ~/.vercel/" >> debug-logs/no-logs-found.txt
-            echo "- /tmp/ (node-*, npm-*, pnpm-*, vercel-*)" >> debug-logs/no-logs-found.txt
-          fi
-
-      - name: Upload error logs
-        if: needs.test-and-lint.result == 'failure' || needs.deploy-environment.result == 'failure' || needs.tag-release.result == 'failure'
-        uses: actions/upload-artifact@v4
-        with:
-          name: error-debug-logs-production-${{ github.run_number }}
-          path: debug-logs/
-          retention-days: 30

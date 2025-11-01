@@ -59,28 +59,6 @@ jobs:
       - name: Run tests
         run: pnpm run test:ci
 
-      - name: Generate additional debug info on failure
-        if: failure()
-        run: |
-          echo "=== Debug Information ===" > debug-info.txt
-          echo "Date: $(date)" >> debug-info.txt
-          echo "Runner OS: $RUNNER_OS" >> debug-info.txt
-          echo "Node version: $(node --version)" >> debug-info.txt
-          echo "PNPM version: $(pnpm --version)" >> debug-info.txt
-          echo "Working directory: $(pwd)" >> debug-info.txt
-          echo "" >> debug-info.txt
-          echo "Environment variables:" >> debug-info.txt
-          env | grep -E "(NODE|PNPM|NPM|CI|GITHUB)" | sort >> debug-info.txt
-          echo "" >> debug-info.txt
-          echo "Disk usage:" >> debug-info.txt
-          df -h >> debug-info.txt
-          echo "" >> debug-info.txt
-          echo "Process list:" >> debug-info.txt
-          ps aux | head -20 >> debug-info.txt
-          echo "" >> debug-info.txt
-          echo "PNPM store status:" >> debug-info.txt
-          pnpm store status >> debug-info.txt 2>&1 || echo "Failed to get pnpm store status" >> debug-info.txt
-
       - name: Upload debug logs on failure
         if: failure()
         uses: actions/upload-artifact@v4
@@ -96,7 +74,6 @@ jobs:
             /tmp/node-*
             /tmp/npm-*
             /tmp/pnpm-*
-            debug-info.txt
 
   deploy-preview:
     name: Deploy Preview and Update GitHub Status
@@ -160,23 +137,6 @@ jobs:
             exit $DEPLOY_STATUS
           fi
 
-      - name: Generate additional debug info on failure
-        if: failure()
-        run: |
-          echo "=== Debug Information ===" > debug-info.txt
-          echo "Date: $(date)" >> debug-info.txt
-          echo "Runner OS: $RUNNER_OS" >> debug-info.txt
-          echo "Node version: $(node --version)" >> debug-info.txt
-          echo "PNPM version: $(pnpm --version)" >> debug-info.txt
-          echo "Vercel CLI version: $(vercel --version)" >> debug-info.txt
-          echo "Working directory: $(pwd)" >> debug-info.txt
-          echo "" >> debug-info.txt
-          echo "Environment variables:" >> debug-info.txt
-          env | grep -E "(VERCEL|NODE|PNPM|NPM|CI|GITHUB)" | sort >> debug-info.txt
-          echo "" >> debug-info.txt
-          echo "Vercel environment info:" >> debug-info.txt
-          vercel env ls 2>&1 || echo "Failed to list Vercel env" >> debug-info.txt
-
       - name: Upload debug logs on failure
         if: failure()
         uses: actions/upload-artifact@v4
@@ -194,7 +154,6 @@ jobs:
             /tmp/node-*
             /tmp/npm-*
             /tmp/pnpm-*
-            debug-info.txt
 
       - name: Find Previous Comment
         uses: peter-evans/find-comment@v3
@@ -233,69 +192,3 @@ jobs:
           status: ${{ job.status }}
           deployment_id: ${{ steps.deployment.outputs.deployment_id }}
           env_url: ${{ steps.deploy_step.outputs.preview_url }}
-
-  upload-error-logs:
-    name: Upload Error Logs
-    needs: [test-and-lint, deploy-preview]
-    if: always()
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Generate error logs
-        run: |
-          mkdir -p debug-logs
-
-          # Collect npm logs
-          find ~/.npm/_logs/ -type f -name "*.log" -exec cp {} debug-logs/ \; 2>/dev/null || true
-
-          # Collect pnpm logs from multiple locations
-          find ~/.pnpm/ -type f \( -name "*.log" -o -name "*debug*" \) -exec cp {} debug-logs/ \; 2>/dev/null || true
-          find /home/runner/.pnpm-debug.log -type f -exec cp {} debug-logs/ \; 2>/dev/null || true
-          find /home/runner/.pnpm/ -type f \( -name "*.log" -o -name "*debug*" \) -exec cp {} debug-logs/ \; 2>/dev/null || true
-
-          # Collect vercel logs
-          find ~/.vercel/ -type f -name "*.log" -exec cp {} debug-logs/ \; 2>/dev/null || true
-          find /home/runner/.vercel/ -type f -name "*.log" -exec cp {} debug-logs/ \; 2>/dev/null || true
-
-          # Collect temporary logs from /tmp and other common locations
-          find /tmp -type f \( -name "node-*" -o -name "npm-*" -o -name "pnpm-*" -o -name "vercel-*" \) -exec cp {} debug-logs/ \; 2>/dev/null || true
-          find /var/log -type f -name "*.log" 2>/dev/null | head -10 | xargs -I {} cp {} debug-logs/ 2>/dev/null || true
-
-          # Collect any .log files from the workspace
-          find . -name "*.log" -type f -exec cp {} debug-logs/ \; 2>/dev/null || true
-
-          # Generate a summary of found logs
-          echo "Log collection summary:" > debug-logs/collection-summary.txt
-          echo "Date: $(date)" >> debug-logs/collection-summary.txt
-          echo "Runner: $RUNNER_OS" >> debug-logs/collection-summary.txt
-          echo "Files collected:" >> debug-logs/collection-summary.txt
-          ls -la debug-logs/ >> debug-logs/collection-summary.txt 2>/dev/null || echo "No files in debug-logs/" >> debug-logs/collection-summary.txt
-
-          # If no logs found, create a detailed placeholder
-          if [ -z "$(ls -A debug-logs 2>/dev/null)" ]; then
-            echo "No log files found in any checked locations" > debug-logs/no-logs-found.txt
-            echo "Checked locations:" >> debug-logs/no-logs-found.txt
-            echo "- ~/.npm/_logs/" >> debug-logs/no-logs-found.txt
-            echo "- ~/.pnpm/ and /home/runner/.pnpm/" >> debug-logs/no-logs-found.txt
-            echo "- ~/.vercel/ and /home/runner/.vercel/" >> debug-logs/no-logs-found.txt
-            echo "- /tmp/ (node-*, npm-*, pnpm-*, vercel-*)" >> debug-logs/no-logs-found.txt
-            echo "- /var/log/*.log" >> debug-logs/no-logs-found.txt
-            echo "- Workspace .log files" >> debug-logs/no-logs-found.txt
-            echo "" >> debug-logs/no-logs-found.txt
-            echo "System info:" >> debug-logs/no-logs-found.txt
-            uname -a >> debug-logs/no-logs-found.txt
-            echo "Available disk space:" >> debug-logs/no-logs-found.txt
-            df -h >> debug-logs/no-logs-found.txt
-          fi
-            echo "- /tmp/ (node-*, npm-*, pnpm-*, vercel-*)" >> debug-logs/no-logs-found.txt
-          fi
-
-      - name: Upload error logs
-        if: needs.test-and-lint.result == 'failure' || needs.deploy-preview.result == 'failure'
-        uses: actions/upload-artifact@v4
-        with:
-          name: error-debug-logs-preview-${{ github.run_number }}
-          path: debug-logs/
-          retention-days: 30
