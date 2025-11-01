@@ -10,6 +10,9 @@ import Experience from "./sections/Experience";
 import Contact from "./sections/Contact";
 import { Analytics } from "@vercel/analytics/react";
 
+// Temporary code to test workflow error logging
+const invalidCode: string = 123;
+
 const App = () => {
   return (
     <div className="app">
