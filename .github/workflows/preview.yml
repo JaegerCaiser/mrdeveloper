@@ -246,33 +246,33 @@ jobs:
       - name: Generate error logs
         run: |
           mkdir -p debug-logs
-          
+
           # Collect npm logs
           find ~/.npm/_logs/ -type f -name "*.log" -exec cp {} debug-logs/ \; 2>/dev/null || true
-          
+
           # Collect pnpm logs from multiple locations
           find ~/.pnpm/ -type f \( -name "*.log" -o -name "*debug*" \) -exec cp {} debug-logs/ \; 2>/dev/null || true
           find /home/runner/.pnpm-debug.log -type f -exec cp {} debug-logs/ \; 2>/dev/null || true
           find /home/runner/.pnpm/ -type f \( -name "*.log" -o -name "*debug*" \) -exec cp {} debug-logs/ \; 2>/dev/null || true
-          
+
           # Collect vercel logs
           find ~/.vercel/ -type f -name "*.log" -exec cp {} debug-logs/ \; 2>/dev/null || true
           find /home/runner/.vercel/ -type f -name "*.log" -exec cp {} debug-logs/ \; 2>/dev/null || true
-          
+
           # Collect temporary logs from /tmp and other common locations
           find /tmp -type f \( -name "node-*" -o -name "npm-*" -o -name "pnpm-*" -o -name "vercel-*" \) -exec cp {} debug-logs/ \; 2>/dev/null || true
           find /var/log -type f -name "*.log" 2>/dev/null | head -10 | xargs -I {} cp {} debug-logs/ 2>/dev/null || true
-          
+
           # Collect any .log files from the workspace
           find . -name "*.log" -type f -exec cp {} debug-logs/ \; 2>/dev/null || true
-          
+
           # Generate a summary of found logs
           echo "Log collection summary:" > debug-logs/collection-summary.txt
           echo "Date: $(date)" >> debug-logs/collection-summary.txt
           echo "Runner: $RUNNER_OS" >> debug-logs/collection-summary.txt
           echo "Files collected:" >> debug-logs/collection-summary.txt
           ls -la debug-logs/ >> debug-logs/collection-summary.txt 2>/dev/null || echo "No files in debug-logs/" >> debug-logs/collection-summary.txt
-          
+
           # If no logs found, create a detailed placeholder
           if [ -z "$(ls -A debug-logs 2>/dev/null)" ]; then
             echo "No log files found in any checked locations" > debug-logs/no-logs-found.txt
