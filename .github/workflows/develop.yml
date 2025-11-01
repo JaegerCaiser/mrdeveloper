@@ -1,5 +1,9 @@
 name: Develop Environment
 
+# Workflow para deploy do ambiente de desenvolvimento
+# Executado quando há push na branch develop
+# Realiza testes, linting, build e deploy para Vercel (ambiente develop)
+
 on:
   push:
     branches:

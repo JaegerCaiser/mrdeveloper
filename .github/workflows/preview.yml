@@ -1,4 +1,11 @@
-name: Vercel Preview Deployment
+name: Preview Environment
+
+# Workflow para deploy do ambiente de preview/staging
+# Executado em:
+# - Pull Requests (para preview de mudanças)
+# - Push em branches release/* (para testes de release)
+# Realiza testes, linting, build, deploy para Vercel (ambiente preview)
+# e atualização automática de comentários nos PRs
 
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -7,6 +14,9 @@ env:
 on:
   pull_request:
     types: [opened, synchronize, reopened]
+  push:
+    branches:
+      - release/**
 
 jobs:
   test-and-lint:
