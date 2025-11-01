@@ -1,4 +1,9 @@
-name: Vercel Environment Deployment and Tagging
+name: Production Environment
+
+# Workflow para deploy do ambiente de produção
+# Executado apenas quando há push na branch main
+# Realiza testes, linting, build, deploy para Vercel (ambiente production)
+# e criação automática de tags de release
 
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -8,8 +13,6 @@ on:
   push:
     branches:
       - main
-      - develop
-      - "release/**"
 
 jobs:
   test-and-lint:
