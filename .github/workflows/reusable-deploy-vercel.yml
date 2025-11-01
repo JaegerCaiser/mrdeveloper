@@ -51,7 +51,12 @@ jobs:
         run: npm install --global vercel@latest
 
       - name: Pull Vercel Environment Information
-        run: vercel pull --yes --environment=${{ inputs.environment }} --token=${{ secrets.vercel-token }}
+        run: |
+          if [ "${{ inputs.environment }}" = "develop" ]; then
+            vercel pull --yes --token=${{ secrets.vercel-token }}
+          else
+            vercel pull --yes --environment=${{ inputs.environment }} --token=${{ secrets.vercel-token }}
+          fi
 
       - name: Ensure Vercel cache directory exists
         run: mkdir -p ~/.vercel && touch ~/.vercel/.gitkeep
