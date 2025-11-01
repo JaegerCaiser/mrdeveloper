@@ -22,11 +22,17 @@ on:
         required: true
       github-token:
         required: true
+    outputs:
+      deployment_url:
+        description: "URL do deployment no Vercel"
+        value: ${{ jobs.deploy.outputs.deployment_url }}
 
 jobs:
   deploy:
     name: Deploy to Vercel
     runs-on: ubuntu-latest
+    outputs:
+      deployment_url: ${{ steps.deploy_step.outputs.deployment_url }}
     environment:
       name: ${{ inputs.environment }}
       url: ${{ steps.deploy_step.outputs.deployment_url }}

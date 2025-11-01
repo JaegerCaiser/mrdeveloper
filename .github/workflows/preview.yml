@@ -71,7 +71,23 @@ jobs:
 
   update-version:
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/release/')
-    uses: ./.github/workflows/reusable-release.yml
-    with:
-      version: $(echo "${{ github.ref }}" | sed 's|refs/heads/release/||')-beta.${{ github.run_id }}
-      node-version: "22.x"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Extract version from branch name
+        id: extract_version
+        run: |
+          BRANCH_NAME="${{ github.ref }}"
+          VERSION=$(echo "$BRANCH_NAME" | sed 's|refs/heads/release/||')
+          BETA_VERSION="${VERSION}-beta.${{ github.run_id }}"
+          echo "version=$BETA_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Create beta tag
+        uses: ./.github/workflows/reusable-release.yml
+        with:
+          version: ${{ steps.extract_version.outputs.version }}
+          node-version: "22.x"

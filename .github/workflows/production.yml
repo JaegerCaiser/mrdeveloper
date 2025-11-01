@@ -21,6 +21,7 @@ jobs:
       node-version: "22.x"
 
   deploy-production:
+    needs: test-and-lint
     uses: ./.github/workflows/reusable-deploy-vercel.yml
     with:
       environment: production
@@ -33,7 +34,21 @@ jobs:
 
   tag-release:
     needs: deploy-production
-    uses: ./.github/workflows/reusable-release.yml
-    with:
-      version: $(node -p "require('./package.json').version")
-      node-version: "22.x"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get version from package.json
+        id: get_version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Create release
+        uses: ./.github/workflows/reusable-release.yml
+        with:
+          version: ${{ steps.get_version.outputs.version }}
+          node-version: "22.x"
