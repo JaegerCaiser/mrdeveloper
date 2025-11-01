@@ -134,14 +134,6 @@ jobs:
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
 
-      - name: Cache Vercel CLI
-        uses: actions/cache@v4
-        with:
-          path: ~/.vercel
-          key: vercel-cli-${{ runner.os }}
-          restore-keys: |
-            vercel-cli-${{ runner.os }}
-
       - name: Pull Vercel Environment Information
         run: |
           if [ "${{ github.ref }}" == "refs/heads/main" ]; then
@@ -149,6 +141,14 @@ jobs:
           else
             vercel pull --yes --token=${{ secrets.VERCEL_TOKEN }}
           fi
+
+      - name: Cache Vercel CLI
+        uses: actions/cache@v4
+        with:
+          path: ~/.vercel
+          key: vercel-cli-${{ runner.os }}
+          restore-keys: |
+            vercel-cli-${{ runner.os }}
 
       - name: Build Project Artifacts
         run: |
