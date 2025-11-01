@@ -52,7 +52,7 @@ jobs:
           uname -a >> error-logs.txt
 
       - name: Upload error logs
-        if: failure()
+        if: needs.check-branch.result == 'failure'
         uses: actions/upload-artifact@v4
         with:
           name: error-logs-check-release-${{ github.run_number }}

@@ -168,7 +168,7 @@ jobs:
           pnpm --version >> error-logs.txt 2>&1 || echo "pnpm not available" >> error-logs.txt
 
       - name: Upload error logs
-        if: failure()
+        if: needs.test-and-lint.result == 'failure' || needs.deploy-preview.result == 'failure'
         uses: actions/upload-artifact@v4
         with:
           name: error-logs-preview-${{ github.run_number }}

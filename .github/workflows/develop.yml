@@ -120,7 +120,7 @@ jobs:
           pnpm --version >> error-logs.txt 2>&1 || echo "pnpm not available" >> error-logs.txt
 
       - name: Upload error logs
-        if: failure()
+        if: needs.deploy-develop.result == 'failure'
         uses: actions/upload-artifact@v4
         with:
           name: error-logs-develop-${{ github.run_number }}
