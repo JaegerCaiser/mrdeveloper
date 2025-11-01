@@ -32,6 +32,7 @@ jobs:
       github-token: ${{ secrets.GITHUB_TOKEN }}
 
   tag-release:
+    needs: deploy-production
     uses: ./.github/workflows/reusable-release.yml
     with:
       version: $(node -p "require('./package.json').version")

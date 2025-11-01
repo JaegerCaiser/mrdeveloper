@@ -73,5 +73,5 @@ jobs:
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/release/')
     uses: ./.github/workflows/reusable-release.yml
     with:
-      version: $(echo "${{ github.ref }}" | sed 's|refs/heads/release/||')
+      version: $(echo "${{ github.ref }}" | sed 's|refs/heads/release/||')-beta.${{ github.run_id }}
       node-version: "22.x"
