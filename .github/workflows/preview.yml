@@ -29,10 +29,11 @@ jobs:
     uses: ./.github/workflows/reusable-deploy-vercel.yml
     with:
       environment: preview
-      vercel-token: ${{ secrets.VERCEL_TOKEN }}
-      github-token: ${{ secrets.GITHUB_TOKEN }}
       ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
       prebuilt: true
+    secrets:
+      vercel-token: ${{ secrets.VERCEL_TOKEN }}
+      github-token: ${{ secrets.GITHUB_TOKEN }}
 
   update-pr-comment:
     if: github.event_name == 'pull_request'

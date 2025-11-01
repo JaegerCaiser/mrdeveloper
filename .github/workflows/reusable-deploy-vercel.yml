@@ -6,12 +6,6 @@ on:
       environment:
         required: true
         type: string
-      vercel-token:
-        required: true
-        type: string
-      github-token:
-        required: true
-        type: string
       ref:
         required: true
         type: string
@@ -23,6 +17,11 @@ on:
         required: false
         type: boolean
         default: false
+    secrets:
+      vercel-token:
+        required: true
+      github-token:
+        required: true
 
 jobs:
   deploy:
@@ -41,7 +40,7 @@ jobs:
         uses: bobheadxi/deployments@v1.5.0
         with:
           step: start
-          token: ${{ inputs.github-token }}
+          token: ${{ secrets.github-token }}
           env: ${{ inputs.environment }}
           ref: ${{ inputs.ref }}
 
@@ -52,7 +51,7 @@ jobs:
         run: npm install --global vercel@latest
 
       - name: Pull Vercel Environment Information
-        run: vercel pull --yes --environment=${{ inputs.environment }} --token=${{ inputs.vercel-token }}
+        run: vercel pull --yes --environment=${{ inputs.environment }} --token=${{ secrets.vercel-token }}
 
       - name: Ensure Vercel cache directory exists
         run: mkdir -p ~/.vercel && touch ~/.vercel/.gitkeep
@@ -66,12 +65,12 @@ jobs:
             vercel-cli-${{ runner.os }}
 
       - name: Build Project Artifacts
-        run: vercel build ${{ inputs.prod && '--prod' || '' }} --token=${{ inputs.vercel-token }}
+        run: vercel build ${{ inputs.prod && '--prod' || '' }} --token=${{ secrets.vercel-token }}
 
       - name: Deploy to Vercel
         id: deploy_step
         run: |
-          DEPLOY_COMMAND="vercel deploy ${{ inputs.prebuilt && '--prebuilt' || '' }} ${{ inputs.prod && '--prod' || '' }} --token=${{ inputs.vercel-token }}"
+          DEPLOY_COMMAND="vercel deploy ${{ inputs.prebuilt && '--prebuilt' || '' }} ${{ inputs.prod && '--prod' || '' }} --token=${{ secrets.vercel-token }}"
 
           if DEPLOY_URL=$($DEPLOY_COMMAND); then
             echo "Deployment successful."
@@ -105,7 +104,7 @@ jobs:
         uses: bobheadxi/deployments@v1.5.0
         with:
           step: finish
-          token: ${{ inputs.github-token }}
+          token: ${{ secrets.github-token }}
           env: ${{ inputs.environment }}
           status: ${{ job.status }}
           deployment_id: ${{ steps.deployment.outputs.deployment_id }}

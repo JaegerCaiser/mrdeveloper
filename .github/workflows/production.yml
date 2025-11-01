@@ -24,11 +24,12 @@ jobs:
     uses: ./.github/workflows/reusable-deploy-vercel.yml
     with:
       environment: production
-      vercel-token: ${{ secrets.VERCEL_TOKEN }}
-      github-token: ${{ secrets.GITHUB_TOKEN }}
       ref: ${{ github.ref }}
       prebuilt: true
       prod: true
+    secrets:
+      vercel-token: ${{ secrets.VERCEL_TOKEN }}
+      github-token: ${{ secrets.GITHUB_TOKEN }}
 
   tag-release:
     uses: ./.github/workflows/reusable-release.yml
