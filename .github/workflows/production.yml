@@ -40,15 +40,47 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+          cache: "pnpm"
 
       - name: Get version from package.json
         id: get_version
         run: |
           VERSION=$(node -p "require('./package.json').version")
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "TAG_VERSION=v$VERSION" >> $GITHUB_ENV
 
-      - name: Create release
-        uses: ./.github/workflows/reusable-release.yml
-        with:
-          version: ${{ steps.get_version.outputs.version }}
-          node-version: "22.x"
+      - name: Check if tag already exists
+        id: check_tag
+        run: |
+          git fetch --tags
+          if git rev-parse "refs/tags/${{ env.TAG_VERSION }}" >/dev/null 2>&1; then
+            echo "Tag ${{ env.TAG_VERSION }} already exists. Skipping release."
+            echo "SKIP_ALL=true" >> $GITHUB_OUTPUT
+          else
+            echo "Tag ${{ env.TAG_VERSION }} does not exist. Proceeding with release."
+            echo "SKIP_ALL=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Update version and create tag
+        if: steps.check_tag.outputs.SKIP_ALL == 'false'
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          pnpm version ${{ env.VERSION }} --no-git-tag-version
+          git add package.json pnpm-lock.yaml
+          git commit -m "chore: Bump version to ${{ env.VERSION }}"
+          git tag ${{ env.TAG_VERSION }} -m "Release ${{ env.TAG_VERSION }}"
+          git push
+          git push origin ${{ env.TAG_VERSION }}
