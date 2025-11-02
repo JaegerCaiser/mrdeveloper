@@ -22,11 +22,17 @@ on:
         required: true
       github-token:
         required: true
+    outputs:
+      deployment_url:
+        description: "URL do deployment no Vercel"
+        value: ${{ jobs.deploy.outputs.deployment_url }}
 
 jobs:
   deploy:
     name: Deploy to Vercel
     runs-on: ubuntu-latest
+    outputs:
+      deployment_url: ${{ steps.deploy_step.outputs.deployment_url }}
     environment:
       name: ${{ inputs.environment }}
       url: ${{ steps.deploy_step.outputs.deployment_url }}
@@ -51,7 +57,12 @@ jobs:
         run: npm install --global vercel@latest
 
       - name: Pull Vercel Environment Information
-        run: vercel pull --yes --environment=${{ inputs.environment }} --token=${{ secrets.vercel-token }}
+        run: |
+          if [ "${{ inputs.environment }}" = "develop" ]; then
+            vercel pull --yes --token=${{ secrets.vercel-token }}
+          else
+            vercel pull --yes --environment=${{ inputs.environment }} --token=${{ secrets.vercel-token }}
+          fi
 
       - name: Ensure Vercel cache directory exists
         run: mkdir -p ~/.vercel && touch ~/.vercel/.gitkeep

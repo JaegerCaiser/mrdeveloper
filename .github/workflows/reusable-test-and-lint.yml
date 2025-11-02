@@ -39,8 +39,9 @@ jobs:
             .vite
             node_modules/.cache
             .eslintcache
-          key: build-${{ runner.os }}-node-${{ inputs.node-version }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          key: build-${{ runner.os }}-node-${{ inputs.node-version }}-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ hashFiles('src/**/*.{ts,tsx,js,jsx}', 'vite.config.ts', 'tsconfig.json', 'eslint.config.mjs') }}
           restore-keys: |
+            build-${{ runner.os }}-node-${{ inputs.node-version }}-${{ hashFiles('**/pnpm-lock.yaml') }}-
             build-${{ runner.os }}-node-${{ inputs.node-version }}-
 
       - name: Run linting
