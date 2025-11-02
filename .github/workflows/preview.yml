@@ -217,6 +217,8 @@ jobs:
 
       - name: Update version and create beta tag
         if: steps.check_tag.outputs.SKIP_ALL == 'false'
+        env:
+          GH_PAT: ${{ secrets.GH_PAT_FOR_RELEASE }}
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
@@ -224,7 +226,7 @@ jobs:
           git add package.json pnpm-lock.yaml
           git commit -m "chore(release): Bump version to ${{ env.VERSION }} [beta-release]"
           git tag ${{ env.TAG_VERSION }} -m "Beta Release ${{ env.TAG_VERSION }}"
-          git push
-          git push origin ${{ env.TAG_VERSION }}
+          git push https://github-actions[bot]:${GH_PAT}@github.com/${{ github.repository }}.git HEAD:${{ github.ref_name }}
+          git push https://github-actions[bot]:${GH_PAT}@github.com/${{ github.repository }}.git ${{ env.TAG_VERSION }}
 
 
