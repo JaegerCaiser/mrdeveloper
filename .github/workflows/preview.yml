@@ -23,6 +23,7 @@ jobs:
       node-version: "22.x"
 
   deploy-preview:
+    needs: test-and-lint
     uses: ./.github/workflows/reusable-deploy-vercel.yml
     with:
       environment: preview
