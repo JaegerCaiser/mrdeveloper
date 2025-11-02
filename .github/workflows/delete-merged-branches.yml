@@ -1,0 +1,41 @@
+name: Delete Merged Branches
+
+# Workflow para deletar branches automaticamente após merge
+# Exclui branches release/* para manter histórico de releases
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  delete-merged-branch:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Delete merged branch
+        run: |
+          BRANCH_NAME="${{ github.event.pull_request.head.ref }}"
+          TARGET_BRANCH="${{ github.event.pull_request.base.ref }}"
+
+          echo "PR merged: $BRANCH_NAME → $TARGET_BRANCH"
+
+          # Não deletar branches release/* (importantes para histórico)
+          if [[ "$BRANCH_NAME" == release/* ]]; then
+            echo "Keeping release branch: $BRANCH_NAME"
+            exit 0
+          fi
+
+          # Não deletar branches principais
+          if [[ "$BRANCH_NAME" == "main" || "$BRANCH_NAME" == "develop" ]]; then
+            echo "Keeping main branch: $BRANCH_NAME"
+            exit 0
+          fi
+
+          # Deletar a branch usando GitHub CLI
+          echo "Deleting merged branch: $BRANCH_NAME"
+          gh api -X DELETE "repos/${{ github.repository }}/git/refs/heads/$BRANCH_NAME" || echo "Branch may have been already deleted or not found"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

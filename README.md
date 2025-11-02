@@ -5,6 +5,8 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
 [![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
+[![CI/CD](https://img.shields.io/github/actions/workflow/status/JaegerCaiser/mrdeveloper/production.yml?branch=main&style=for-the-badge&label=production)](https://github.com/JaegerCaiser/mrdeveloper/actions)
+[![CI/CD](https://img.shields.io/github/actions/workflow/status/JaegerCaiser/mrdeveloper/develop.yml?branch=develop&style=for-the-badge&label=develop)](https://github.com/JaegerCaiser/mrdeveloper/actions)
 
 **A modern, animated portfolio website showcasing Matheus Caiser's work as a Full Stack Developer**
 
@@ -90,6 +92,98 @@ http://localhost:3000
 | `pnpm preview` | Preview production build locally |
 | `pnpm lint` | Lint code |
 | `pnpm lint:fix` | Fix linting issues |
+
+## 🚀 CI/CD - GitHub Actions
+
+Este projeto utiliza **GitHub Actions** com infraestrutura completa de CI/CD seguindo o padrão **Gitflow**, proporcionando deploy automatizado e monitoramento contínuo.
+
+### 🌟 Workflows Disponíveis
+
+#### ✅ **Ambiente de Desenvolvimento** (`develop.yml`)
+- **Trigger**: Push na branch `develop`
+- **Recursos**:
+  - 🧪 Testes automatizados (`pnpm run test:ci`)
+  - 🔍 Linting (`pnpm run lint`)
+  - 🏗️ Build de produção (`pnpm run build`)
+  - 🚀 Deploy automático para Vercel (ambiente develop)
+  - 📊 Rastreamento de deployments via GitHub Deployments API
+  - 📋 Upload de logs de erro em caso de falha
+
+#### ✅ **Ambiente de Preview** (`preview.yml`)
+- **Trigger**: Pull Requests + Push em branches `release/*`
+- **Recursos**:
+  - 🧪 Testes e linting
+  - 🚀 Deploy preview no Vercel (por PR)
+  - 📋 Sistema de logs de erro inteligente
+  - 💬 Comentários automáticos nos PRs com links de preview
+
+#### ✅ **Ambiente de Produção** (`production.yml`)
+- **Trigger**: Push na branch `main`
+- **Recursos**:
+  - 🧪 Testes completos e linting
+  - 🚀 Deploy automático para produção no Vercel
+  - 🏷️ Versionamento automático com tags de release
+  - 📋 Logs detalhados de erro
+  - 🔒 Controle rigoroso de qualidade
+
+#### ✅ **Validação de Release** (`check-release-branch.yml`)
+- **Trigger**: PRs para `main`
+- **Recursos**:
+  - ✅ Validação de branches de release
+  - 📋 Logs de auditoria
+
+### ⚡ Otimizações de Performance
+
+- **Cache Inteligente**: Redução de ~25-40% no tempo de execução
+  - 📦 Cache de dependências pnpm
+  - 🏗️ Cache de build artifacts (`.vite`, `node_modules/.cache`, `.eslintcache`)
+  - 🚀 Cache do Vercel CLI
+  - 🔍 Cache do ESLint
+
+### 🔧 Configuração Necessária
+
+#### Secrets do GitHub (Repository Settings > Secrets and variables > Actions)
+```
+VERCEL_TOKEN=your_vercel_token_here
+VERCEL_ORG_ID=your_vercel_org_id_here
+VERCEL_PROJECT_ID=your_vercel_project_id_here
+```
+
+#### Como obter os tokens do Vercel:
+1. Acesse [Vercel Dashboard](https://vercel.com/dashboard)
+2. Settings > Tokens → Crie um novo token
+3. Para Org ID: Execute `vercel org ls` no terminal
+4. Para Project ID: Execute `vercel project ls` no terminal
+
+### 📊 Status dos Deploys
+
+- **🏠 Produção**: [mrdeveloper.vercel.app](https://mrdeveloper.vercel.app) (deploy automático em push para `main`)
+- **🧪 Desenvolvimento**: Deploy automático em push para `develop`
+- **👀 Preview**: Deploy automático em PRs (comentários com links)
+
+### 🔍 Monitoramento
+
+- **📍 Local**: [GitHub Repository > Actions](https://github.com/JaegerCaiser/mrdeveloper/actions)
+- **📋 Logs**: Artefatos de erro disponíveis em caso de falhas
+- **🚨 Alertas**: Notificações automáticas em falhas de CI/CD
+
+### 🎯 Fluxo de Desenvolvimento
+
+#### Desenvolvimento Normal:
+```bash
+# Criar feature branch
+git checkout -b feature/nova-funcionalidade
+
+# Desenvolver e commitar
+git add .
+git commit -m "feat: adiciona nova funcionalidade"
+
+# Push (executa CI automaticamente)
+git push origin feature/nova-funcionalidade
+
+# Criar PR para develop (deploy preview automático)
+# Após merge, criar PR para main (deploy produção)
+```
 
 ## 🎨 Customization Guide
 

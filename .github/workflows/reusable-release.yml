@@ -1,39 +1,18 @@
-name: Production Environment
-
-# Workflow para deploy do ambiente de produção
-# Executado apenas quando há push na branch main
-# Realiza testes, linting, build, deploy para Vercel (ambiente production)
-# e criação automática de tags de release
-
-env:
-  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+name: Reusable Release
 
 on:
-  push:
-    branches:
-      - main
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+      node-version:
+        required: true
+        type: string
 
 jobs:
-  test-and-lint:
-    uses: ./.github/workflows/reusable-test-and-lint.yml
-    with:
-      node-version: "22.x"
-
-  deploy-production:
-    needs: test-and-lint
-    uses: ./.github/workflows/reusable-deploy-vercel.yml
-    with:
-      environment: production
-      ref: ${{ github.ref }}
-      prebuilt: true
-      prod: true
-    secrets:
-      vercel-token: ${{ secrets.VERCEL_TOKEN }}
-      github-token: ${{ secrets.GITHUB_TOKEN }}
-
-  tag-release:
-    needs: deploy-production
+  release:
+    name: Create Git Tag and Bump Version
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -51,15 +30,14 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "22.x"
+          node-version: ${{ inputs.node-version }}
           cache: "pnpm"
 
-      - name: Get version from package.json
+      - name: Get version
         id: get_version
         run: |
-          VERSION=$(node -p "require('./package.json').version")
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo "TAG_VERSION=v$VERSION" >> $GITHUB_ENV
+          echo "VERSION=${{ inputs.version }}" >> $GITHUB_ENV
+          echo "TAG_VERSION=v${{ inputs.version }}" >> $GITHUB_ENV
 
       - name: Check if tag already exists
         id: check_tag

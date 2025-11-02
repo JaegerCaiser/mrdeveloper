@@ -1,0 +1,122 @@
+name: Reusable Vercel Deploy
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+      ref:
+        required: true
+        type: string
+      prebuilt:
+        required: false
+        type: boolean
+        default: false
+      prod:
+        required: false
+        type: boolean
+        default: false
+    secrets:
+      vercel-token:
+        required: true
+      github-token:
+        required: true
+    outputs:
+      deployment_url:
+        description: "URL do deployment no Vercel"
+        value: ${{ jobs.deploy.outputs.deployment_url }}
+
+jobs:
+  deploy:
+    name: Deploy to Vercel
+    runs-on: ubuntu-latest
+    outputs:
+      deployment_url: ${{ steps.deploy_step.outputs.deployment_url }}
+    environment:
+      name: ${{ inputs.environment }}
+      url: ${{ steps.deploy_step.outputs.deployment_url }}
+    permissions:
+      deployments: write
+      contents: read
+
+    steps:
+      - name: Create GitHub Deployment
+        id: deployment
+        uses: bobheadxi/deployments@v1.5.0
+        with:
+          step: start
+          token: ${{ secrets.github-token }}
+          env: ${{ inputs.environment }}
+          ref: ${{ inputs.ref }}
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Pull Vercel Environment Information
+        run: |
+          if [ "${{ inputs.environment }}" = "develop" ]; then
+            vercel pull --yes --token=${{ secrets.vercel-token }}
+          else
+            vercel pull --yes --environment=${{ inputs.environment }} --token=${{ secrets.vercel-token }}
+          fi
+
+      - name: Ensure Vercel cache directory exists
+        run: mkdir -p ~/.vercel && touch ~/.vercel/.gitkeep
+
+      - name: Cache Vercel CLI
+        uses: actions/cache@v4
+        with:
+          path: ~/.vercel
+          key: vercel-cli-${{ runner.os }}
+          restore-keys: |
+            vercel-cli-${{ runner.os }}
+
+      - name: Build Project Artifacts
+        run: vercel build ${{ inputs.prod && '--prod' || '' }} --token=${{ secrets.vercel-token }}
+
+      - name: Deploy to Vercel
+        id: deploy_step
+        run: |
+          DEPLOY_COMMAND="vercel deploy ${{ inputs.prebuilt && '--prebuilt' || '' }} ${{ inputs.prod && '--prod' || '' }} --token=${{ secrets.vercel-token }}"
+
+          if DEPLOY_URL=$($DEPLOY_COMMAND); then
+            echo "Deployment successful."
+            echo "deployment_url=$DEPLOY_URL" >> $GITHUB_OUTPUT
+          else
+            DEPLOY_STATUS=$?
+            echo "Error: Vercel deploy failed with exit code $DEPLOY_STATUS."
+            exit $DEPLOY_STATUS
+          fi
+
+      - name: Upload debug logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: deploy-${{ inputs.environment }}-debug-logs-${{ github.run_number }}
+          path: |
+            ~/.vercel/
+            /home/runner/.vercel/
+            ~/.npm/_logs/
+            ~/.pnpm-debug.log
+            ~/.pnpm/
+            /home/runner/.pnpm-debug.log
+            /home/runner/.pnpm/
+            /tmp/vercel-*
+            /tmp/node-*
+            /tmp/npm-*
+            /tmp/pnpm-*
+
+      - name: Update GitHub Deployment Status
+        if: always()
+        uses: bobheadxi/deployments@v1.5.0
+        with:
+          step: finish
+          token: ${{ secrets.github-token }}
+          env: ${{ inputs.environment }}
+          status: ${{ job.status }}
+          deployment_id: ${{ steps.deployment.outputs.deployment_id }}
+          env_url: ${{ steps.deploy_step.outputs.deployment_url }}
