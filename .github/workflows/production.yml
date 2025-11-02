@@ -3,7 +3,7 @@ name: Production Environment
 # Workflow para deploy do ambiente de produção
 # Executado apenas quando há push na branch main
 # Realiza testes, linting, build, deploy para Vercel (ambiente production)
-# e criação automática de tags de release
+# e criação automática de tags de release usando semantic-release
 
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -15,96 +15,124 @@ on:
       - main
 
 jobs:
-  validate-production:
-    name: Validate Production Deploy
+  test-and-lint:
+    name: Test & Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node.js 22.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run linting
+        run: pnpm run lint
+
+      - name: Run tests
+        run: pnpm run test:ci
+
+  deploy-production:
+    name: Deploy to Vercel Production
+    needs: test-and-lint
+    runs-on: ubuntu-latest
+    environment:
+      name: Production
+      url: https://mrdeveloper.vercel.app
+    permissions:
+      deployments: write
+      contents: read
+    steps:
+      - name: Create GitHub Deployment
+        id: deployment
+        uses: bobheadxi/deployments@v1.5.0
+        with:
+          step: start
+          token: ${{ secrets.GITHUB_TOKEN }}
+          env: production
+          ref: ${{ github.sha }}
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Pull Vercel Environment Information
+        run: vercel pull --yes --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build Project Artifacts
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }} --prod
+
+      - name: Deploy to Vercel
+        id: deploy_step
+        run: |
+          DEPLOY_COMMAND="vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} --prod"
+          if DEPLOY_URL=$($DEPLOY_COMMAND); then
+            echo "deployment_url=$DEPLOY_URL" >> $GITHUB_OUTPUT
+          else
+            exit 1
+          fi
+
+      - name: Update GitHub Deployment Status
+        if: always()
+        uses: bobheadxi/deployments@v1.5.0
+        with:
+          step: finish
+          token: ${{ secrets.GITHUB_TOKEN }}
+          env: production
+          status: ${{ job.status }}
+          deployment_id: ${{ steps.deployment.outputs.deployment_id }}
+          env_url: https://mrdeveloper.vercel.app
+
+  run-semantic-release:
+    name: Run Semantic Release
+    needs: deploy-production
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
+      issues: write
+      pull-requests: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ secrets.GH_PAT_FOR_RELEASE }}
 
-      - name: Setup Node.js
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node.js 22.x
         uses: actions/setup-node@v4
         with:
           node-version: "22.x"
+          cache: "pnpm"
 
-      - name: Validate package.json version
-        run: |
-          VERSION=$(node -p "require('./package.json').version")
-          echo "Current version: $VERSION"
-          
-          # Verificar formato semântico de versão
-          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "::error::Invalid version format in package.json: $VERSION"
-            echo "::error::Must follow semantic versioning (X.Y.Z)"
-            exit 1
-          fi
-          
-          echo "✅ Version format is valid: $VERSION"
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
-      - name: Check for version conflicts
-        run: |
-          VERSION=$(node -p "require('./package.json').version")
-          
-          # Verificar se a tag já existe
-          git fetch --tags
-          if git rev-parse "refs/tags/v$VERSION" >/dev/null 2>&1; then
-            echo "::warning::Tag v$VERSION already exists. This may indicate a version bump is needed."
-            echo "::warning::Consider incrementing the version in package.json before deploying."
-          else
-            echo "✅ No tag conflict detected for v$VERSION"
-          fi
+      - name: Install semantic-release
+        run: pnpm add -D semantic-release @semantic-release/changelog @semantic-release/git
 
-  test-and-lint:
-    needs: validate-production
-    uses: ./.github/workflows/reusable-test-and-lint.yml
-    with:
-      node-version: "22.x"
+      - name: Run Semantic Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAT_FOR_RELEASE }}
+          GIT_AUTHOR_NAME: github-actions[bot]
+          GIT_AUTHOR_EMAIL: github-actions[bot]@users.noreply.github.com
+          GIT_COMMITTER_NAME: github-actions[bot]
+          GIT_COMMITTER_EMAIL: github-actions[bot]@users.noreply.github.com
+        run: pnpm exec semantic-release
 
-  deploy-production:
-    needs: test-and-lint
-    uses: ./.github/workflows/reusable-deploy-vercel.yml
-    with:
-      environment: Production
-      ref: ${{ github.ref }}
-      prebuilt: true
-      prod: true
-    secrets:
-      vercel-token: ${{ secrets.VERCEL_TOKEN }}
-      github-token: ${{ secrets.GITHUB_TOKEN }}
-
-  get-version:
-    needs: validate-production
-    runs-on: ubuntu-latest
-    outputs:
-      version: ${{ steps.get_version.outputs.version }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22.x"
-
-      - name: Get version from package.json
-        id: get_version
-        run: |
-          VERSION=$(node -p "require('./package.json').version")
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "Version detected: $VERSION"
-
-  tag-release:
-    needs: [deploy-production, get-version]
-    uses: ./.github/workflows/reusable-create-tag.yml
-    with:
-      tag-type: release
-      version: ${{ needs.get-version.outputs.version }}
-      commit-sha: ${{ github.sha }}
-      create-version-commit: false
-    secrets: inherit
-    permissions:
-      contents: write
