@@ -58,7 +58,7 @@ jobs:
 
       - name: Pull Vercel Environment Information
         run: |
-          if [ "${{ inputs.environment }}" = "develop" ]; then
+          if [ "${{ inputs.environment }}" = "Develop" ]; then
             vercel pull --yes --token=${{ secrets.vercel-token }}
           else
             vercel pull --yes --environment=${{ inputs.environment }} --token=${{ secrets.vercel-token }}
