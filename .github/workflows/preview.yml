@@ -178,9 +178,6 @@ jobs:
           node-version: "22.x"
           cache: "pnpm"
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
       - name: Install semantic-release
         run: pnpm add -D semantic-release @semantic-release/changelog @semantic-release/git
 
