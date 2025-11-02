@@ -15,7 +15,51 @@ on:
       - main
 
 jobs:
+  validate-production:
+    name: Validate Production Deploy
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+
+      - name: Validate package.json version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "Current version: $VERSION"
+          
+          # Verificar formato semântico de versão
+          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Invalid version format in package.json: $VERSION"
+            echo "::error::Must follow semantic versioning (X.Y.Z)"
+            exit 1
+          fi
+          
+          echo "✅ Version format is valid: $VERSION"
+
+      - name: Check for version conflicts
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          
+          # Verificar se a tag já existe
+          git fetch --tags
+          if git rev-parse "refs/tags/v$VERSION" >/dev/null 2>&1; then
+            echo "::warning::Tag v$VERSION already exists. This may indicate a version bump is needed."
+            echo "::warning::Consider incrementing the version in package.json before deploying."
+          else
+            echo "✅ No tag conflict detected for v$VERSION"
+          fi
+
   test-and-lint:
+    needs: validate-production
     uses: ./.github/workflows/reusable-test-and-lint.yml
     with:
       node-version: "22.x"
@@ -32,55 +76,35 @@ jobs:
       vercel-token: ${{ secrets.VERCEL_TOKEN }}
       github-token: ${{ secrets.GITHUB_TOKEN }}
 
-  tag-release:
-    needs: deploy-production
+  get-version:
+    needs: validate-production
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
+    outputs:
+      version: ${{ steps.get_version.outputs.version }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "22.x"
-          cache: "pnpm"
 
       - name: Get version from package.json
         id: get_version
         run: |
           VERSION=$(node -p "require('./package.json').version")
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo "TAG_VERSION=v$VERSION" >> $GITHUB_ENV
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Version detected: $VERSION"
 
-      - name: Check if tag already exists
-        id: check_tag
-        run: |
-          git fetch --tags
-          if git rev-parse "refs/tags/${{ env.TAG_VERSION }}" >/dev/null 2>&1; then
-            echo "Tag ${{ env.TAG_VERSION }} already exists. Skipping release."
-            echo "SKIP_ALL=true" >> $GITHUB_OUTPUT
-          else
-            echo "Tag ${{ env.TAG_VERSION }} does not exist. Proceeding with release."
-            echo "SKIP_ALL=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Update version and create tag
-        if: steps.check_tag.outputs.SKIP_ALL == 'false'
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          pnpm version ${{ env.VERSION }} --no-git-tag-version
-          git add package.json pnpm-lock.yaml
-          git commit -m "chore: Bump version to ${{ env.VERSION }}"
-          git tag ${{ env.TAG_VERSION }} -m "Release ${{ env.TAG_VERSION }}"
-          git push
-          git push origin ${{ env.TAG_VERSION }}
+  tag-release:
+    needs: [deploy-production, get-version]
+    uses: ./.github/workflows/reusable-create-tag.yml
+    with:
+      tag-type: release
+      version: ${{ needs.get-version.outputs.version }}
+      commit-sha: ${{ github.sha }}
+      create-version-commit: false
+    secrets: inherit
+    permissions:
+      contents: write

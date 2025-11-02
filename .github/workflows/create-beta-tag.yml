@@ -1,0 +1,117 @@
+name: Create Beta Tag
+
+# Workflow manual para criar tags beta em release branches
+# Executado manualmente via workflow_dispatch
+# Realiza testes, deploy e cria tag beta automática
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "Release branch (e.g., release/1.1.0)"
+        required: true
+        type: string
+
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+jobs:
+  validate-branch:
+    name: Validate Branch
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      has_pr: ${{ steps.check_pr.outputs.has_pr }}
+      version: ${{ steps.extract_version.outputs.version }}
+      commit_sha: ${{ steps.get_commit.outputs.commit_sha }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+          fetch-depth: 0
+
+      - name: Check if PR exists for this branch
+        id: check_pr
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH_NAME="${{ inputs.branch }}"
+          PR_COUNT=$(gh pr list --head "$BRANCH_NAME" --state open --json number --jq 'length')
+          if [ "$PR_COUNT" -gt 0 ]; then
+            echo "::warning::PR exists for branch $BRANCH_NAME. Beta tag creation may interfere with PR."
+            echo "has_pr=true" >> $GITHUB_OUTPUT
+          else
+            echo "No open PR found for branch $BRANCH_NAME. Safe to proceed."
+            echo "has_pr=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Extract version from branch name
+        id: extract_version
+        run: |
+          BRANCH_NAME="${{ inputs.branch }}"
+          VERSION=$(echo "$BRANCH_NAME" | sed 's|^release/||')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Version extracted: $VERSION"
+
+      - name: Get commit SHA
+        id: get_commit
+        run: |
+          COMMIT_SHA=$(git rev-parse HEAD)
+          echo "commit_sha=$COMMIT_SHA" >> $GITHUB_OUTPUT
+          echo "Commit SHA: $COMMIT_SHA"
+
+  test-and-lint:
+    needs: validate-branch
+    uses: ./.github/workflows/reusable-test-and-lint.yml
+    with:
+      node-version: "22.x"
+
+  deploy-preview:
+    needs: [validate-branch, test-and-lint]
+    uses: ./.github/workflows/reusable-deploy-vercel.yml
+    with:
+      environment: preview
+      ref: ${{ needs.validate-branch.outputs.commit_sha }}
+      prebuilt: true
+    secrets:
+      vercel-token: ${{ secrets.VERCEL_TOKEN }}
+      github-token: ${{ secrets.GITHUB_TOKEN }}
+
+  create-beta-tag:
+    needs: [validate-branch, deploy-preview]
+    uses: ./.github/workflows/reusable-create-tag.yml
+    with:
+      tag-type: beta
+      version: ${{ needs.validate-branch.outputs.version }}
+      commit-sha: ${{ needs.validate-branch.outputs.commit_sha }}
+      create-version-commit: false
+    secrets: inherit
+    permissions:
+      contents: write
+
+  summary:
+    name: Deployment Summary
+    needs: [validate-branch, deploy-preview, create-beta-tag]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Summary
+        run: |
+          echo "## 🚀 Beta Tag Creation Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch:** \`${{ inputs.branch }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** \`${{ needs.validate-branch.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** \`${{ needs.validate-branch.outputs.commit_sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Results:" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Tests & Lint: ${{ needs.test-and-lint.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Deploy: ${{ needs.deploy-preview.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Tag Creation: ${{ needs.create-beta-tag.result }}" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ needs.validate-branch.outputs.has_pr }}" = "true" ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "⚠️ **Warning:** An open PR exists for this branch." >> $GITHUB_STEP_SUMMARY
+          fi

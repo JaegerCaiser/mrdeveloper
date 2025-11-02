@@ -1,0 +1,157 @@
+name: Reusable Create Tag
+
+# Workflow reutilizável para criação de tags
+# Consolidação de lógica para evitar duplicação
+# Suporta tags de release (production) e beta (staging)
+
+on:
+  workflow_call:
+    inputs:
+      tag-type:
+        description: "Tipo da tag: 'release' ou 'beta'"
+        required: true
+        type: string
+      version:
+        description: "Versão a ser tagueada (ex: 1.1.0)"
+        required: true
+        type: string
+      commit-sha:
+        description: "SHA do commit a ser tagueado"
+        required: true
+        type: string
+      create-version-commit:
+        description: "Se deve criar commit de version bump"
+        required: false
+        type: boolean
+        default: false
+    outputs:
+      tag-name:
+        description: "Nome da tag criada"
+        value: ${{ jobs.create-tag.outputs.tag_name }}
+      tag-created:
+        description: "Se a tag foi criada com sucesso"
+        value: ${{ jobs.create-tag.outputs.tag_created }}
+
+jobs:
+  create-tag:
+    name: Create Git Tag
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      tag_name: ${{ steps.create_tag.outputs.tag_name }}
+      tag_created: ${{ steps.create_tag.outputs.tag_created }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.commit-sha }}
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        if: inputs.create-version-commit
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        if: inputs.create-version-commit
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+          cache: "pnpm"
+
+      - name: Validate inputs
+        run: |
+          VERSION="${{ inputs.version }}"
+          TAG_TYPE="${{ inputs.tag-type }}"
+
+          # Validar tipo de tag
+          if [[ "$TAG_TYPE" != "release" && "$TAG_TYPE" != "beta" ]]; then
+            echo "::error::Invalid tag type: $TAG_TYPE. Must be 'release' or 'beta'."
+            exit 1
+          fi
+
+          # Validar formato de versão (básico)
+          if [[ -z "$VERSION" ]]; then
+            echo "::error::Version cannot be empty."
+            exit 1
+          fi
+
+          echo "✅ Input validation passed"
+
+      - name: Prepare tag information
+        id: prepare_tag
+        run: |
+          VERSION="${{ inputs.version }}"
+          TAG_TYPE="${{ inputs.tag-type }}"
+
+          # Remover prefixo release/ se existir
+          VERSION=$(echo "$VERSION" | sed 's|^release/||')
+
+          if [ "$TAG_TYPE" = "beta" ]; then
+            TAG_NAME="v${VERSION}-beta.${{ github.run_id }}"
+            TAG_MESSAGE="Beta Release ${TAG_NAME}"
+          else
+            TAG_NAME="v${VERSION}"
+            TAG_MESSAGE="Release ${TAG_NAME}"
+          fi
+
+          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
+          echo "TAG_MESSAGE=$TAG_MESSAGE" >> $GITHUB_ENV
+          echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
+          echo "📦 Prepared tag: $TAG_NAME"
+
+      - name: Check if tag already exists
+        id: check_tag
+        run: |
+          git fetch --tags
+          if git rev-parse "refs/tags/${{ env.TAG_NAME }}" >/dev/null 2>&1; then
+            echo "::warning::Tag ${{ env.TAG_NAME }} already exists. Skipping tag creation."
+            echo "tag_exists=true" >> $GITHUB_OUTPUT
+            echo "tag_created=false" >> $GITHUB_OUTPUT
+          else
+            echo "Tag ${{ env.TAG_NAME }} does not exist. Proceeding with tag creation."
+            echo "tag_exists=false" >> $GITHUB_OUTPUT
+            echo "tag_created=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Update package.json version
+        if: inputs.create-version-commit && steps.check_tag.outputs.tag_exists == 'false'
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Extrair apenas a versão sem o prefixo beta
+          VERSION=$(echo "${{ env.TAG_NAME }}" | sed 's/^v//')
+
+          pnpm version "$VERSION" --no-git-tag-version
+          git add package.json pnpm-lock.yaml
+          git commit -m "chore: bump version to $VERSION [skip ci]"
+          git push
+
+      - name: Create Git tag
+        id: create_tag
+        if: steps.check_tag.outputs.tag_exists == 'false'
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          git tag "${{ env.TAG_NAME }}" -m "${{ env.TAG_MESSAGE }}"
+          git push origin "${{ env.TAG_NAME }}"
+
+          echo "✅ Tag ${{ env.TAG_NAME }} created successfully!"
+
+      - name: Summary
+        if: always()
+        run: |
+          if [ "${{ steps.check_tag.outputs.tag_exists }}" = "true" ]; then
+            echo "ℹ️ Tag ${{ env.TAG_NAME }} already exists. No action taken." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ Tag ${{ env.TAG_NAME }} created successfully!" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Tag Details:**" >> $GITHUB_STEP_SUMMARY
+            echo "- Name: \`${{ env.TAG_NAME }}\`" >> $GITHUB_STEP_SUMMARY
+            echo "- Type: \`${{ inputs.tag-type }}\`" >> $GITHUB_STEP_SUMMARY
+            echo "- Commit: \`${{ inputs.commit-sha }}\`" >> $GITHUB_STEP_SUMMARY
+          fi
