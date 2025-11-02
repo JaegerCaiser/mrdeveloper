@@ -74,7 +74,7 @@ jobs:
     needs: [validate-branch, test-and-lint]
     uses: ./.github/workflows/reusable-deploy-vercel.yml
     with:
-      environment: preview
+      environment: Preview
       ref: ${{ needs.validate-branch.outputs.commit_sha }}
       prebuilt: true
     secrets:

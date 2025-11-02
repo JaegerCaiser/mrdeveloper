@@ -68,7 +68,7 @@ jobs:
     needs: test-and-lint
     uses: ./.github/workflows/reusable-deploy-vercel.yml
     with:
-      environment: production
+      environment: Production
       ref: ${{ github.ref }}
       prebuilt: true
       prod: true
