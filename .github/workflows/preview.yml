@@ -14,6 +14,9 @@ env:
 on:
   pull_request:
     types: [opened, synchronize, reopened]
+  push:
+    branches:
+      - release/**
   workflow_dispatch:
 
 jobs:
@@ -81,5 +84,61 @@ jobs:
             ---
             *Commit: `${{ github.event.pull_request.head.sha }}`*
           edit-mode: replace
+
+  create-beta-tag:
+    needs: deploy-preview
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/release/')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+          cache: "pnpm"
+
+      - name: Extract version from branch name
+        id: extract_version
+        run: |
+          BRANCH_NAME="${{ github.ref }}"
+          VERSION=$(echo "$BRANCH_NAME" | sed 's|refs/heads/release/||')
+          BETA_VERSION="${VERSION}-beta.${{ github.run_id }}"
+          echo "VERSION=$BETA_VERSION" >> $GITHUB_ENV
+          echo "TAG_VERSION=v$BETA_VERSION" >> $GITHUB_ENV
+
+      - name: Check if tag already exists
+        id: check_tag
+        run: |
+          git fetch --tags
+          if git rev-parse "refs/tags/${{ env.TAG_VERSION }}" >/dev/null 2>&1; then
+            echo "Tag ${{ env.TAG_VERSION }} already exists. Skipping release."
+            echo "SKIP_ALL=true" >> $GITHUB_OUTPUT
+          else
+            echo "Tag ${{ env.TAG_VERSION }} does not exist. Proceeding with release."
+            echo "SKIP_ALL=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Update version and create beta tag
+        if: steps.check_tag.outputs.SKIP_ALL == 'false'
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          pnpm version ${{ env.VERSION }} --no-git-tag-version
+          git add package.json pnpm-lock.yaml
+          git commit -m "chore: Bump version to ${{ env.VERSION }}"
+          git tag ${{ env.TAG_VERSION }} -m "Beta Release ${{ env.TAG_VERSION }}"
+          git push
+          git push origin ${{ env.TAG_VERSION }}
 
 
