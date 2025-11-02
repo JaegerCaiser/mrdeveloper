@@ -116,6 +116,8 @@ Este projeto utiliza **GitHub Actions** com infraestrutura completa de CI/CD seg
   - 🚀 Deploy preview no Vercel (por PR)
   - 📋 Sistema de logs de erro inteligente
   - 💬 Comentários automáticos nos PRs com links de preview
+  - 🛡️ **Dummy Pass Strategy**: Prevenção de loops infinitos em workflows de release
+  - ⚡ Execução condicional baseada em mensagens de commit automatizadas
 
 #### ✅ **Ambiente de Produção** (`production.yml`)
 - **Trigger**: Push na branch `main`
@@ -184,6 +186,31 @@ git push origin feature/nova-funcionalidade
 # Criar PR para develop (deploy preview automático)
 # Após merge, criar PR para main (deploy produção)
 ```
+
+## 🚀 Recent Improvements
+
+### v1.1.0 - Dummy Pass Strategy & Documentation Enhancement
+
+#### 🛡️ **Dummy Pass Strategy**
+- **Problema Resolvido**: Loop infinito em workflows de beta-release causado por commits automatizados
+- **Solução**: Estratégia Dummy Pass com execução condicional baseada em mensagens de commit
+- **Implementação**: Workflows inline com detecção de `contains(github.event.head_commit.message, 'beta-release')`
+- **Resultado**: Prevenção de recursão infinita mantendo funcionalidade completa de CI/CD
+
+#### 📚 **Documentação Aprimorada**
+- **Suite Completa**: 4 novos arquivos de documentação em `.github/`
+  - `README.md` - Índice central e guia de navegação
+  - `WORKFLOW.md` - Documentação completa de CI/CD
+  - `DUMMY_PASS_STRATEGY.md` - Explicação técnica da estratégia
+  - `DUMMY_PASS_IMPLEMENTATION.md` - Checklist de implementação
+- **Instruções do Copilot**: Melhoria nas diretrizes de execução de comandos GitHub CLI
+- **Clareza**: Distinção clara entre comandos estruturados vs. interativos
+
+#### 🔧 **Workflows Otimizados**
+- **Execução Condicional**: Passos reais só executam para commits manuais
+- **Dummy Steps**: ~5 segundos de execução para commits automatizados
+- **Loop Prevention**: Proteção adicional contra recursão em jobs de tagging
+- **Manutenibilidade**: Estrutura inline para controle granular de condições
 
 ## 🎨 Customization Guide
 
@@ -283,7 +310,7 @@ src/
 └── main.tsx
 ```
 
-## �️ Architecture
+## 🏗️ Architecture
 
 This project follows **Clean Architecture** principles with clear separation of concerns:
 
@@ -301,6 +328,17 @@ This project follows **Clean Architecture** principles with clear separation of 
 - **UI Only**: Pure presentation components focused on rendering
 - **Props Interface**: Clear data contracts with TypeScript interfaces
 - **Separation**: No business logic, only JSX and styling
+
+### CI/CD Architecture (`.github/workflows/`)
+- **Dummy Pass Strategy**: Intelligent workflow execution preventing infinite loops
+- **Conditional Logic**: Step-level control based on commit message detection
+- **Branch Protection**: Status checks integration with automated beta-release handling
+- **Documentation Suite**: Comprehensive CI/CD documentation in `.github/` directory
+
+### Development Workflow
+- **Gitflow**: Feature branches → develop → release → main
+- **Automated Testing**: Comprehensive CI/CD with preview and production environments
+- **Quality Gates**: Linting, building, and deployment validation at each stage
 
 ### Vercel
 ```bash
@@ -354,7 +392,23 @@ docker run -p 3000:3000 portfolio
 docker-compose up
 ```
 
-## � License
+## 📋 Changelog
+
+### v1.1.0 (2025-11-02)
+- 🛡️ **Dummy Pass Strategy**: Implemented to prevent infinite loops in beta-release workflows
+- 📚 **Documentation Suite**: Added comprehensive CI/CD documentation (4 new files in `.github/`)
+- 🔧 **Workflow Optimization**: Converted to inline jobs with conditional execution
+- 📖 **Copilot Instructions**: Improved GitHub CLI command execution guidelines
+- ⚡ **Performance**: Enhanced workflow execution with intelligent caching
+
+### v1.0.0 (2024-10-XX)
+- 🚀 Initial release with complete portfolio functionality
+- 🎨 Modern design with animated background
+- 📧 Contact form with service layer integration
+- 🏗️ Clean architecture implementation
+- ⚡ Vite build system with TypeScript
+
+## 📄 License
 
 MIT License - feel free to use this template for your own portfolio!
 
