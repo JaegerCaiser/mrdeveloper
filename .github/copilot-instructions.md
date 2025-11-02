@@ -43,9 +43,18 @@ Este arquivo serve como guia de referência para futuras interações com o GitH
 
 **Sempre execute comandos `gh` de modo que o output seja exibido diretamente no terminal.**
 
-- Se necessário, redirecione o output para um arquivo temporário (ex: `gh pr list ... > prs.json`)
-- Após uso, remova o arquivo temporário criado para evitar poluição do repositório
-- Não utilize visualizadores interativos ou pagers que impeçam a captura direta do output
+#### 📊 Para comandos que retornam dados estruturados:
+- **SEMPRE** redirecione para arquivo temporário
+- Use: `gh command ... > temp.json && cat temp.json && rm temp.json`
+- Exemplos: `gh pr list`, `gh pr view --json`, `gh issue list`, `gh repo list`
+
+#### 💬 Para comandos interativos ou de ação:
+- Execute diretamente no terminal
+- Exemplos: `gh pr create`, `gh pr edit`, `gh pr merge`, `gh repo clone`
+
+#### 🧹 Limpeza:
+- **SEMPRE** remova arquivos temporários após uso
+- **NUNCA** use visualizadores interativos ou pagers
 
 **Exemplo de fluxo recomendado:**
 
@@ -279,5 +288,5 @@ tipo: descrição clara e objetiva
 
 ---
 
-_Atualizado em: Novembro 2025_
+_Atualizado em: 2 de novembro de 2025_
 _Próxima revisão: Quando necessário_
