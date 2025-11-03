@@ -1,0 +1,78 @@
+name: Sync Main back to Develop
+
+# Dispara este workflow QUANDO o workflow "Production Environment"
+# (o 'name:' do seu production.yml) terminar com sucesso
+on:
+  workflow_run:
+    workflows: ["Production Environment"] #
+    types:
+      - completed
+
+jobs:
+  create-sync-pr:
+    # Só roda se o workflow de produção foi um sucesso
+    if: github.event.workflow_run.conclusion == 'success'
+
+    runs-on: ubuntu-latest
+    permissions:
+      # Essencial: permissão para criar branchs e PRs
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout develop branch
+        uses: actions/checkout@v4
+        with:
+          ref: develop
+
+      - name: Configure Git User
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "bot@users.noreply.github.com"
+
+      - name: Merge main into a temp branch and push
+        id: merge
+        env:
+          # O PAT é necessário para o PUSH, para que o PR
+          # que vamos criar dispare os status checks (o preview.yml)
+          GH_PAT: ${{ secrets.GH_PAT_FOR_RELEASE }}
+        run: |
+          git fetch origin main
+
+          # Otimização: Verifica se 'main' já está no 'develop'
+          if git merge-base --is-ancestor origin/main develop; then
+            echo "main is already merged into develop. No sync needed."
+            echo "sync_needed=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          echo "main has new commits. Creating sync PR..."
+          echo "sync_needed=true" >> $GITHUB_OUTPUT
+
+          BRANCH_NAME="sync/main-to-develop-${{ github.run_id }}"
+          echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+
+          git checkout -b $BRANCH_NAME
+          # Faz o merge do 'main' (com o commit do semantic-release)
+          git merge origin/main --no-edit -m "chore: sync main back to develop"
+
+          # Push usando o PAT
+          git push https://github-actions[bot]:${GH_PAT}@github.com/${{ github.repository }}.git HEAD:$BRANCH_NAME
+
+      - name: Create Pull Request
+        if: steps.merge.outputs.sync_needed == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          # O 'create-pull-request' usa o GITHUB_TOKEN padrão
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ steps.merge.outputs.branch_name }}
+          base: develop #
+          title: "🔄 [Auto-Sync] Merge main back into develop"
+          body: |
+            This PR automatically syncs the latest production release from `main` back into `develop`.
+
+            Includes:
+            - Version bump from `semantic-release`
+            - Updated `CHANGELOG.md`
+            - Any hotfixes that were merged to `main`
+          delete-branch: true # Deleta o branch 'sync/...' após o merge
