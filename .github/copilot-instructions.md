@@ -136,6 +136,47 @@ git push -u origin feature/nome-da-feature
 - Comparativo com a versão anterior em `main`
 - Notas de migração se necessário
 
+### ✅ Comando "Criar uma Branch"
+
+**Quando o usuário disser "criar uma branch" ou similar, execute o fluxo de Gitflow para criação de branches:**
+
+1. **Verificar mudanças atuais**: Analisar todas as mudanças não commitadas no working directory
+2. **Comparar com develop**: Fazer `git diff develop` para ver todas as diferenças
+3. **Categorizar mudanças**: Identificar se são features, fixes, docs, etc. baseado nos arquivos modificados
+4. **Criar nome da branch**: Usar padrão `feature/nome-descritivo` baseado no conventional commits
+5. **Criar e fazer checkout**: `git checkout -b feature/nome-descritivo`
+6. **Adicionar mudanças**: `git add .` para staging
+7. **Commit inicial**: `git commit -m "tipo: descrição clara"` seguindo conventional commits
+8. **Push da branch**: `git push -u origin feature/nome-descritivo`
+9. **Criar PR**: Usar `gh pr create` para abrir Pull Request para `develop`
+
+**IMPORTANTE: Análise de Mudanças**
+- ✅ **Sempre** compare com `develop` antes de criar a branch
+- ✅ **Categorize** as mudanças pelos tipos de conventional commits:
+  - `feat:` para novas funcionalidades
+  - `fix:` para correções de bugs
+  - `docs:` para documentação
+  - `refactor:` para refatoração de código
+  - `style:` para formatação/código
+  - `test:` para testes
+  - `chore:` para manutenção
+- ✅ **Nomeie** a branch baseada no propósito principal das mudanças
+- ✅ **Liste** todos os arquivos modificados na descrição do PR
+
+**Exemplos de Nomenclatura:**
+- `feature/user-authentication` (nova funcionalidade de autenticação)
+- `fix/payment-processing` (correção no processamento de pagamentos)
+- `docs/api-documentation` (documentação da API)
+- `refactor/database-layer` (refatoração da camada de banco)
+- `test/integration-tests` (testes de integração)
+
+**Descrição do PR deve incluir:**
+- Resumo das mudanças implementadas
+- Arquivos modificados e impacto
+- Testes realizados (se aplicável)
+- Screenshots ou demos (se aplicável)
+- Notas de migração (se aplicável)
+
 ### 🛡️ Branch Protection
 
 **A branch `develop` está protegida contra commits diretos!**
