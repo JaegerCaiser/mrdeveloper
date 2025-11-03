@@ -157,8 +157,8 @@ Este projeto utiliza **GitHub Actions** com infraestrutura completa de CI/CD seg
   - 🚀 Deploy preview no Vercel (por PR)
   - 📋 Sistema de logs de erro inteligente
   - 💬 Comentários automáticos nos PRs com links de preview
-  - 🛡️ **Dummy Pass Strategy**: Prevenção de loops infinitos em workflows de release
-  - ⚡ Execução condicional baseada em mensagens de commit automatizadas
+  - 🛡️ **Semantic Release**: Automated versioning and changelog generation
+  - ⚡ Intelligent commit analysis for PATCH/MINOR/MAJOR version bumps
 
 #### ✅ **Ambiente de Produção** (`production.yml`)
 
@@ -259,22 +259,20 @@ git push origin feature/nova-funcionalidade
 - **Implementação**: Consistent pnpm@10.20.0 usage via packageManager field in all environments
 - **Resultado**: Eliminated version conflicts and improved CI/CD reliability
 
-#### 🛡️ **Dummy Pass Strategy** (v1.0.x)
+#### � **Semantic Release Migration** (v1.1.x)
 
-- **Problema Resolvido**: Infinite loops in beta-release workflows from automated commits
-- **Solução**: Conditional execution based on commit message detection
-- **Implementação**: Inline workflows with `contains(github.event.head_commit.message, 'beta-release')` checks
-- **Resultado**: Loop prevention while maintaining full CI/CD functionality
+- **Problema Resolvido**: Complex manual versioning and changelog management
+- **Solução**: Automated semantic versioning based on conventional commits
+- **Implementação**: Industry-standard semantic-release with GitHub integration
+- **Resultado**: Automatic PATCH/MINOR/MAJOR versioning with generated changelogs
 
-#### 📚 **Comprehensive Documentation Suite**
+#### 📚 **Streamlined Documentation**
 
-- **4 New Documentation Files** in `.github/` directory:
-  - [`README.md`](../.github/README.md) - Central index and navigation guide
+- **2 Core Documentation Files** in `.github/` directory:
   - [`WORKFLOW.md`](../.github/WORKFLOW.md) - Complete CI/CD documentation
-  - [`DUMMY_PASS_STRATEGY.md`](../.github/DUMMY_PASS_STRATEGY.md) - Technical strategy explanation
-  - [`DUMMY_PASS_IMPLEMENTATION.md`](../.github/DUMMY_PASS_IMPLEMENTATION.md) - Implementation checklist
+  - [`copilot-instructions.md`](../.github/copilot-instructions.md) - AI assistant guidelines
 - **Enhanced Copilot Instructions**: Improved GitHub CLI command execution guidelines
-- **Clear Distinction**: Structured vs interactive command handling
+- **Clean Structure**: Removed redundant and outdated documentation files
 
 <a id="customization-guide"></a>
 
@@ -431,10 +429,10 @@ This project follows **Clean Architecture** principles with clear separation of 
 
 ### CI/CD Architecture (`.github/workflows/`)
 
-- **Dummy Pass Strategy**: Intelligent workflow execution preventing infinite loops
-- **Conditional Logic**: Step-level control based on commit message detection
-- **Branch Protection**: Status checks integration with automated beta-release handling
-- **Documentation Suite**: Comprehensive CI/CD documentation in `.github/` directory
+- **Semantic Release**: Automated versioning and changelog generation
+- **Conventional Commits**: Intelligent version bumping based on commit types
+- **Branch Protection**: Status checks integration with automated release handling
+- **Documentation Suite**: Streamlined CI/CD documentation in `.github/` directory
 
 ### Development Workflow
 
@@ -515,8 +513,8 @@ docker-compose up
 - 🔧 **CI/CD Optimization**: Resolved ERR_PNPM_BAD_PM_VERSION conflicts across all workflows
 - 📦 **Package Manager**: Added `packageManager: "pnpm@10.20.0"` field for consistent versioning
 - 🚀 **Vercel Performance**: Eliminated npx overhead, reducing build times by 9-13 seconds
-- 🛡️ **Dummy Pass Strategy**: Prevents infinite loops in beta-release workflows
-- 📚 **Documentation Suite**: Comprehensive CI/CD documentation (4 new files in `.github/`)
+- 🛡️ **Semantic Release Migration**: Automated versioning replacing manual release process
+- 📚 **Documentation Cleanup**: Streamlined documentation (removed 5 outdated files)
 - 🌐 **Custom Domain Setup**: Added homepage field and CNAME file for GitHub Pages custom domain support
 - 📖 **README Updates**: Updated project structure, features, and deployment instructions
 
