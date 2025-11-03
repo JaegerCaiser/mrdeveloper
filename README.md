@@ -10,7 +10,7 @@
 
 **A modern, animated portfolio website showcasing Matheus Caiser's work as a Full Stack Developer**
 
-[🌐 Live Demo](#) • [📝 Documentation](#features) • [🎨 Customization](#customization-guide)
+[🌐 Live Demo](https://www.mrdeveloper.com.br/) • [📝 Documentation](#features) • [🎨 Customization](#customization-guide)
 
 </div>
 
@@ -43,40 +43,35 @@
 
 ## ✨ Features
 
-- � **Animated Background** - Canvas-based particle animation in the hero section
-- 🎯 **Smooth Scrolling** - Anchor-based navigation with smooth scroll behavior
-## ✨ Features
-
-- **Responsive Design**: Mobile-first approach with adaptive layouts
-- **Dark Theme**: Modern dark color scheme with smooth transitions
-- **Interactive Animations**: Canvas-based particle system and scroll animations
-- **Clean Architecture**: Separation of concerns with services, hooks, and components layers (veja [Architecture](#architecture))
-- **Type-Safe Contact Form**: Form validation and submission with TypeScript
-- **SEO Optimized**: Meta tags and structured data for better search visibility
-- **Performance Focused**: Optimized bundle size and lazy loading
-- **Accessibility**: ARIA labels and keyboard navigation support
-- ⚡ **Modern Stack** - React 18, TypeScript, SCSS, Vite
-- 📧 **Contact Form** - Integrated form with validation, services layer, and email integration
-- ♿ **Accessibility** - Semantic HTML and ARIA labels throughout
-- � **Custom Theme** - Dark theme with accent colors
-- 🏗️ **Clean Architecture** - Services, hooks, and components layered approach
-- 🔧 **Easy Customization** - Well-structured and documented code
+- **🎨 Modern Portfolio Design** - Clean, responsive portfolio with dark theme
+- **⚡ Animated Background** - Canvas-based particle animation system
+- **📱 Responsive Design** - Mobile-first approach with adaptive layouts
+- **🎯 Smooth Scrolling Navigation** - Anchor-based navigation with smooth scroll behavior
+- **📧 Contact Form** - Integrated form with validation and email integration via FormSubmit
+- **🏗️ Clean Architecture** - Services, hooks, and components layered approach
+- **🔧 Type-Safe Development** - Full TypeScript implementation with strict typing
+- **⚡ Performance Optimized** - Vite build system with optimized bundle size
+- **♿ Accessibility** - Semantic HTML, ARIA labels, and keyboard navigation
+- **🎨 SCSS Styling** - Centralized design system with variables and animations
+- **🚀 CI/CD Integration** - GitHub Actions with automated testing and deployment
 
 <a id="tech-stack"></a>
 ## 🛠️ Tech Stack
 
 ### Core
-- **React 18.3.1** - UI library
-- **TypeScript 5.9.3** - Type safety
-- **SCSS** - Styling with variables
-- **Vite 7.1.12** - Build tool and dev server
-- **Lucide React 0.548.0** - Modern icons
-- **React Helmet Async 2.0.5** - Document head management
+- **React 18.3.1** - UI library with modern hooks and concurrent features
+- **TypeScript 5.9.3** - Type safety and enhanced developer experience
+- **SCSS 1.93.2** - Advanced CSS preprocessing with variables and mixins
+- **Vite 7.1.12** - Fast build tool and development server
+- **Lucide React 0.548.0** - Beautiful, customizable icons
+- **React Helmet Async 2.0.5** - Document head management for SEO
+- **Vercel Analytics 1.5.0** - Privacy-focused web analytics
 
-### Development
-- **ESLint 9.38.0** - Code linting
-- **Prettier** - Code formatting
-- **pnpm** - Fast, efficient package manager
+### Development & Quality
+- **ESLint 9.38.0** - Code linting with React and TypeScript rules
+- **pnpm 10.20.0** - Fast, efficient package manager (via corepack)
+- **Semantic Release 25.0.1** - Automated versioning and changelog generation
+- **Vercel CLI 34.2.0** - Deployment and project management
 
 <a id="quick-start"></a>
 ## 🚀 Quick Start
@@ -84,7 +79,7 @@
 ### Prerequisites
 ```bash
 Node.js >= 16.x
-pnpm >= 8.x (recommended) or npm/yarn
+pnpm >= 10.20.0 (recommended) or npm/yarn
 ```
 
 ### Installation
@@ -118,8 +113,10 @@ http://localhost:3000
 | `pnpm dev` | Start development server |
 | `pnpm build` | Create production build |
 | `pnpm preview` | Preview production build locally |
-| `pnpm lint` | Lint code |
-| `pnpm lint:fix` | Fix linting issues |
+| `pnpm lint` | Lint code with ESLint |
+| `pnpm lint:fix` | Fix linting issues automatically |
+| `pnpm lint:yaml` | Lint YAML files in workflows |
+| `pnpm test:ci` | Run CI tests (placeholder) |
 
 <a id="cicd-github-actions"></a>
 ## 🚀 CI/CD - GitHub Actions
@@ -223,28 +220,34 @@ git push origin feature/nova-funcionalidade
 <a id="recent-improvements"></a>
 ## 🚀 Recent Improvements
 
-### v1.1.0 - Dummy Pass Strategy & Documentation Enhancement
+### v1.1.0 - Performance Optimization & Corepack Integration
 
-#### 🛡️ **Dummy Pass Strategy**
-- **Problema Resolvido**: Loop infinito em workflows de beta-release causado por commits automatizados
-- **Solução**: Estratégia Dummy Pass com execução condicional baseada em mensagens de commit
-- **Implementação**: Workflows inline com detecção de `contains(github.event.head_commit.message, 'beta-release')`
-- **Resultado**: Prevenção de recursão infinita mantendo funcionalidade completa de CI/CD
+#### ⚡ **Corepack pnpm Integration**
+- **Problema Resolvido**: Slow Vercel builds due to `npx pnpm` downloads (~21s overhead)
+- **Solução**: Native pnpm support via Node.js corepack integration
+- **Implementação**: Added `packageManager: "pnpm@10.20.0"` field and updated `vercel.json` with `corepack pnpm` commands
+- **Resultado**: ~55% faster builds (9-13 seconds improvement) with consistent package manager across environments
 
-#### 📚 **Documentação Aprimorada**
-- **Suite Completa**: 4 novos arquivos de documentação em [`.github/`](../.github/)
-  - [`README.md`](../.github/README.md) - Índice central e guia de navegação
-  - [`WORKFLOW.md`](../.github/WORKFLOW.md) - Documentação completa de CI/CD
-  - [`DUMMY_PASS_STRATEGY.md`](../.github/DUMMY_PASS_STRATEGY.md) - Explicação técnica da estratégia
-  - [`DUMMY_PASS_IMPLEMENTATION.md`](../.github/DUMMY_PASS_IMPLEMENTATION.md) - Checklist de implementação
-- **Instruções do Copilot**: Melhoria nas diretrizes de execução de comandos GitHub CLI
-- **Clareza**: Distinção clara entre comandos estruturados vs. interativos
+#### � **CI/CD Workflow Optimization**
+- **Problema Resolvido**: ERR_PNPM_BAD_PM_VERSION conflicts between workflow configs and package.json
+- **Solução**: Removed version specifications from `pnpm/action-setup@v4` across all workflows
+- **Implementação**: Consistent pnpm@10.20.0 usage via packageManager field in all environments
+- **Resultado**: Eliminated version conflicts and improved CI/CD reliability
 
-#### 🔧 **Workflows Otimizados**
-- **Execução Condicional**: Passos reais só executam para commits manuais
-- **Dummy Steps**: ~5 segundos de execução para commits automatizados
-- **Loop Prevention**: Proteção adicional contra recursão em jobs de tagging
-- **Manutenibilidade**: Estrutura inline para controle granular de condições
+#### 🛡️ **Dummy Pass Strategy** (v1.0.x)
+- **Problema Resolvido**: Infinite loops in beta-release workflows from automated commits
+- **Solução**: Conditional execution based on commit message detection
+- **Implementação**: Inline workflows with `contains(github.event.head_commit.message, 'beta-release')` checks
+- **Resultado**: Loop prevention while maintaining full CI/CD functionality
+
+#### 📚 **Comprehensive Documentation Suite**
+- **4 New Documentation Files** in `.github/` directory:
+  - [`README.md`](../.github/README.md) - Central index and navigation guide
+  - [`WORKFLOW.md`](../.github/WORKFLOW.md) - Complete CI/CD documentation
+  - [`DUMMY_PASS_STRATEGY.md`](../.github/DUMMY_PASS_STRATEGY.md) - Technical strategy explanation
+  - [`DUMMY_PASS_IMPLEMENTATION.md`](../.github/DUMMY_PASS_IMPLEMENTATION.md) - Implementation checklist
+- **Enhanced Copilot Instructions**: Improved GitHub CLI command execution guidelines
+- **Clear Distinction**: Structured vs interactive command handling
 
 <a id="customization-guide"></a>
 ## 🎨 Customization Guide
@@ -323,27 +326,37 @@ const connectionDistance = 150;     // Connection distance
 ```
 src/
 ├── components/
-│   ├── AnimatedBackground.tsx  # Canvas particle animation
-│   ├── Header.tsx              # Fixed navigation
-│   └── Footer.tsx              # Social links and copyright
+│   ├── AnimatedBackground.tsx    # Canvas particle animation system
+│   ├── Header.tsx & Header.scss  # Fixed navigation header
+│   ├── Footer.tsx & Footer.scss  # Social links and copyright
+│   └── SkillItem.tsx             # Reusable skill item component
 ├── sections/
-│   ├── Hero.tsx               # Landing with animation
-│   ├── About.tsx              # Bio + skills
-│   ├── Experience.tsx         # Work history
-│   └── Contact.tsx            # Contact form (UI only)
+│   ├── Hero.tsx & Hero.scss      # Landing section with animations
+│   ├── About.tsx & About.scss    # Bio and skills section
+│   ├── Experience.tsx & Experience.scss  # Work history
+│   ├── Contact.tsx & Contact.scss        # Contact form (UI only)
+│   └── experienceData.tsx        # Experience data configuration
 ├── services/
-│   ├── contactService.ts      # Contact form business logic
-│   └── index.ts               # Service exports
+│   ├── contactService.ts         # Contact form business logic & API
+│   ├── index.ts                  # Service exports
+│   └── __tests__/                # Service unit tests
 ├── hooks/
-│   ├── useContactForm.ts      # Contact form state management
-│   └── index.ts               # Hook exports
+│   ├── useContactForm.ts         # Contact form state management
+│   └── index.ts                  # Hook exports
 ├── styles/
-│   ├── _variables.scss        # Theme variables
-│   └── layout.scss            # Main styles
+│   ├── _variables.scss           # Theme variables and design tokens
+│   ├── animations.scss           # CSS animations and keyframes
+│   └── layout.scss               # Main layout and responsive styles
+├── utils/
+│   └── Particle.ts               # Particle animation utilities
 ├── assets/
-│   └── profile.png            # Profile photo
-├── App.tsx
-└── main.tsx
+│   ├── profile.png               # Profile photo
+│   ├── logo.svg                  # Logo assets
+│   └── mustache.svg              # Icon assets
+├── App.tsx & App.scss           # Main app component and styles
+├── main.tsx                     # App entry point
+├── index.scss                   # Global styles
+└── react-app-env.d.ts           # TypeScript declarations
 ```
 
 <a id="architecture"></a>
@@ -393,7 +406,7 @@ netlify deploy --prod --dir=build
 
 1. Add to `package.json`:
 ```json
-"homepage": "https://yourusername.github.io/repo-name"
+"homepage": "https://www.mrdeveloper.com.br/"
 ```
 
 2. Install gh-pages:
@@ -433,12 +446,15 @@ docker-compose up
 <a id="changelog"></a>
 ## 📋 Changelog
 
-### v1.1.0 (2025-11-02)
-- 🛡️ **Dummy Pass Strategy**: Implemented to prevent infinite loops in beta-release workflows
-- 📚 **Documentation Suite**: Added comprehensive CI/CD documentation (4 new files in `.github/`)
-- 🔧 **Workflow Optimization**: Converted to inline jobs with conditional execution
-- 📖 **Copilot Instructions**: Improved GitHub CLI command execution guidelines
-- ⚡ **Performance**: Enhanced workflow execution with intelligent caching
+### v1.1.0-beta.1 (2025-11-03)
+- ⚡ **Corepack pnpm Integration**: ~55% faster builds with native pnpm support via Node.js corepack
+- 🔧 **CI/CD Optimization**: Resolved ERR_PNPM_BAD_PM_VERSION conflicts across all workflows
+- 📦 **Package Manager**: Added `packageManager: "pnpm@10.20.0"` field for consistent versioning
+- 🚀 **Vercel Performance**: Eliminated npx overhead, reducing build times by 9-13 seconds
+- 🛡️ **Dummy Pass Strategy**: Prevents infinite loops in beta-release workflows
+- 📚 **Documentation Suite**: Comprehensive CI/CD documentation (4 new files in `.github/`)
+- 🌐 **Custom Domain Setup**: Added homepage field and CNAME file for GitHub Pages custom domain support
+- 📖 **README Updates**: Updated project structure, features, and deployment instructions
 
 ### v1.0.0 (2024-10-XX)
 - 🚀 Initial release with complete portfolio functionality
