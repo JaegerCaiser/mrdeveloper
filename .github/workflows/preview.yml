@@ -81,7 +81,7 @@ jobs:
 
             | Recurso | Link |
             |---|---|
-            | **🔗 URL de Preview** | https://depreview.nl/(${{ needs.deploy-preview.outputs.deployment_url }}) |
+            | **🔗 URL de Preview** | [URL de Preview](${{ needs.deploy-preview.outputs.deployment_url }}) |
             | **📜 Logs do Deploy** | [Ver logs da Action](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) |
 
             ---
