@@ -154,6 +154,64 @@ git push -u origin feature/nome-da-feature
 - ✅ Estrutura do projeto deve estar atualizada
 - ✅ Scripts e comandos devem estar corretos
 
+## 🏗️ Arquitetura do Projeto
+
+### Visão Geral
+**Portfolio React SPA** - Site de portfólio moderno com animações, construído com React 18 + TypeScript + Vite.
+
+**Arquitetura Principal:**
+- `src/App.tsx` - Componente raiz que orquestra todas as seções
+- **Seções** (`src/sections/`): Hero, About, Experience, Contact - cada uma é uma página independente
+- **Componentes** (`src/components/`): Header, Footer, AnimatedBackground - reutilizáveis
+- **Serviços** (`src/services/`): contactService.ts - lógica de negócio isolada
+- **Hooks** (`src/hooks/`): useContactForm.ts - estado e efeitos encapsulados
+- **Estilos** (`src/styles/`): Sistema SCSS centralizado com variáveis e animações
+
+### Padrões de Componentes
+```tsx
+// ❌ EVITE: Componentes monolíticos com lógica inline
+const BadComponent = () => {
+  const [data, setData] = useState([]);
+  // ... 50 linhas de lógica aqui ...
+  return <div>...</div>;
+};
+
+// ✅ FAÇA: Separe responsabilidades
+// src/services/dataService.ts
+export class DataService {
+  async fetchData() { /* ... */ }
+}
+
+// src/hooks/useData.ts
+export const useData = () => {
+  const [data, setData] = useState([]);
+  // lógica do hook
+  return { data, loading, error };
+};
+
+// src/components/DataComponent.tsx
+const DataComponent = () => {
+  const { data, loading } = useData();
+  return <div>{loading ? 'Loading...' : data.map(item => <Item key={item.id} />)}</div>;
+};
+```
+
+### Padrão Service Layer
+**Exemplo: `src/services/contactService.ts`**
+- Classes singleton para serviços externos
+- Interface clara para tipos de dados
+- Validação centralizada no serviço
+- Tratamento de erros consistente
+- Separação entre API calls e validação
+
+### Sistema de Formulários
+**Hook Pattern: `src/hooks/useContactForm.ts`**
+- Estado unificado do formulário
+- Validação em tempo real com limpeza de erros
+- Estados de loading e mensagens de status
+- Fallback para mailto quando API falha
+- Reset automático após sucesso
+
 ## 🎯 Padrões de Desenvolvimento
 
 ### Estrutura do Projeto
@@ -203,14 +261,21 @@ pnpm lint         # Verificação de código
 pnpm lint:fix     # Correção automática
 ```
 
-### Git Workflow
+### Build System Específico
 
-```bash
-git checkout -b feature/nome-da-feature
-git add .
-git commit -m "tipo: descrição clara"
-git push -u origin feature/nome-da-feature
-```
+**Vite + TypeScript + Node Version Check:**
+- `prebuild` script valida versão do Node antes do build
+- Build output vai para `build/` (não `dist/`)
+- TypeScript compilation obrigatória antes do Vite
+- ESLint com zero warnings permitidos
+
+### CI/CD Workflows
+
+**GitHub Actions Reutilizáveis:**
+- `reusable-test-and-lint.yml`: Testes + linting com cache inteligente
+- `reusable-deploy-vercel.yml`: Deploy para Vercel com preview/production
+- `reusable-release.yml`: Semantic release automation
+- Cache de build artifacts (`.vite`, `node_modules/.cache`, `.eslintcache`)
 
 ## 📝 Padrões de Commit
 
@@ -267,6 +332,56 @@ tipo: descrição clara e objetiva
 - HMR para desenvolvimento
 - Source maps em desenvolvimento
 
+## 🎨 Sistema de Design
+
+### Variáveis SCSS (`src/styles/_variables.scss`)
+
+```scss
+// Typography
+$font-stack: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+  "Helvetica Neue", Arial, sans-serif;
+$font-secondary: "Raleway", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+  "Helvetica Neue", Arial, sans-serif;
+
+// Colors - benscott.dev theme (exact match)
+$color-text: #fafafa;
+$color-red: #ff4d5a;
+$color-background: rgb(26, 26, 26);
+$color-background-light: rgb(40, 40, 40);
+$color-blue: rgb(81, 162, 233);
+$color-blue-dark: rgb(50, 22, 187);
+
+// Layout
+$max-width: 1300px;
+$section-padding: 100px;
+$mobile-padding: 60px;
+
+// Transitions
+$transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+```
+
+### Animações
+
+- Canvas-based particle system (`src/utils/Particle.ts`)
+- CSS animations centralizadas (`src/styles/animations.scss`)
+- Smooth scroll navigation com Intersection Observer
+
+## 🔗 Integrações Externas
+
+### FormSubmit (`src/services/contactService.ts`)
+- Endpoint: `https://formsubmit.co/ajax/[hash]`
+- Fallback para `mailto:` quando API falha
+- Validação client-side + server-side
+
+### Vercel Analytics
+- `<Analytics />` component no App.tsx
+- Rastreamento automático de page views
+
+### Semantic Release
+- Versionamento automático baseado em conventional commits
+- Changelog generation
+- GitHub releases automáticas
+
 ## 📚 Lições Aprendidas
 
 ### Refatoração de Formulários
@@ -301,5 +416,6 @@ tipo: descrição clara e objetiva
 
 ---
 
-_Atualizado em: 2 de novembro de 2025_
+_Atualizado em: 3 de novembro de 2025_
 _Próxima revisão: Quando necessário_
+
