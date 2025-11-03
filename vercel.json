@@ -1,7 +1,7 @@
 {
-  "buildCommand": "npx pnpm@10 build",
-  "installCommand": "npx pnpm@10 install",
-  "devCommand": "npx pnpm@10 dev",
+  "buildCommand": "pnpm build",
+  "installCommand": "pnpm install --frozen-lockfile",
+  "devCommand": "pnpm dev",
   "git": {
     "deploymentEnabled": false
   }
