@@ -44,16 +44,19 @@ Este arquivo serve como guia de referência para futuras interações com o GitH
 **Sempre execute comandos `gh` de modo que o output seja exibido diretamente no terminal.**
 
 #### 📊 Para comandos que retornam dados estruturados:
+
 - **SEMPRE** redirecione para arquivo temporário
 - Use: `gh command ... > temp.json && cat temp.json && rm temp.json`
 - **⚠️ IMPORTANTE:** Para alguns comandos como `gh pr checks`, use `--json campos | cat` em vez de redirecionar para arquivo, pois podem não mostrar output quando redirecionados
 - Exemplos: `gh pr list`, `gh pr view --json`, `gh pr checks --json name,state | cat`, `gh issue list`, `gh repo list`
 
 #### 💬 Para comandos interativos ou de ação:
+
 - Execute diretamente no terminal
 - Exemplos: `gh pr create`, `gh pr edit`, `gh pr merge`, `gh repo clone`
 
 #### 🧹 Limpeza:
+
 - **SEMPRE** remova arquivos temporários após uso
 - **NUNCA** use visualizadores interativos ou pagers
 
