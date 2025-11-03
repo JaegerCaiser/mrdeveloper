@@ -58,10 +58,12 @@ jobs:
 
       - name: Pull Vercel Environment Information
         run: |
-          if [ "${{ inputs.environment }}" = "develop" ]; then
+          ENV_NAME=$(echo "${{ inputs.environment }}" | tr '[:upper:]' '[:lower:]')
+
+          if [ "$ENV_NAME" = "develop" ]; then
             vercel pull --yes --token=${{ secrets.vercel-token }}
           else
-            vercel pull --yes --environment=${{ inputs.environment }} --token=${{ secrets.vercel-token }}
+            vercel pull --yes --environment=$ENV_NAME --token=${{ secrets.vercel-token }}
           fi
 
       - name: Ensure Vercel cache directory exists
