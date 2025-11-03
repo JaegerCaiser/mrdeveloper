@@ -51,8 +51,6 @@ jobs:
       - name: Setup pnpm
         if: inputs.create-version-commit
         uses: pnpm/action-setup@v4
-        with:
-          version: 10
 
       - name: Setup Node.js
         if: inputs.create-version-commit

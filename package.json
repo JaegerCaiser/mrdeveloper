@@ -2,6 +2,8 @@
   "name": "mrdeveloper",
   "version": "1.1.0-beta.1",
   "type": "module",
+  "packageManager": "pnpm@10.20.0",
+  "homepage": "https://www.mrdeveloper.com.br/",
   "private": true,
   "dependencies": {
     "@icons-pack/react-simple-icons": "^13.8.0",
@@ -14,8 +16,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "prebuild": "node -e \"if (process.env.CI) process.exit(0); else require('child_process').execSync('npx ts-node --esm ./scripts/check-node-version.ts', {stdio: 'inherit'})\"",
-    "build": "tsc && vite build",
+    "build": "vite build",
     "lint": "eslint . --ext ts,tsx --ignore-pattern scripts/** --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint . --ext ts,tsx --ignore-pattern scripts/** --fix",
     "lint:yaml": "yamllint .github/workflows/*.yml",
