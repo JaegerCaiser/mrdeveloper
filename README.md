@@ -56,9 +56,11 @@
 - **🚀 CI/CD Integration** - GitHub Actions with automated testing and deployment
 
 <a id="tech-stack"></a>
+
 ## 🛠️ Tech Stack
 
 ### Core
+
 - **React 18.3.1** - UI library with modern hooks and concurrent features
 - **TypeScript 5.9.3** - Type safety and enhanced developer experience
 - **SCSS 1.93.2** - Advanced CSS preprocessing with variables and mixins
@@ -68,15 +70,18 @@
 - **Vercel Analytics 1.5.0** - Privacy-focused web analytics
 
 ### Development & Quality
+
 - **ESLint 9.38.0** - Code linting with React and TypeScript rules
 - **pnpm 10.20.0** - Fast, efficient package manager (via corepack)
 - **Semantic Release 25.0.1** - Automated versioning and changelog generation
 - **Vercel CLI 34.2.0** - Deployment and project management
 
 <a id="quick-start"></a>
+
 ## 🚀 Quick Start
 
 ### Prerequisites
+
 ```bash
 Node.js >= 16.x
 pnpm >= 10.20.0 (recommended) or npm/yarn
@@ -85,48 +90,56 @@ pnpm >= 10.20.0 (recommended) or npm/yarn
 ### Installation
 
 1. **Clone the repository**
+
 ```bash
 git clone https://github.com/JaegerCaiser/mrdeveloper.git
 cd mrdeveloper
 ```
 
 2. **Install dependencies**
+
 ```bash
 pnpm install
 ```
 
 3. **Start development server**
+
 ```bash
 pnpm dev
 ```
 
 4. **Open in browser**
+
 ```
 http://localhost:3000
 ```
 
 <a id="available-scripts"></a>
+
 ## 📦 Available Scripts
 
-| Command | Description |
-|---------|-----------|
-| `pnpm dev` | Start development server |
-| `pnpm build` | Create production build |
-| `pnpm preview` | Preview production build locally |
-| `pnpm lint` | Lint code with ESLint |
-| `pnpm lint:fix` | Fix linting issues automatically |
-| `pnpm lint:yaml` | Lint YAML files in workflows |
-| `pnpm test:ci` | Run CI tests (placeholder) |
+| Command          | Description                      |
+| ---------------- | -------------------------------- |
+| `pnpm dev`       | Start development server         |
+| `pnpm build`     | Create production build          |
+| `pnpm preview`   | Preview production build locally |
+| `pnpm lint`      | Lint code with ESLint            |
+| `pnpm lint:fix`  | Fix linting issues automatically |
+| `pnpm lint:yaml` | Lint YAML files in workflows     |
+| `pnpm test:ci`   | Run CI tests (placeholder)       |
 
 <a id="cicd-github-actions"></a>
+
 ## 🚀 CI/CD - GitHub Actions
 
 Este projeto utiliza **GitHub Actions** com infraestrutura completa de CI/CD seguindo o padrão **Gitflow**, proporcionando deploy automatizado e monitoramento contínuo.
 
 <a id="workflows-disponíveis"></a>
+
 ### 🌟 Workflows Disponíveis
 
 #### ✅ **Ambiente de Desenvolvimento** (`develop.yml`)
+
 - **Trigger**: Push na branch `develop`
 - **Recursos**:
   - 🧪 Testes automatizados (`pnpm run test:ci`)
@@ -137,6 +150,7 @@ Este projeto utiliza **GitHub Actions** com infraestrutura completa de CI/CD seg
   - 📋 Upload de logs de erro em caso de falha
 
 #### ✅ **Ambiente de Preview** (`preview.yml`)
+
 - **Trigger**: Pull Requests + Push em branches `release/*`
 - **Recursos**:
   - 🧪 Testes e linting
@@ -147,6 +161,7 @@ Este projeto utiliza **GitHub Actions** com infraestrutura completa de CI/CD seg
   - ⚡ Execução condicional baseada em mensagens de commit automatizadas
 
 #### ✅ **Ambiente de Produção** (`production.yml`)
+
 - **Trigger**: Push na branch `main`
 - **Recursos**:
   - 🧪 Testes completos e linting
@@ -156,12 +171,14 @@ Este projeto utiliza **GitHub Actions** com infraestrutura completa de CI/CD seg
   - 🔒 Controle rigoroso de qualidade
 
 #### ✅ **Validação de Release** (`check-release-branch.yml`)
+
 - **Trigger**: PRs para `main`
 - **Recursos**:
   - ✅ Validação de branches de release
   - 📋 Logs de auditoria
 
 <a id="otimizações-de-performance"></a>
+
 ### ⚡ Otimizações de Performance
 
 - **Cache Inteligente**: Redução de ~25-40% no tempo de execução
@@ -171,9 +188,11 @@ Este projeto utiliza **GitHub Actions** com infraestrutura completa de CI/CD seg
   - 🔍 Cache do ESLint
 
 <a id="configuração-necessária"></a>
+
 ### 🔧 Configuração Necessária
 
 #### Secrets do GitHub (Repository Settings > Secrets and variables > Actions)
+
 ```
 VERCEL_TOKEN=your_vercel_token_here
 VERCEL_ORG_ID=your_vercel_org_id_here
@@ -181,6 +200,7 @@ VERCEL_PROJECT_ID=your_vercel_project_id_here
 ```
 
 #### Como obter os tokens do Vercel:
+
 1. Acesse [Vercel Dashboard](https://vercel.com/dashboard)
 2. Settings > Tokens → Crie um novo token
 3. Para Org ID: Execute `vercel org ls` no terminal
@@ -188,7 +208,7 @@ VERCEL_PROJECT_ID=your_vercel_project_id_here
 
 ### 📊 Status dos Deploys
 
-- **🏠 Produção**: [mrdeveloper.vercel.app](https://mrdeveloper.vercel.app) (deploy automático em push para `main`)
+- **🏠 Produção**: [www.mrdeveloper.com.br](https://www.mrdeveloper.com.br) (deploy automático em push para `main`)
 - **🧪 Desenvolvimento**: Deploy automático em push para `develop`
 - **👀 Preview**: Deploy automático em PRs (comentários com links)
 
@@ -199,9 +219,11 @@ VERCEL_PROJECT_ID=your_vercel_project_id_here
 - **🚨 Alertas**: Notificações automáticas em falhas de CI/CD
 
 <a id="fluxo-de-desenvolvimento"></a>
+
 ### 🎯 Fluxo de Desenvolvimento
 
 #### Desenvolvimento Normal:
+
 ```bash
 # Criar feature branch
 git checkout -b feature/nova-funcionalidade
@@ -218,29 +240,34 @@ git push origin feature/nova-funcionalidade
 ```
 
 <a id="recent-improvements"></a>
+
 ## 🚀 Recent Improvements
 
 ### v1.1.0 - Performance Optimization & Corepack Integration
 
 #### ⚡ **Corepack pnpm Integration**
+
 - **Problema Resolvido**: Slow Vercel builds due to `npx pnpm` downloads (~21s overhead)
 - **Solução**: Native pnpm support via Node.js corepack integration
 - **Implementação**: Added `packageManager: "pnpm@10.20.0"` field and updated `vercel.json` with `corepack pnpm` commands
 - **Resultado**: ~55% faster builds (9-13 seconds improvement) with consistent package manager across environments
 
 #### � **CI/CD Workflow Optimization**
+
 - **Problema Resolvido**: ERR_PNPM_BAD_PM_VERSION conflicts between workflow configs and package.json
 - **Solução**: Removed version specifications from `pnpm/action-setup@v4` across all workflows
 - **Implementação**: Consistent pnpm@10.20.0 usage via packageManager field in all environments
 - **Resultado**: Eliminated version conflicts and improved CI/CD reliability
 
 #### 🛡️ **Dummy Pass Strategy** (v1.0.x)
+
 - **Problema Resolvido**: Infinite loops in beta-release workflows from automated commits
 - **Solução**: Conditional execution based on commit message detection
 - **Implementação**: Inline workflows with `contains(github.event.head_commit.message, 'beta-release')` checks
 - **Resultado**: Loop prevention while maintaining full CI/CD functionality
 
 #### 📚 **Comprehensive Documentation Suite**
+
 - **4 New Documentation Files** in `.github/` directory:
   - [`README.md`](../.github/README.md) - Central index and navigation guide
   - [`WORKFLOW.md`](../.github/WORKFLOW.md) - Complete CI/CD documentation
@@ -250,15 +277,18 @@ git push origin feature/nova-funcionalidade
 - **Clear Distinction**: Structured vs interactive command handling
 
 <a id="customization-guide"></a>
+
 ## 🎨 Customization Guide
 
 ### 1. Personal Information
 
 **Header** (`src/components/Header.tsx`)
+
 - Change logo initials (currently "BS")
 - Update navigation links
 
 **Hero Section** (`src/sections/Hero.tsx`)
+
 ```typescript
 <h1 className="hero__title">
   Hello, I'm <span>Matheus</span>.
@@ -268,29 +298,44 @@ git push origin feature/nova-funcionalidade
 ```
 
 **About Section** (`src/sections/About.tsx`)
+
 - Replace bio paragraphs with personal description
 - Update skills array:
+
 ```typescript
 const skills = [
-  "HTML", "REACT", "EXPRESS.JS", "JAVASCRIPT", "CSS", "MONGODB", "GIT", "SASS", "NEXT.JS", "NODE.JS"
+  "HTML",
+  "REACT",
+  "EXPRESS.JS",
+  "JAVASCRIPT",
+  "CSS",
+  "MONGODB",
+  "GIT",
+  "SASS",
+  "NEXT.JS",
+  "NODE.JS",
 ];
 ```
+
 - Replace `src/assets/profile.png` with your photo
 
 **Experience** (`src/sections/Experience.tsx`)
+
 ```typescript
 const items: ExperienceItem[] = [
   {
     company: "DBC Company (Unicred)",
     role: "Front-end Developer",
     period: "January 2022 — Present",
-    description: "Working as front-end developer building products for Unicred's internet banking cooperative...",
+    description:
+      "Working as front-end developer building products for Unicred's internet banking cooperative...",
   },
   // Add other experiences from experienceData.tsx
 ];
 ```
 
 **Contact** (`src/sections/Contact.tsx`)
+
 - Update social media links in Footer component
 - Integrate form service (Formspree, EmailJS, etc.)
 - Change copyright name to "MATHEUS CAISER"
@@ -300,11 +345,11 @@ const items: ExperienceItem[] = [
 Edit `src/styles/_variables.scss`:
 
 ```scss
-$bg: #0a192f;          // Main background
-$bg-light: #112240;    // Card backgrounds
-$text: #8892b0;        // Body text
+$bg: #0a192f; // Main background
+$bg-light: #112240; // Card backgrounds
+$text: #8892b0; // Body text
 $text-bright: #ccd6f6; // Headings
-$accent: #64ffda;      // Accent color
+$accent: #64ffda; // Accent color
 ```
 
 ### 3. Fonts
@@ -316,11 +361,12 @@ Update Google Fonts import in `src/index.scss` and variables in `src/styles/_var
 Customize in `src/components/AnimatedBackground.tsx`:
 
 ```typescript
-const particleCount = 80;           // Number of particles
-const connectionDistance = 150;     // Connection distance
+const particleCount = 80; // Number of particles
+const connectionDistance = 150; // Connection distance
 ```
 
 <a id="project-structure"></a>
+
 ## 📁 Project Structure
 
 ```
@@ -360,43 +406,51 @@ src/
 ```
 
 <a id="architecture"></a>
+
 ## 🏗️ Architecture
 
 This project follows **Clean Architecture** principles with clear separation of concerns:
 
 ### Services Layer (`src/services/`)
+
 - **Business Logic**: API calls, data validation, and external integrations
 - **contactService.ts**: Handles contact form submission to FormSubmit API
 - **Error Handling**: Centralized error management and user feedback
 
 ### Hooks Layer (`src/hooks/`)
+
 - **State Management**: Custom hooks for component logic
 - **useContactForm.ts**: Manages form state, validation, and submission flow
 - **Reusability**: Logic can be reused across multiple components
 
 ### Components Layer (`src/components/`, `src/sections/`)
+
 - **UI Only**: Pure presentation components focused on rendering
 - **Props Interface**: Clear data contracts with TypeScript interfaces
 - **Separation**: No business logic, only JSX and styling
 
 ### CI/CD Architecture (`.github/workflows/`)
+
 - **Dummy Pass Strategy**: Intelligent workflow execution preventing infinite loops
 - **Conditional Logic**: Step-level control based on commit message detection
 - **Branch Protection**: Status checks integration with automated beta-release handling
 - **Documentation Suite**: Comprehensive CI/CD documentation in `.github/` directory
 
 ### Development Workflow
+
 - **Gitflow**: Feature branches → develop → release → main
 - **Automated Testing**: Comprehensive CI/CD with preview and production environments
 - **Quality Gates**: Linting, building, and deployment validation at each stage
 
 ### Vercel
+
 ```bash
 pnpm build
 vercel --prod
 ```
 
 ### Netlify
+
 ```bash
 pnpm build
 netlify deploy --prod --dir=build
@@ -405,48 +459,58 @@ netlify deploy --prod --dir=build
 ### GitHub Pages
 
 1. Add to `package.json`:
+
 ```json
 "homepage": "https://www.mrdeveloper.com.br/"
 ```
 
 2. Install gh-pages:
+
 ```bash
 pnpm add -D gh-pages
 ```
 
 3. Add scripts:
+
 ```json
 "predeploy": "pnpm build",
 "deploy": "gh-pages -d build"
 ```
 
 4. Deploy:
+
 ```bash
 pnpm deploy
 ```
 
 <a id="docker"></a>
+
 ## 🐳 Docker
 
 ### Build image
+
 ```bash
 docker build -t portfolio .
 ```
 
 ### Run container
+
 ```bash
 docker run -p 3000:3000 portfolio
 ```
 
 ### Docker Compose
+
 ```bash
 docker-compose up
 ```
 
 <a id="changelog"></a>
+
 ## 📋 Changelog
 
 ### v1.1.0-beta.1 (2025-11-03)
+
 - ⚡ **Corepack pnpm Integration**: ~55% faster builds with native pnpm support via Node.js corepack
 - 🔧 **CI/CD Optimization**: Resolved ERR_PNPM_BAD_PM_VERSION conflicts across all workflows
 - 📦 **Package Manager**: Added `packageManager: "pnpm@10.20.0"` field for consistent versioning
@@ -457,6 +521,7 @@ docker-compose up
 - 📖 **README Updates**: Updated project structure, features, and deployment instructions
 
 ### v1.0.0 (2024-10-XX)
+
 - 🚀 Initial release with complete portfolio functionality
 - 🎨 Modern design with animated background
 - 📧 Contact form with service layer integration
@@ -464,11 +529,13 @@ docker-compose up
 - ⚡ Vite build system with TypeScript
 
 <a id="license"></a>
+
 ## 📄 License
 
 MIT License - feel free to use this template for your own portfolio!
 
 <a id="credits"></a>
+
 ## 🙏 Credits
 
 - Design inspiration: [benscott.dev](https://benscott.dev/)
@@ -476,6 +543,7 @@ MIT License - feel free to use this template for your own portfolio!
 - Fonts: [Google Fonts](https://fonts.google.com/)
 
 <a id="contributing"></a>
+
 ## 🤝 Contributing
 
 Contributions, issues, and feature requests are welcome!
@@ -487,6 +555,7 @@ Contributions, issues, and feature requests are welcome!
 5. Open a Pull Request
 
 <a id="author"></a>
+
 ## 👨‍💻 Author
 
 **Matheus Caiser**
@@ -503,7 +572,6 @@ Made with ❤️ using React + TypeScript + Vite
 Portfolio of Matheus Caiser - Full Stack Developer
 
 </div>
-
 
 <div align="center">
 

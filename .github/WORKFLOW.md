@@ -2,12 +2,12 @@
 
 ## 📑 Índice
 
-1. [Arquitetura Geral](#arquitetura-geral)
-2. [Workflows Principais](#workflows-principais)
-3. [Workflows Reutilizáveis](#workflows-reutilizáveis)
-4. [Fluxos de Execução](#fluxos-de-execução)
-5. [Segurança e Proteções](#segurança-e-proteções)
-6. [Guia de Troubleshooting](#guia-de-troubleshooting)
+1. [Arquitetura Geral](#-arquitetura-geral)
+2. [Workflows Principais](#-workflows-principais)
+3. [Workflows Reutilizáveis](#-workflows-reutilizáveis)
+4. [Fluxos de Execução](#-fluxos-de-execução)
+5. [Segurança e Proteções](#-segurança-e-proteções)
+6. [Guia de Troubleshooting](#-guia-de-troubleshooting)
 
 ---
 
@@ -33,9 +33,9 @@ main          ──→ production.yml ──→ Deploy PROD + Release Tag
 
 | Ambiente            | Branch          | Trigger             | URL             | Deploy |
 | ------------------- | --------------- | ------------------- | --------------- | ------ |
-| **Development**     | develop         | Push                | vercel-develop  | ✅     |
-| **Preview/Staging** | PR / release/\* | PR / Push           | vercel-preview  | ✅     |
-| **Production**      | main            | Merge de release/\* | seu-dominio.com | ✅     |
+| **Development**     | develop         | Push                | mrdeveloper-develop.vercel.app | ✅     |
+| **Preview/Staging** | PR / release/\* | PR / Push           | mrdeveloper-pr-{number}.vercel.app | ✅     |
+| **Production**      | main            | Merge de release/\* | www.mrdeveloper.com.br | ✅     |
 
 ---
 
@@ -69,7 +69,7 @@ on:
 └───────────────────┘
          │
          ▼
-    ✅ Live em https://seu-app-develop.vercel.app
+    ✅ Live em https://mrdeveloper-develop.vercel.app
 ```
 
 #### 🔍 Detalhes Técnicos
@@ -190,8 +190,8 @@ deploy-preview:
 **Exemplo URLs geradas**:
 
 ```
-Pull Request #123:  https://seu-app-pr-123.vercel.app
-Release push:       https://seu-app-release.vercel.app
+Pull Request #123:  https://mrdeveloper-pr-123.vercel.app
+Release push:       https://mrdeveloper-release.vercel.app
 ```
 
 #### Job 3: `validate-release-branch` ⭐ (CRÍTICO)
@@ -323,8 +323,8 @@ A pré-visualização para este PR foi atualizada.
 
 | Recurso               | Link                                                          |
 | --------------------- | ------------------------------------------------------------- |
-| **🔗 URL de Preview** | [Clique aqui](https://seu-app-pr-456.vercel.app)              |
-| **📜 Logs do Deploy** | [Ver logs da Action](https://github.com/.../actions/runs/789) |
+| **🔗 URL de Preview** | [Clique aqui](https://mrdeveloper-pr-456.vercel.app)              |
+| **📜 Logs do Deploy** | [Ver logs da Action](https://github.com/JaegerCaiser/mrdeveloper/actions/runs/789) |
 
 ---
 
@@ -596,6 +596,250 @@ tag-release:
    ↓
 ✅ Produção live + Tag versionada + Release no GitHub
 ```
+
+---
+
+### 4. `create-beta-tag.yml` - Criação Manual de Tags Beta
+
+**Arquivo**: `.github/workflows/create-beta-tag.yml`
+
+#### ⏱️ Quando Executa?
+
+```yaml
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "Release branch (e.g., release/1.1.0)"
+        required: true
+        type: string
+```
+
+- **APENAS manualmente** via botão "Run workflow" no GitHub
+- Usado para criar tags beta em release branches antes do merge para main
+
+#### 📊 Jobs Executados
+
+```
+┌────────────────────┐
+│ validate-branch    │  ← Valida branch e PR
+└────────┬───────────┘
+         │ (se passar)
+┌────────▼──────────┐
+│  test-and-lint    │  ← Testa e faz lint
+└────────┬──────────┘
+         │ (se passar)
+┌────────▼────────────────┐
+│ deploy-preview          │  ← Deploy preview
+└────────┬────────────────┘
+         │ (depois)
+┌────────▼──────────┐
+│ create-beta-tag   │  ← Cria tag beta
+└───────────────────┘
+         │
+         ▼
+    ✅ Tag beta criada + Deploy preview
+```
+
+#### Job 1: `validate-branch` ⭐
+
+```yaml
+validate-branch:
+  runs-on: ubuntu-latest
+  permissions:
+    contents: read
+    pull-requests: read
+```
+
+**Primeira defesa**: Validações antes de qualquer ação
+
+##### Step 1: Check if PR exists
+
+```bash
+PR_COUNT=$(gh pr list --head "$BRANCH_NAME" --state open --json number --jq 'length')
+if [ "$PR_COUNT" -gt 0 ]; then
+  echo "::warning::PR exists for branch. Beta tag creation may interfere."
+fi
+```
+
+**O que faz**: Avisa se existe PR aberto para a branch
+
+**Motivo**: Criação de tag beta pode interferir com PR ativo
+
+##### Step 2: Extract version from branch
+
+```bash
+VERSION=$(echo "$BRANCH_NAME" | sed 's|^release/||')
+echo "version=$VERSION" >> $GITHUB_OUTPUT
+```
+
+**O que faz**: Extrai versão do nome da branch
+
+| Branch          | Versão Extraída |
+| --------------- | --------------- |
+| `release/1.1.0` | `1.1.0`         |
+| `release/2.0.0` | `2.0.0`         |
+
+##### Step 3: Get commit SHA
+
+```bash
+COMMIT_SHA=$(git rev-parse HEAD)
+echo "commit_sha=$COMMIT_SHA" >> $GITHUB_OUTPUT
+```
+
+**O que faz**: Captura SHA do commit atual da branch
+
+#### Job 2: `test-and-lint`
+
+Idêntico aos outros workflows - Testa e faz linting
+
+#### Job 3: `deploy-preview`
+
+Idêntico ao `preview.yml` - Deploy para ambiente preview
+
+#### Job 4: `create-beta-tag`
+
+```yaml
+create-beta-tag:
+  needs: [validate-branch, deploy-preview]
+  uses: ./.github/workflows/reusable-create-tag.yml
+  with:
+    tag-type: beta
+    version: ${{ needs.validate-branch.outputs.version }}
+    commit-sha: ${{ needs.validate-branch.outputs.commit_sha }}
+    create-version-commit: false
+```
+
+**O que faz**: Cria tag beta automática
+
+**Resultado**: Tag no formato `v{VERSION}-beta.{RUN_ID}`
+
+| Versão | Tag Criada                  |
+| ------ | --------------------------- |
+| 1.1.0  | `v1.1.0-beta.123456789`     |
+| 2.0.0  | `v2.0.0-beta.987654321`     |
+
+#### Job 5: `summary`
+
+```yaml
+summary:
+  needs: [validate-branch, deploy-preview, create-beta-tag]
+  if: always()
+  runs-on: ubuntu-latest
+```
+
+**O que faz**: Cria resumo da execução
+
+**Resultado no GitHub**:
+
+```markdown
+## 🚀 Beta Tag Creation Summary
+
+**Branch:** `release/1.1.0`
+**Version:** `1.1.0`
+**Commit:** `abc123def456...`
+
+### Results:
+- ✅ Tests & Lint: success
+- ✅ Deploy: success
+- ✅ Tag Creation: success
+```
+
+**Quando usar**: Antes de merge de release branches para testar versão beta
+
+---
+
+### 5. `delete-merged-branches.yml` - Limpeza Automática de Branches
+
+**Arquivo**: `.github/workflows/delete-merged-branches.yml`
+
+#### ⏱️ Quando Executa?
+
+```yaml
+on:
+  pull_request:
+    types: [closed]
+```
+
+- **SEMPRE** que um Pull Request é fechado (merged ou não)
+- Mantém repositório limpo automaticamente
+
+#### 📊 Jobs Executados
+
+```
+┌────────────────────┐
+│ PR fechado         │
+└────────┬───────────┘
+         │ (se merged)
+┌────────▼──────────┐
+│ delete-merged-    │
+│ branch            │
+└───────────────────┘
+```
+
+#### Job 1: `delete-merged-branch`
+
+```yaml
+delete-merged-branch:
+  if: github.event.pull_request.merged == true
+  runs-on: ubuntu-latest
+  permissions:
+    contents: write
+    pull-requests: write
+```
+
+**Executa APENAS se** PR foi **merged** (`merged == true`)
+
+##### Step 1: Identificar branch
+
+```bash
+BRANCH_NAME="${{ github.event.pull_request.head.ref }}"
+TARGET_BRANCH="${{ github.event.pull_request.base.ref }}"
+
+echo "PR merged: $BRANCH_NAME → $TARGET_BRANCH"
+```
+
+**Captura informações do merge**
+
+##### Step 2: Regras de exclusão
+
+```bash
+# NÃO deletar branches release/* (importantes para histórico)
+if [[ "$BRANCH_NAME" == release/* ]]; then
+  echo "Keeping release branch: $BRANCH_NAME"
+  exit 0
+fi
+
+# NÃO deletar branches principais
+if [[ "$BRANCH_NAME" == "main" || "$BRANCH_NAME" == "develop" ]]; then
+  echo "Keeping main branch: $BRANCH_NAME"
+  exit 0
+fi
+```
+
+**Regras de proteção**:
+
+| Branch Type      | Ação       | Motivo                          |
+| ---------------- | ---------- | ------------------------------- |
+| `release/*`      | ✅ Mantém  | Histórico de releases           |
+| `main`           | ✅ Mantém  | Branch principal               |
+| `develop`        | ✅ Mantém  | Branch de desenvolvimento       |
+| `feature/*`      | ❌ Deleta  | Já merged, não precisa mais     |
+| `bugfix/*`       | ❌ Deleta  | Já merged, não precisa mais     |
+| `hotfix/*`       | ❌ Deleta  | Já merged, não precisa mais     |
+
+##### Step 3: Deletar branch
+
+```bash
+echo "Deleting merged branch: $BRANCH_NAME"
+gh api -X DELETE "repos/${{ github.repository }}/git/refs/heads/$BRANCH_NAME" || echo "Branch may have been already deleted"
+```
+
+**O que faz**: Remove branch usando GitHub API
+
+**Fallback**: Se branch já foi deletada, não dá erro
+
+**Resultado**: Repositório fica limpo automaticamente
 
 ---
 
@@ -1018,9 +1262,9 @@ vercel build --token=...
 
 | Cenário    | URL                                  |
 | ---------- | ------------------------------------ |
-| Production | `https://seu-app.com` (seu domínio)  |
-| Develop    | `https://seu-app-develop.vercel.app` |
-| Preview    | `https://seu-app-pr-123.vercel.app`  |
+| Production | `https://www.mrdeveloper.com.br` (seu domínio)  |
+| Develop    | `https://mrdeveloper-develop.vercel.app` |
+| Preview    | `https://mrdeveloper-pr-123.vercel.app`  |
 
 **Compartilha URL**: `deployment_url` output para outros jobs
 
@@ -1061,7 +1305,7 @@ Se deployment falhar, salva logs para debug
 
 ```
 ✅ Production deployment successful
-   Environment: https://seu-app.com
+   Environment: https://www.mrdeveloper.com.br
    Completed 30 seconds ago
 ```
 
@@ -1264,6 +1508,257 @@ Tag Details:
 
 ---
 
+### `reusable-release.yml`
+
+**Arquivo**: `.github/workflows/reusable-release.yml`
+
+**Propósito**: Centralizar lógica de criação de releases e versionamento
+
+#### Definição
+
+```yaml
+on:
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+      node-version:
+        required: true
+        type: string
+```
+
+- Pode ser **chamado por outros workflows**
+- Recebe `version` e `node-version` como inputs
+
+#### Steps Detalhados
+
+##### 1️⃣ Checkout Code
+
+```yaml
+- name: Checkout code
+  uses: actions/checkout@v4
+  with:
+    fetch-depth: 0
+```
+
+Baixa código com histórico completo
+
+##### 2️⃣ Setup pnpm e Node.js
+
+```yaml
+- name: Setup pnpm
+  uses: pnpm/action-setup@v4
+
+- name: Setup Node.js
+  uses: actions/setup-node@v4
+  with:
+    node-version: ${{ inputs.node-version }}
+    cache: "pnpm"
+```
+
+Prepara ambiente de desenvolvimento
+
+##### 3️⃣ Get Version
+
+```yaml
+- name: Get version
+  id: get_version
+  run: |
+    echo "VERSION=${{ inputs.version }}" >> $GITHUB_ENV
+    echo "TAG_VERSION=v${{ inputs.version }}" >> $GITHUB_ENV
+```
+
+**Prepara variáveis de ambiente**
+
+##### 4️⃣ Check if Tag Already Exists
+
+```yaml
+- name: Check if tag already exists
+  id: check_tag
+  run: |
+    git fetch --tags
+    if git rev-parse "refs/tags/${{ env.TAG_VERSION }}" >/dev/null 2>&1; then
+      echo "Tag ${{ env.TAG_VERSION }} already exists. Skipping release."
+      echo "SKIP_ALL=true" >> $GITHUB_OUTPUT
+    else
+      echo "Tag ${{ env.TAG_VERSION }} does not exist. Proceeding with release."
+      echo "SKIP_ALL=false" >> $GITHUB_OUTPUT
+    fi
+```
+
+**O que faz**: Evita releases duplicados
+
+**Se tag existe**: Pula todo o processo
+
+##### 5️⃣ Update Version and Create Tag
+
+```yaml
+- name: Update version and create tag
+  if: steps.check_tag.outputs.SKIP_ALL == 'false'
+  run: |
+    git config --global user.name "github-actions[bot]"
+    git config --global user.email "github-actions[bot]@users.noreply.github.com"
+    pnpm version ${{ env.VERSION }} --no-git-tag-version
+    git add package.json pnpm-lock.yaml
+    git commit -m "chore: Bump version to ${{ env.VERSION }}"
+    git tag ${{ env.TAG_VERSION }} -m "Release ${{ env.TAG_VERSION }}"
+    git push
+    git push origin ${{ env.TAG_VERSION }}
+```
+
+**O que faz**: Atualiza versão e cria release
+
+**Sequência**:
+
+1. Atualiza `package.json` com nova versão
+2. Commit da mudança de versão
+3. Cria tag anotada
+4. Push do commit e tag
+
+**Resultado**: Versão atualizada + tag criada + release no GitHub
+
+---
+
+### 6. `sync-main-to-develop.yml` - Sincronização Automática Main → Develop
+
+**Arquivo**: `.github/workflows/sync-main-to-develop.yml`
+
+#### ⏱️ Quando Executa?
+
+```yaml
+on:
+  workflow_run:
+    workflows: ["Production Environment"] #
+    types:
+      - completed
+```
+
+- **APENAS** quando workflow de produção (`production.yml`) **termina com sucesso**
+- Mantém `develop` sincronizado com releases de produção
+
+#### 📊 Jobs Executados
+
+```
+┌────────────────────┐
+│ Production workflow│
+│ terminou com       │
+│ sucesso            │
+└────────┬───────────┘
+         │
+┌────────▼──────────┐
+│ create-sync-pr    │  ← Cria PR de sync
+└───────────────────┘
+```
+
+#### Job 1: `create-sync-pr`
+
+```yaml
+create-sync-pr:
+  if: github.event.workflow_run.conclusion == 'success'
+  runs-on: ubuntu-latest
+  permissions:
+    contents: write
+    pull-requests: write
+```
+
+**Executa APENAS se** workflow de produção teve **sucesso**
+
+##### Step 1: Checkout develop
+
+```yaml
+- name: Checkout develop branch
+  uses: actions/checkout@v4
+  with:
+    ref: develop
+```
+
+Faz checkout da branch develop
+
+##### Step 2: Configure Git User
+
+```yaml
+- name: Configure Git User
+  run: |
+    git config --global user.name "github-actions[bot]"
+    git config --global user.email "bot@users.noreply.github.com"
+```
+
+Configura Git para commits automáticos
+
+##### Step 3: Verificar necessidade de sync
+
+```bash
+git fetch origin main
+
+# Otimização: Verifica se 'main' já está no 'develop'
+if git merge-base --is-ancestor origin/main develop; then
+  echo "main is already merged into develop. No sync needed."
+  echo "sync_needed=false" >> $GITHUB_OUTPUT
+  exit 0
+fi
+
+echo "main has new commits. Creating sync PR..."
+echo "sync_needed=true" >> $GITHUB_OUTPUT
+```
+
+**O que faz**: Verifica se sync é necessário
+
+**Lógica**: Se `main` já está em `develop`, não precisa sync
+
+##### Step 4: Criar branch de sync
+
+```bash
+BRANCH_NAME="sync/main-to-develop-${{ github.run_id }}"
+echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+
+git checkout -b $BRANCH_NAME
+# Faz o merge do 'main' (com o commit do semantic-release)
+git merge origin/main --no-edit -m "chore: sync main back to develop"
+
+# Push usando PAT
+git push https://github-actions[bot]:${GH_PAT}@github.com/${{ github.repository }}.git HEAD:$BRANCH_NAME
+```
+
+**O que faz**: Cria branch temporária com merge de main
+
+**Branch name**: `sync/main-to-develop-{run_id}` (único)
+
+**Merge strategy**: `--no-edit` (usa mensagem padrão)
+
+##### Step 5: Criar Pull Request
+
+```yaml
+- name: Create Pull Request
+  if: steps.merge.outputs.sync_needed == 'true'
+  uses: peter-evans/create-pull-request@v6
+  with:
+    token: ${{ secrets.GITHUB_TOKEN }}
+    branch: ${{ steps.merge.outputs.branch_name }}
+    base: develop #
+    title: "🔄 [Auto-Sync] Merge main back into develop"
+    body: |
+      This PR automatically syncs the latest production release from `main` back into `develop`.
+
+      Includes:
+      - Version bump from `semantic-release`
+      - Updated `CHANGELOG.md`
+      - Any hotfixes that were merged to `main`
+    delete-branch: true # Deleta branch 'sync/...' após merge
+```
+
+**O que faz**: Cria PR automático para merge
+
+**Título**: `🔄 [Auto-Sync] Merge main back into develop`
+
+**Corpo**: Explica o que está sendo sincronizado
+
+**Auto-cleanup**: Deleta branch após merge
+
+**Resultado**: PR criado automaticamente para revisão
+
+---
+
 ## 🔄 Fluxos de Execução
 
 ### Fluxo 1: Feature Development (Feature → PR → Merge em Develop)
@@ -1294,7 +1789,7 @@ Tag Details:
 
 5. Comentário no PR:
    🚀 Vercel Preview Deployment
-   https://seu-app-pr-456.vercel.app
+   https://mrdeveloper-pr-456.vercel.app
 
 6. Revisor testa em preview
    ✅ Funcionalidade OK
@@ -1336,7 +1831,7 @@ Tag Details:
    ✅ create-beta-tag → v1.1.0-beta.123456
 
 5. Testar em preview
-   URL: https://seu-app-release.vercel.app
+   URL: https://mrdeveloper-release.vercel.app
 
 6. Abrir PR release/1.1.0 → main
    GitHub UI → Create Pull Request
@@ -1733,9 +2228,13 @@ git push
 - `.github/workflows/develop.yml` - Deploy dev
 - `.github/workflows/preview.yml` - Deploy preview + validações
 - `.github/workflows/production.yml` - Deploy prod + tags
+- `.github/workflows/create-beta-tag.yml` - Criação manual de tags beta
+- `.github/workflows/delete-merged-branches.yml` - Limpeza automática de branches
+- `.github/workflows/sync-main-to-develop.yml` - Sincronização automática main→develop
 - `.github/workflows/reusable-test-and-lint.yml` - Testes e lint
 - `.github/workflows/reusable-deploy-vercel.yml` - Deploy Vercel
 - `.github/workflows/reusable-create-tag.yml` - Criação de tags
+- `.github/workflows/reusable-release.yml` - Criação de releases
 - `package.json` - Scripts e versão do projeto
 - `vercel.json` - Configuração Vercel
 - `.eslintrc.cjs` ou `eslint.config.mjs` - Configuração linting
@@ -1772,6 +2271,6 @@ pnpm version major  # 1.0.0 → 2.0.0
 
 ---
 
-**Última atualização**: Novembro 2, 2025
+**Última atualização**: Novembro 3, 2025
 **Versão**: 1.0.0
 **Manutenedor**: GitHub Copilot
