@@ -94,7 +94,7 @@ jobs:
 
   run-semantic-release:
     name: Run Semantic Release (Beta)
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/release/')
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/release/') && !contains(github.event.head_commit.message, 'chore(release)')
     needs: deploy-preview
     runs-on: ubuntu-latest
     permissions:
