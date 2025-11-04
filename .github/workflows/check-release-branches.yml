@@ -1,0 +1,32 @@
+name: Check Release Branches
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - main
+
+jobs:
+  check-release-branches:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for multiple release branches
+        run: |
+          # Get all open PRs targeting main
+          OPEN_PRS=$(gh pr list --state open --base main --json number,headRefName --jq '.[] | select(.headRefName | startswith("release/")) | .headRefName')
+
+          # Count release branches
+          RELEASE_COUNT=$(echo "$OPEN_PRS" | wc -l)
+
+          echo "Found $RELEASE_COUNT open release branches:"
+          echo "$OPEN_PRS"
+
+          # Fail if more than one release branch is open
+          if [ "$RELEASE_COUNT" -gt 1 ]; then
+            echo "❌ ERROR: Multiple release branches detected!"
+            echo "Only one release branch can be open at a time."
+            echo "Please merge or close existing release PRs before opening a new one."
+            exit 1
+          fi
+
+          echo "✅ OK: No conflicting release branches found."
