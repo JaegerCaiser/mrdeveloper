@@ -1,3 +1,10 @@
+## [1.1.1-beta.1](https://github.com/JaegerCaiser/mrdeveloper/compare/v1.1.0...v1.1.1-beta.1) (2025-11-04)
+
+
+### Bug Fixes
+
+* remove duplicate changelog entries for 1.1.0-beta.1 ([b3a35b0](https://github.com/JaegerCaiser/mrdeveloper/commit/b3a35b0333f43eef0629dc0978336219eedf15f0))
+
 # [1.1.0](https://github.com/JaegerCaiser/mrdeveloper/compare/v1.0.3...v1.1.0) (2025-11-03)
 
 
@@ -72,4 +79,3 @@
 ### Reverts
 
 * remove duplicate pr-checks workflow ([93b6258](https://github.com/JaegerCaiser/mrdeveloper/commit/93b62588e2dc1b480f3a2570d6b43027741b7c23))
-
