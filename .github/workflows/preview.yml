@@ -30,28 +30,29 @@ jobs:
     outputs:
       should_skip: ${{ steps.check.outputs.should_skip }}
     steps:
-      - name: Check for recent workflow runs
+      - name: Check if this is a duplicate run
         id: check
         run: |
-          # Get current run info
-          CURRENT_SHA="${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}"
-          WORKFLOW_NAME="${{ github.workflow }}"
+          EVENT_NAME="${{ github.event_name }}"
           BRANCH_NAME="${{ github.event_name == 'pull_request' && github.head_ref || github.ref_name }}"
           
-          echo "Current SHA: $CURRENT_SHA"
-          echo "Workflow: $WORKFLOW_NAME"
+          echo "Event: $EVENT_NAME"
           echo "Branch: $BRANCH_NAME"
           
-          # Check for running/in-progress workflows on same branch
-          RUNNING_RUNS=$(gh run list --workflow="$WORKFLOW_NAME" --branch="$BRANCH_NAME" --status=in_progress --json databaseId --jq length)
-          
-          echo "Running workflows on same branch: $RUNNING_RUNS"
-          
-          if [ "$RUNNING_RUNS" -gt 0 ]; then
-            echo "Found running workflow, should skip this run"
-            echo "should_skip=true" >> $GITHUB_OUTPUT
+          # If this is a push to a release branch, check if there's an open PR for it
+          if [ "$EVENT_NAME" = "push" ] && [[ "$BRANCH_NAME" == release/* ]]; then
+            PR_COUNT=$(gh pr list --head "$BRANCH_NAME" --state open --json number --jq length)
+            echo "PR count for branch $BRANCH_NAME: $PR_COUNT"
+            
+            if [ "$PR_COUNT" -gt 0 ]; then
+              echo "Found open PR for release branch, should skip this push-triggered run"
+              echo "should_skip=true" >> $GITHUB_OUTPUT
+            else
+              echo "No open PR found, should proceed with semantic-release"
+              echo "should_skip=false" >> $GITHUB_OUTPUT
+            fi
           else
-            echo "No running workflows found, should proceed"
+            echo "Not a push to release branch, should proceed"
             echo "should_skip=false" >> $GITHUB_OUTPUT
           fi
         env:
