@@ -342,6 +342,27 @@ pnpm lint:fix     # Correção automática
 - `reusable-release.yml`: Semantic release automation
 - Cache de build artifacts (`.vite`, `node_modules/.cache`, `.eslintcache`)
 
+### Workflow Preview - Otimizações Recentes
+
+**Implementado em novembro de 2025 - Resolução de duplicação e status checks quebrados:**
+
+**Problema Resolvido:**
+- Workflows `preview.yml` executavam duas vezes (push + PR simultâneos)
+- Execuções canceladas apareciam como "failed" nos status checks
+- Bloqueava merges mesmo com execução bem-sucedida posterior
+
+**Solução Implementada:**
+- **Job `check-duplicate-run`**: Detecta quando há PR aberto para branch release
+- **Lógica Condicional**: Jobs downstream só executam se `should_skip != 'true'`
+- **Semantic-release**: Só roda em push direto para `release/*` sem PR aberto
+- **Status Checks**: Permanecem limpos (jobs pulados não falham)
+
+**Comportamento Atual:**
+- ✅ PRs: Executam testes, lint, deploy (semantic-release pula)
+- ✅ Push em `release/*`: Executam tudo + semantic-release (se sem PR)
+- ✅ Status checks: Sempre limpos, sem "failed" de duplicatas
+- ✅ Recursos: Economia de Actions minutes por evitar duplicação
+
 ## 📝 Padrões de Commit
 
 **IMPORTANTE: As mensagens de commit controlam o versionamento automático com `semantic-release`. Siga estas regras rigorosamente.**
@@ -502,6 +523,6 @@ $transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
 
 ---
 
-_Atualizado em: 3 de novembro de 2025_
+_Atualizado em: 4 de novembro de 2025_
 _Próxima revisão: Quando necessário_
 
