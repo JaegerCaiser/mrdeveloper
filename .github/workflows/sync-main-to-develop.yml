@@ -69,7 +69,7 @@ jobs:
 
           # Faz o merge do 'main' (com o commit do semantic-release)
           echo "Merging origin/main into $BRANCH_NAME..."
-          git merge origin/main --no-edit -m "chore: sync main back to develop"
+          git merge origin/main --allow-unrelated-histories --no-edit -m "chore: sync main back to develop"
           echo "Merge completed successfully"
 
           # Push usando o PAT
