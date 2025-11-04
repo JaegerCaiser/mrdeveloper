@@ -144,6 +144,7 @@ git push -u origin feature/nome-da-feature
 9. **Merge**: Após aprovação, fazer merge via interface do GitHub (semantic-release criará tag automaticamente)
 
 **IMPORTANTE: Nomenclatura da Release Branch**
+
 - ✅ Use `release/nome-descritivo` (ex: `release/new-authentication-system`)
 - ✅ Baseie o nome no conventional commits das mudanças incluídas
 - ✅ Exemplos:
@@ -175,6 +176,7 @@ git push -u origin feature/nome-da-feature
 9. **Criar PR**: Usar `gh pr create` para abrir Pull Request para `develop`
 
 **IMPORTANTE: Análise de Mudanças**
+
 - ✅ **Sempre** compare com `develop` antes de criar a branch
 - ✅ **Categorize** as mudanças pelos tipos de conventional commits:
   - `feat:` para novas funcionalidades
@@ -188,6 +190,7 @@ git push -u origin feature/nome-da-feature
 - ✅ **Liste** todos os arquivos modificados na descrição do PR
 
 **Exemplos de Nomenclatura:**
+
 - `feature/user-authentication` (nova funcionalidade de autenticação)
 - `fix/payment-processing` (correção no processamento de pagamentos)
 - `docs/api-documentation` (documentação da API)
@@ -195,6 +198,7 @@ git push -u origin feature/nome-da-feature
 - `test/integration-tests` (testes de integração)
 
 **Descrição do PR deve incluir:**
+
 - Resumo das mudanças implementadas
 - Arquivos modificados e impacto
 - Testes realizados (se aplicável)
@@ -222,9 +226,11 @@ git push -u origin feature/nome-da-feature
 ## 🏗️ Arquitetura do Projeto
 
 ### Visão Geral
+
 **Portfolio React SPA** - Site de portfólio moderno com animações, construído com React 18 + TypeScript + Vite.
 
 **Arquitetura Principal:**
+
 - `src/App.tsx` - Componente raiz que orquestra todas as seções
 - **Seções** (`src/sections/`): Hero, About, Experience, Contact - cada uma é uma página independente
 - **Componentes** (`src/components/`): Header, Footer, AnimatedBackground - reutilizáveis
@@ -233,6 +239,7 @@ git push -u origin feature/nome-da-feature
 - **Estilos** (`src/styles/`): Sistema SCSS centralizado com variáveis e animações
 
 ### Padrões de Componentes
+
 ```tsx
 // ❌ EVITE: Componentes monolíticos com lógica inline
 const BadComponent = () => {
@@ -244,7 +251,9 @@ const BadComponent = () => {
 // ✅ FAÇA: Separe responsabilidades
 // src/services/dataService.ts
 export class DataService {
-  async fetchData() { /* ... */ }
+  async fetchData() {
+    /* ... */
+  }
 }
 
 // src/hooks/useData.ts
@@ -257,12 +266,18 @@ export const useData = () => {
 // src/components/DataComponent.tsx
 const DataComponent = () => {
   const { data, loading } = useData();
-  return <div>{loading ? 'Loading...' : data.map(item => <Item key={item.id} />)}</div>;
+  return (
+    <div>
+      {loading ? "Loading..." : data.map((item) => <Item key={item.id} />)}
+    </div>
+  );
 };
 ```
 
 ### Padrão Service Layer
+
 **Exemplo: `src/services/contactService.ts`**
+
 - Classes singleton para serviços externos
 - Interface clara para tipos de dados
 - Validação centralizada no serviço
@@ -270,7 +285,9 @@ const DataComponent = () => {
 - Separação entre API calls e validação
 
 ### Sistema de Formulários
+
 **Hook Pattern: `src/hooks/useContactForm.ts`**
+
 - Estado unificado do formulário
 - Validação em tempo real com limpeza de erros
 - Estados de loading e mensagens de status
@@ -329,6 +346,7 @@ pnpm lint:fix     # Correção automática
 ### Build System Específico
 
 **Vite + TypeScript + Node Version Check:**
+
 - `prebuild` script valida versão do Node antes do build
 - Build output vai para `build/` (não `dist/`)
 - TypeScript compilation obrigatória antes do Vite
@@ -337,6 +355,7 @@ pnpm lint:fix     # Correção automática
 ### CI/CD Workflows
 
 **GitHub Actions Reutilizáveis:**
+
 - `reusable-test-and-lint.yml`: Testes + linting com cache inteligente
 - `reusable-deploy-vercel.yml`: Deploy para Vercel com preview/production
 - `reusable-release.yml`: Semantic release automation
@@ -347,17 +366,20 @@ pnpm lint:fix     # Correção automática
 **Implementado em novembro de 2025 - Resolução de duplicação e status checks quebrados:**
 
 **Problema Resolvido:**
+
 - Workflows `preview.yml` executavam duas vezes (push + PR simultâneos)
 - Execuções canceladas apareciam como "failed" nos status checks
 - Bloqueava merges mesmo com execução bem-sucedida posterior
 
 **Solução Implementada:**
+
 - **Job `check-duplicate-run`**: Detecta quando há PR aberto para branch release
 - **Lógica Condicional**: Jobs downstream só executam se `should_skip != 'true'`
 - **Semantic-release**: Só roda em push direto para `release/*` sem PR aberto
 - **Status Checks**: Permanecem limpos (jobs pulados não falham)
 
 **Comportamento Atual:**
+
 - ✅ PRs: Executam testes, lint, deploy (semantic-release pula)
 - ✅ Push em `release/*`: Executam tudo + semantic-release (se sem PR)
 - ✅ Status checks: Sempre limpos, sem "failed" de duplicatas
@@ -398,6 +420,7 @@ tipo(escopo opcional): descrição clara e objetiva
 
 - Para uma mudança que quebra a compatibilidade (major release), adicione `BREAKING CHANGE:` no rodapé do commit.
 - **Exemplo:**
+
   ```
   feat: refatorar sistema de autenticação
 
@@ -476,15 +499,18 @@ $transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
 ## 🔗 Integrações Externas
 
 ### FormSubmit (`src/services/contactService.ts`)
+
 - Endpoint: `https://formsubmit.co/ajax/[hash]`
 - Fallback para `mailto:` quando API falha
 - Validação client-side + server-side
 
 ### Vercel Analytics
+
 - `<Analytics />` component no App.tsx
 - Rastreamento automático de page views
 
 ### Semantic Release
+
 - Versionamento automático baseado em conventional commits
 - Changelog generation
 - GitHub releases automáticas
@@ -525,4 +551,3 @@ $transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
 
 _Atualizado em: 4 de novembro de 2025_
 _Próxima revisão: Quando necessário_
-
