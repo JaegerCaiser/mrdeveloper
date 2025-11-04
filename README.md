@@ -6,6 +6,7 @@
 [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
 [![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
 [![CI/CD](https://img.shields.io/github/actions/workflow/status/JaegerCaiser/mrdeveloper/production.yml?branch=main&style=for-the-badge&label=production)](https://github.com/JaegerCaiser/mrdeveloper/actions)
+[![CI/CD](https://img.shields.io/github/actions/workflow/status/JaegerCaiser/mrdeveloper/preview.yml?branch=release%2Fsemantic-release-and-workflow-fixes&style=for-the-badge&label=preview)](https://github.com/JaegerCaiser/mrdeveloper/actions)
 [![CI/CD](https://img.shields.io/github/actions/workflow/status/JaegerCaiser/mrdeveloper/develop.yml?branch=develop&style=for-the-badge&label=develop)](https://github.com/JaegerCaiser/mrdeveloper/actions)
 
 **A modern, animated portfolio website showcasing Matheus Caiser's work as a Full Stack Developer**
@@ -82,10 +83,8 @@
 
 ### Prerequisites
 
-```bash
-Node.js >= 16.x
-pnpm >= 10.20.0 (recommended) or npm/yarn
-```
+- **Node.js**: A versão exata está definida no arquivo `.nvmrc`. Se você usa `nvm`, apenas rode `nvm use` na raiz do projeto.
+- **pnpm**: Versão `10.20.0` ou superior (instalado via `corepack`).
 
 ### Installation
 
@@ -151,14 +150,16 @@ Este projeto utiliza **GitHub Actions** com infraestrutura completa de CI/CD seg
 
 #### ✅ **Ambiente de Preview** (`preview.yml`)
 
-- **Trigger**: Pull Requests + Push em branches `release/*`
+- **Trigger**: Pull Requests para `main` + Push em branches `release/*`
 - **Recursos**:
   - 🧪 Testes e linting
   - 🚀 Deploy preview no Vercel (por PR)
-  - 📋 Sistema de logs de erro inteligente
-  - 💬 Comentários automáticos nos PRs com links de preview
-  - 🛡️ **Semantic Release**: Automated versioning and changelog generation
-  - ⚡ Intelligent commit analysis for PATCH/MINOR/MAJOR version bumps
+  -  Comentários automáticos nos PRs com links de preview
+  - 🛡️ **Semantic Release**: Geração de versões beta automáticas em push para `release/*` (quando não há PR aberto).
+  - ⚡ **Otimização de Workflow**:
+    - **Detecção de Duplicatas**: Um job `check-duplicate-run` verifica se já existe uma execução para o PR, evitando que o workflow de `push` rode desnecessariamente.
+    - **Status Checks Limpos**: Jobs são pulados (`skipped`) ao invés de cancelados (`cancelled`), mantendo os status checks do PR sempre corretos e evitando bloqueios de merge.
+    - **Economia de Recursos**: Evita o desperdício de *Actions minutes* com execuções duplicadas.
 
 #### ✅ **Ambiente de Produção** (`production.yml`)
 
@@ -169,13 +170,6 @@ Este projeto utiliza **GitHub Actions** com infraestrutura completa de CI/CD seg
   - 🏷️ Versionamento automático com tags de release
   - 📋 Logs detalhados de erro
   - 🔒 Controle rigoroso de qualidade
-
-#### ✅ **Validação de Release** (`check-release-branch.yml`)
-
-- **Trigger**: PRs para `main`
-- **Recursos**:
-  - ✅ Validação de branches de release
-  - 📋 Logs de auditoria
 
 <a id="otimizações-de-performance"></a>
 

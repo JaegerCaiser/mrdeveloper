@@ -19,16 +19,57 @@ on:
       - release/**
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
 jobs:
+  check-duplicate-run:
+    name: Check for Duplicate Runs
+    runs-on: ubuntu-latest
+    outputs:
+      should_skip: ${{ steps.check.outputs.should_skip }}
+    steps:
+      - name: Check if this is a duplicate run
+        id: check
+        run: |
+          EVENT_NAME="${{ github.event_name }}"
+          BRANCH_NAME="${{ github.event_name == 'pull_request' && github.head_ref || github.ref_name }}"
+          
+          echo "Event: $EVENT_NAME"
+          echo "Branch: $BRANCH_NAME"
+          
+          # If this is a push to a release branch, check if there's an open PR for it
+          if [ "$EVENT_NAME" = "push" ] && [[ "$BRANCH_NAME" == release/* ]]; then
+            PR_COUNT=$(gh pr list --head "$BRANCH_NAME" --state open --json number --jq length)
+            echo "PR count for branch $BRANCH_NAME: $PR_COUNT"
+            
+            if [ "$PR_COUNT" -gt 0 ]; then
+              echo "Found open PR for release branch, should skip this push-triggered run"
+              echo "should_skip=true" >> $GITHUB_OUTPUT
+            else
+              echo "No open PR found, should proceed with semantic-release"
+              echo "should_skip=false" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "Not a push to release branch, should proceed"
+            echo "should_skip=false" >> $GITHUB_OUTPUT
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   test-and-lint:
     name: Test & Lint
+    needs: check-duplicate-run
+    if: needs.check-duplicate-run.outputs.should_skip != 'true'
     uses: ./.github/workflows/reusable-test-and-lint.yml
     with:
       node-version: "22.x"
 
   deploy-preview:
     name: Deploy to Vercel Preview
-    needs: test-and-lint
+    needs: [check-duplicate-run, test-and-lint]
+    if: needs.check-duplicate-run.outputs.should_skip != 'true'
     uses: ./.github/workflows/reusable-deploy-vercel.yml
     with:
       environment: Preview
@@ -90,8 +131,8 @@ jobs:
 
   run-semantic-release:
     name: Run Semantic Release (Beta)
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/release/') && !contains(github.event.head_commit.message, 'chore(release)')
-    needs: deploy-preview
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/release/') && !contains(github.event.head_commit.message, 'chore(release)') && needs.check-duplicate-run.outputs.should_skip != 'true'
+    needs: [check-duplicate-run, deploy-preview]
     runs-on: ubuntu-latest
     permissions:
       contents: write

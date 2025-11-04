@@ -68,6 +68,8 @@ Se qualquer pré-condição falhar, não executar a ação; informe o usuário e
 - Execute diretamente no terminal
 - Exemplos: `gh pr create`, `gh pr edit`, `gh pr merge`, `gh repo clone`
 - **Para PRs complexas**: Crie temporariamente um arquivo `.md` com a descrição completa e use `--body-file arquivo.md` para `gh pr create` ou `gh pr edit`
+- **Como criar arquivos temporários**: Use a ferramenta `create_file` diretamente ao invés de comandos no terminal com `EOF` para manter o terminal limpo
+- **Exemplo**: Crie `pr_description.md` usando `create_file`, depois use `--body-file pr_description.md`
 
 #### 🧹 Limpeza:
 
@@ -126,19 +128,23 @@ git push -u origin feature/nome-da-feature
 
 **Quando o usuário disser "pode criar uma release", execute o fluxo de Release:**
 
-1. **Ir para develop**: `git checkout develop`
-2. **Atualizar develop**: `git pull origin develop`
-3. **Criar branch release**: `git checkout -b release/nome-descritivo` (usar nome descritivo baseado no conventional commits, ex: `release/new-authentication-system`, `release/ui-improvements`, `release/bug-fixes`)
-4. **Criar PR para main**: Usar `gh pr create` com título "Release: Nome Descritivo" e descrição detalhando todas as mudanças desde a última release. **Analisar profundamente:**
+1. **Verificar PRs abertas**: `gh pr list --state open --base main --json number,headRefName,title | cat` - verificar se já existe PR de branch `release/*`
+2. **Se existir PR release aberta**: Informar ao usuário e perguntar se quer continuar ou mergear a existente primeiro
+3. **Ir para develop**: `git checkout develop`
+4. **Atualizar develop**: `git pull origin develop`
+5. **Criar branch release**: `git checkout -b release/nome-descritivo` (usar nome descritivo baseado no conventional commits, ex: `release/new-authentication-system`, `release/ui-improvements`, `release/bug-fixes`)
+6. **Push da branch**: `git push -u origin release/nome-descritivo` (enviar branch para repositório remoto)
+7. **Criar PR para main**: Usar `gh pr create` com título "Release: Nome Descritivo" e descrição detalhando todas as mudanças desde a última release. **Analisar profundamente:**
    - Ver commits com `git log main..HEAD`
    - Examinar conteúdo alterado em cada arquivo
    - Entender o contexto e impacto das mudanças
    - **Se não entender o contexto, perguntar ao usuário antes de prosseguir**
    - Comparar com `main` para garantir descrição precisa
-5. **Aguardar aprovação**: Não fazer merge automático, aguardar revisão
-6. **Merge**: Após aprovação, fazer merge via interface do GitHub (semantic-release criará tag automaticamente)
+8. **Aguardar aprovação**: Não fazer merge automático, aguardar revisão
+9. **Merge**: Após aprovação, fazer merge via interface do GitHub (semantic-release criará tag automaticamente)
 
 **IMPORTANTE: Nomenclatura da Release Branch**
+
 - ✅ Use `release/nome-descritivo` (ex: `release/new-authentication-system`)
 - ✅ Baseie o nome no conventional commits das mudanças incluídas
 - ✅ Exemplos:
@@ -170,6 +176,7 @@ git push -u origin feature/nome-da-feature
 9. **Criar PR**: Usar `gh pr create` para abrir Pull Request para `develop`
 
 **IMPORTANTE: Análise de Mudanças**
+
 - ✅ **Sempre** compare com `develop` antes de criar a branch
 - ✅ **Categorize** as mudanças pelos tipos de conventional commits:
   - `feat:` para novas funcionalidades
@@ -183,6 +190,7 @@ git push -u origin feature/nome-da-feature
 - ✅ **Liste** todos os arquivos modificados na descrição do PR
 
 **Exemplos de Nomenclatura:**
+
 - `feature/user-authentication` (nova funcionalidade de autenticação)
 - `fix/payment-processing` (correção no processamento de pagamentos)
 - `docs/api-documentation` (documentação da API)
@@ -190,6 +198,7 @@ git push -u origin feature/nome-da-feature
 - `test/integration-tests` (testes de integração)
 
 **Descrição do PR deve incluir:**
+
 - Resumo das mudanças implementadas
 - Arquivos modificados e impacto
 - Testes realizados (se aplicável)
@@ -217,9 +226,11 @@ git push -u origin feature/nome-da-feature
 ## 🏗️ Arquitetura do Projeto
 
 ### Visão Geral
+
 **Portfolio React SPA** - Site de portfólio moderno com animações, construído com React 18 + TypeScript + Vite.
 
 **Arquitetura Principal:**
+
 - `src/App.tsx` - Componente raiz que orquestra todas as seções
 - **Seções** (`src/sections/`): Hero, About, Experience, Contact - cada uma é uma página independente
 - **Componentes** (`src/components/`): Header, Footer, AnimatedBackground - reutilizáveis
@@ -228,6 +239,7 @@ git push -u origin feature/nome-da-feature
 - **Estilos** (`src/styles/`): Sistema SCSS centralizado com variáveis e animações
 
 ### Padrões de Componentes
+
 ```tsx
 // ❌ EVITE: Componentes monolíticos com lógica inline
 const BadComponent = () => {
@@ -239,7 +251,9 @@ const BadComponent = () => {
 // ✅ FAÇA: Separe responsabilidades
 // src/services/dataService.ts
 export class DataService {
-  async fetchData() { /* ... */ }
+  async fetchData() {
+    /* ... */
+  }
 }
 
 // src/hooks/useData.ts
@@ -252,12 +266,18 @@ export const useData = () => {
 // src/components/DataComponent.tsx
 const DataComponent = () => {
   const { data, loading } = useData();
-  return <div>{loading ? 'Loading...' : data.map(item => <Item key={item.id} />)}</div>;
+  return (
+    <div>
+      {loading ? "Loading..." : data.map((item) => <Item key={item.id} />)}
+    </div>
+  );
 };
 ```
 
 ### Padrão Service Layer
+
 **Exemplo: `src/services/contactService.ts`**
+
 - Classes singleton para serviços externos
 - Interface clara para tipos de dados
 - Validação centralizada no serviço
@@ -265,7 +285,9 @@ const DataComponent = () => {
 - Separação entre API calls e validação
 
 ### Sistema de Formulários
+
 **Hook Pattern: `src/hooks/useContactForm.ts`**
+
 - Estado unificado do formulário
 - Validação em tempo real com limpeza de erros
 - Estados de loading e mensagens de status
@@ -324,6 +346,7 @@ pnpm lint:fix     # Correção automática
 ### Build System Específico
 
 **Vite + TypeScript + Node Version Check:**
+
 - `prebuild` script valida versão do Node antes do build
 - Build output vai para `build/` (não `dist/`)
 - TypeScript compilation obrigatória antes do Vite
@@ -332,30 +355,77 @@ pnpm lint:fix     # Correção automática
 ### CI/CD Workflows
 
 **GitHub Actions Reutilizáveis:**
+
 - `reusable-test-and-lint.yml`: Testes + linting com cache inteligente
 - `reusable-deploy-vercel.yml`: Deploy para Vercel com preview/production
 - `reusable-release.yml`: Semantic release automation
 - Cache de build artifacts (`.vite`, `node_modules/.cache`, `.eslintcache`)
 
+### Workflow Preview - Otimizações Recentes
+
+**Implementado em novembro de 2025 - Resolução de duplicação e status checks quebrados:**
+
+**Problema Resolvido:**
+
+- Workflows `preview.yml` executavam duas vezes (push + PR simultâneos)
+- Execuções canceladas apareciam como "failed" nos status checks
+- Bloqueava merges mesmo com execução bem-sucedida posterior
+
+**Solução Implementada:**
+
+- **Job `check-duplicate-run`**: Detecta quando há PR aberto para branch release
+- **Lógica Condicional**: Jobs downstream só executam se `should_skip != 'true'`
+- **Semantic-release**: Só roda em push direto para `release/*` sem PR aberto
+- **Status Checks**: Permanecem limpos (jobs pulados não falham)
+
+**Comportamento Atual:**
+
+- ✅ PRs: Executam testes, lint, deploy (semantic-release pula)
+- ✅ Push em `release/*`: Executam tudo + semantic-release (se sem PR)
+- ✅ Status checks: Sempre limpos, sem "failed" de duplicatas
+- ✅ Recursos: Economia de Actions minutes por evitar duplicação
+
 ## 📝 Padrões de Commit
+
+**IMPORTANTE: As mensagens de commit controlam o versionamento automático com `semantic-release`. Siga estas regras rigorosamente.**
 
 ### Formato
 
 ```
-tipo: descrição clara e objetiva
+tipo(escopo opcional): descrição clara e objetiva
 
-[Corpo opcional explicando mudanças]
+[corpo opcional explicando as mudanças]
+
+[rodapé opcional, ex: BREAKING CHANGE ou referência de issue]
 ```
 
-### Tipos
+### Tipos e Impacto na Versão
 
-- `feat:` Nova funcionalidade
-- `fix:` Correção de bug
-- `docs:` Documentação
-- `style:` Formatação/código
-- `refactor:` Refatoração
-- `test:` Testes
-- `chore:` Manutenção
+- `feat`: **(Minor Release)** Adiciona uma nova funcionalidade. Ex: `feat: adicionar login com Google`.
+- `fix`: **(Patch Release)** Corrige um bug. Ex: `fix: corrigir erro no cálculo de impostos`.
+- `docs`: Apenas documentação. **Não gera release.**
+- `style`: Mudanças de formatação, sem impacto no código. **Não gera release.**
+- `refactor`: Refatoração de código sem mudança de comportamento. **Não gera release.**
+- `test`: Adição ou correção de testes. **Não gera release.**
+- `chore`: Manutenção, build, etc. **Não gera release.**
+
+### Revertendo Commits
+
+- **`revert`**: Para desfazer um commit anterior, **SEMPRE** use o tipo `revert`.
+  - **Como usar:** `git revert <hash-do-commit>`
+  - **Mensagem:** `revert: feat: adicionar login com Google`
+  - **Impacto:** O `semantic-release` irá anular o commit original. Se um `feat` for revertido, ele não gerará mais uma release `minor`.
+
+### Breaking Changes (Major Release)
+
+- Para uma mudança que quebra a compatibilidade (major release), adicione `BREAKING CHANGE:` no rodapé do commit.
+- **Exemplo:**
+
+  ```
+  feat: refatorar sistema de autenticação
+
+  BREAKING CHANGE: O endpoint de login foi alterado de `/login` para `/auth/login`.
+  ```
 
 ## 🎨 Padrões de UI/UX
 
@@ -429,15 +499,18 @@ $transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
 ## 🔗 Integrações Externas
 
 ### FormSubmit (`src/services/contactService.ts`)
+
 - Endpoint: `https://formsubmit.co/ajax/[hash]`
 - Fallback para `mailto:` quando API falha
 - Validação client-side + server-side
 
 ### Vercel Analytics
+
 - `<Analytics />` component no App.tsx
 - Rastreamento automático de page views
 
 ### Semantic Release
+
 - Versionamento automático baseado em conventional commits
 - Changelog generation
 - GitHub releases automáticas
@@ -476,6 +549,5 @@ $transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
 
 ---
 
-_Atualizado em: 3 de novembro de 2025_
+_Atualizado em: 4 de novembro de 2025_
 _Próxima revisão: Quando necessário_
-
