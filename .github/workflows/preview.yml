@@ -14,7 +14,6 @@ env:
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-    branches: [main]
   push:
     branches:
       - release/**
@@ -25,15 +24,51 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  check-duplicate-run:
+    name: Check for Duplicate Runs
+    runs-on: ubuntu-latest
+    outputs:
+      should_skip: ${{ steps.check.outputs.should_skip }}
+    steps:
+      - name: Check for recent workflow runs
+        id: check
+        run: |
+          # Get current run info
+          CURRENT_SHA="${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}"
+          WORKFLOW_NAME="${{ github.workflow }}"
+          BRANCH_NAME="${{ github.event_name == 'pull_request' && github.head_ref || github.ref_name }}"
+          
+          echo "Current SHA: $CURRENT_SHA"
+          echo "Workflow: $WORKFLOW_NAME"
+          echo "Branch: $BRANCH_NAME"
+          
+          # Check for running/in-progress workflows on same branch
+          RUNNING_RUNS=$(gh run list --workflow="$WORKFLOW_NAME" --branch="$BRANCH_NAME" --status=in_progress --json databaseId --jq length)
+          
+          echo "Running workflows on same branch: $RUNNING_RUNS"
+          
+          if [ "$RUNNING_RUNS" -gt 0 ]; then
+            echo "Found running workflow, should skip this run"
+            echo "should_skip=true" >> $GITHUB_OUTPUT
+          else
+            echo "No running workflows found, should proceed"
+            echo "should_skip=false" >> $GITHUB_OUTPUT
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   test-and-lint:
     name: Test & Lint
+    needs: check-duplicate-run
+    if: needs.check-duplicate-run.outputs.should_skip == 'false'
     uses: ./.github/workflows/reusable-test-and-lint.yml
     with:
       node-version: "22.x"
 
   deploy-preview:
     name: Deploy to Vercel Preview
-    needs: test-and-lint
+    needs: [check-duplicate-run, test-and-lint]
+    if: needs.check-duplicate-run.outputs.should_skip == 'false'
     uses: ./.github/workflows/reusable-deploy-vercel.yml
     with:
       environment: Preview
@@ -96,7 +131,7 @@ jobs:
   run-semantic-release:
     name: Run Semantic Release (Beta)
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/release/') && !contains(github.event.head_commit.message, 'chore(release)')
-    needs: deploy-preview
+    needs: [check-duplicate-run, deploy-preview]
     runs-on: ubuntu-latest
     permissions:
       contents: write
