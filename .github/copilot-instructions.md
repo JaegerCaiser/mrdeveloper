@@ -17,17 +17,29 @@ Este arquivo serve como guia de referência para futuras interações com o GitH
 **NUNCA faça operações git automaticamente!**
 
 - ✅ Aguarde o usuário testar as mudanças primeiro
-- ✅ Só faça commit/push quando explicitamente solicitado
+- ✅ Só faça commit/push quando explicitamente solicitado pelo usuário (ver palavras-chave autorizadas abaixo)
 - ✅ Permita que o usuário valide as alterações antes de versionar
-- ✅ **EM VEZ DE FAZER OPERAÇÕES GIT, EXPLIQUE O QUE FOI FEITO**
+- ✅ **Explique detalhadamente o que foi feito e quais comandos você pretende executar antes de qualquer ação que modifique o repositório**
 
-**📝 Esta restrição se aplica em TODOS os casos onde o usuário vai testar, validar e possivelmente pedir para alterar algo.**
+Observação importante: esta regra é uma política de segurança — o assistente NÃO executa operações que alterem o repositório sem autorização explícita do usuário. Em outras palavras: "NUNCA faça operações git automaticamente" é a regra por padrão; exceções são permitidas somente quando o usuário dá autorização clara (por exemplo, dizendo exatamente: `pode commitar`, `pode criar uma release`, `criar uma branch`, ou outra frase previamente acordada).
 
-**🔧 Esta restrição também se aplica a operações que afetam o repositório, incluindo:**
+**🔧 Esta restrição aplica-se também a operações que afetam o repositório remoto ou o GitHub:**
 
-- Operações git (commit, push, pull, etc.)
-- GitHub CLI (`gh`) para criação/edição de PRs, issues, etc.
-- Qualquer operação que modifique o estado do repositório ou GitHub
+- Operações git que modificam histórico (commit, push, reset, rebase, tag)
+- Ações do GitHub CLI (`gh`) que criam/editar/remover recursos (PRs, releases, issues)
+- Qualquer operação que publique credenciais ou modifique o estado do repositório remoto
+
+Antes de realizar qualquer ação autorizada, o assistente deve executar os checks pré-ação listados na seção "Preconditions" abaixo.
+
+### Preconditions (verificações obrigatórias antes de qualquer ação automática)
+
+- Verificar que o cliente `gh` está instalado: `gh --version`
+- Verificar que o usuário está autenticado com `gh`: `gh auth status` (se não autenticado, solicitar ao usuário que autentique manualmente)
+- Verificar a branch base esperada (`develop`/`main`) existe remotamente: `git fetch origin && git branch -r | grep origin/develop`
+- Confirmar que o working tree local está num estado esperado: `git status --porcelain` (não prosseguir se houver conflitos ou mudanças desconhecidas)
+- Verificar permissões de push/tag/PR via `gh` quando aplicável (ou pedir confirmação ao usuário)
+
+Se qualquer pré-condição falhar, não executar a ação; informe o usuário e forneça os comandos que ele pode rodar localmente para habilitar/autorizar a ação.
 
 ### ✅ GitHub CLI (gh)
 
@@ -48,12 +60,14 @@ Este arquivo serve como guia de referência para futuras interações com o GitH
 - **SEMPRE** redirecione para arquivo temporário
 - Use: `gh command ... > temp.json && cat temp.json && rm temp.json`
 - **⚠️ IMPORTANTE:** Para alguns comandos como `gh pr checks`, use `--json campos | cat` em vez de redirecionar para arquivo, pois podem não mostrar output quando redirecionados
+- **Para `gh pr view`**: Sempre use `--json campos | cat` para garantir que o output seja exibido corretamente
 - Exemplos: `gh pr list`, `gh pr view --json`, `gh pr checks --json name,state | cat`, `gh issue list`, `gh repo list`
 
 #### 💬 Para comandos interativos ou de ação:
 
 - Execute diretamente no terminal
 - Exemplos: `gh pr create`, `gh pr edit`, `gh pr merge`, `gh repo clone`
+- **Para PRs complexas**: Crie temporariamente um arquivo `.md` com a descrição completa e use `--body-file arquivo.md` para `gh pr create` ou `gh pr edit`
 
 #### 🧹 Limpeza:
 
@@ -135,6 +149,47 @@ git push -u origin feature/nome-da-feature
 - Melhorias técnicas
 - Comparativo com a versão anterior em `main`
 - Notas de migração se necessário
+
+### ✅ Comando "Criar uma Branch"
+
+**Quando o usuário disser "criar uma branch" ou similar, execute o fluxo de Gitflow para criação de branches:**
+
+1. **Verificar mudanças atuais**: Analisar todas as mudanças não commitadas no working directory
+2. **Comparar com develop**: Fazer `git diff develop` para ver todas as diferenças
+3. **Categorizar mudanças**: Identificar se são features, fixes, docs, etc. baseado nos arquivos modificados
+4. **Criar nome da branch**: Usar padrão `feature/nome-descritivo` baseado no conventional commits
+5. **Criar e fazer checkout**: `git checkout -b feature/nome-descritivo`
+6. **Adicionar mudanças**: `git add .` para staging
+7. **Commit inicial**: `git commit -m "tipo: descrição clara"` seguindo conventional commits
+8. **Push da branch**: `git push -u origin feature/nome-descritivo`
+9. **Criar PR**: Usar `gh pr create` para abrir Pull Request para `develop`
+
+**IMPORTANTE: Análise de Mudanças**
+- ✅ **Sempre** compare com `develop` antes de criar a branch
+- ✅ **Categorize** as mudanças pelos tipos de conventional commits:
+  - `feat:` para novas funcionalidades
+  - `fix:` para correções de bugs
+  - `docs:` para documentação
+  - `refactor:` para refatoração de código
+  - `style:` para formatação/código
+  - `test:` para testes
+  - `chore:` para manutenção
+- ✅ **Nomeie** a branch baseada no propósito principal das mudanças
+- ✅ **Liste** todos os arquivos modificados na descrição do PR
+
+**Exemplos de Nomenclatura:**
+- `feature/user-authentication` (nova funcionalidade de autenticação)
+- `fix/payment-processing` (correção no processamento de pagamentos)
+- `docs/api-documentation` (documentação da API)
+- `refactor/database-layer` (refatoração da camada de banco)
+- `test/integration-tests` (testes de integração)
+
+**Descrição do PR deve incluir:**
+- Resumo das mudanças implementadas
+- Arquivos modificados e impacto
+- Testes realizados (se aplicável)
+- Screenshots ou demos (se aplicável)
+- Notas de migração (se aplicável)
 
 ### 🛡️ Branch Protection
 
