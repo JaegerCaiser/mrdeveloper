@@ -129,14 +129,15 @@ git push -u origin feature/nome-da-feature
 1. **Ir para develop**: `git checkout develop`
 2. **Atualizar develop**: `git pull origin develop`
 3. **Criar branch release**: `git checkout -b release/nome-descritivo` (usar nome descritivo baseado no conventional commits, ex: `release/new-authentication-system`, `release/ui-improvements`, `release/bug-fixes`)
-4. **Criar PR para main**: Usar `gh pr create` com título "Release: Nome Descritivo" e descrição detalhando todas as mudanças desde a última release. **Analisar profundamente:**
+4. **Push da branch**: `git push -u origin release/nome-descritivo` (enviar branch para repositório remoto)
+5. **Criar PR para main**: Usar `gh pr create` com título "Release: Nome Descritivo" e descrição detalhando todas as mudanças desde a última release. **Analisar profundamente:**
    - Ver commits com `git log main..HEAD`
    - Examinar conteúdo alterado em cada arquivo
    - Entender o contexto e impacto das mudanças
    - **Se não entender o contexto, perguntar ao usuário antes de prosseguir**
    - Comparar com `main` para garantir descrição precisa
-5. **Aguardar aprovação**: Não fazer merge automático, aguardar revisão
-6. **Merge**: Após aprovação, fazer merge via interface do GitHub (semantic-release criará tag automaticamente)
+6. **Aguardar aprovação**: Não fazer merge automático, aguardar revisão
+7. **Merge**: Após aprovação, fazer merge via interface do GitHub (semantic-release criará tag automaticamente)
 
 **IMPORTANTE: Nomenclatura da Release Branch**
 - ✅ Use `release/nome-descritivo` (ex: `release/new-authentication-system`)
