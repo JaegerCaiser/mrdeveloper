@@ -60,12 +60,14 @@ Se qualquer pré-condição falhar, não executar a ação; informe o usuário e
 - **SEMPRE** redirecione para arquivo temporário
 - Use: `gh command ... > temp.json && cat temp.json && rm temp.json`
 - **⚠️ IMPORTANTE:** Para alguns comandos como `gh pr checks`, use `--json campos | cat` em vez de redirecionar para arquivo, pois podem não mostrar output quando redirecionados
+- **Para `gh pr view`**: Sempre use `--json campos | cat` para garantir que o output seja exibido corretamente
 - Exemplos: `gh pr list`, `gh pr view --json`, `gh pr checks --json name,state | cat`, `gh issue list`, `gh repo list`
 
 #### 💬 Para comandos interativos ou de ação:
 
 - Execute diretamente no terminal
 - Exemplos: `gh pr create`, `gh pr edit`, `gh pr merge`, `gh repo clone`
+- **Para PRs complexas**: Crie temporariamente um arquivo `.md` com a descrição completa e use `--body-file arquivo.md` para `gh pr create` ou `gh pr edit`
 
 #### 🧹 Limpeza:
 
