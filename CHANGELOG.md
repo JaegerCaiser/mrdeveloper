@@ -1,4 +1,10 @@
+## [1.1.3-beta.1](https://github.com/JaegerCaiser/mrdeveloper/compare/v1.1.2...v1.1.3-beta.1) (2025-11-04)
 
+
+### Bug Fixes
+
+* correct semantic-release labels configuration to prevent invalid label names ([106df1f](https://github.com/JaegerCaiser/mrdeveloper/commit/106df1f6f8f4865b566f3545590a3cc33fba3beb))
+* **release:** consolidate workflow fixes and documentation updates ([bd0358a](https://github.com/JaegerCaiser/mrdeveloper/commit/bd0358a9fca49ee0d1f6fb9eebc12ed7ff7acafd))
 
 ## [1.1.2](https://github.com/JaegerCaiser/mrdeveloper/compare/v1.1.1...v1.1.2) (2025-11-04)
 
