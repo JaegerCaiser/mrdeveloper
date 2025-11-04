@@ -74,7 +74,7 @@ jobs:
 
           # Push usando o PAT
           echo "Pushing branch to remote..."
-          git push https://github-actions[bot]:${GH_PAT}@github.com/${{ github.repository }}.git HEAD:$BRANCH_NAME
+          git push https://github-actions[bot]:${GH_PAT}@github.com/${GITHUB_REPOSITORY}.git HEAD:$BRANCH_NAME
           echo "Push completed successfully"
 
       - name: Create Pull Request
