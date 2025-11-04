@@ -61,7 +61,7 @@ jobs:
   test-and-lint:
     name: Test & Lint
     needs: check-duplicate-run
-    if: needs.check-duplicate-run.outputs.should_skip == 'false'
+    if: needs.check-duplicate-run.outputs.should_skip != 'true'
     uses: ./.github/workflows/reusable-test-and-lint.yml
     with:
       node-version: "22.x"
@@ -69,7 +69,7 @@ jobs:
   deploy-preview:
     name: Deploy to Vercel Preview
     needs: [check-duplicate-run, test-and-lint]
-    if: needs.check-duplicate-run.outputs.should_skip == 'false'
+    if: needs.check-duplicate-run.outputs.should_skip != 'true'
     uses: ./.github/workflows/reusable-deploy-vercel.yml
     with:
       environment: Preview
@@ -131,7 +131,7 @@ jobs:
 
   run-semantic-release:
     name: Run Semantic Release (Beta)
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/release/') && !contains(github.event.head_commit.message, 'chore(release)')
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/release/') && !contains(github.event.head_commit.message, 'chore(release)') && needs.check-duplicate-run.outputs.should_skip != 'true'
     needs: [check-duplicate-run, deploy-preview]
     runs-on: ubuntu-latest
     permissions:
