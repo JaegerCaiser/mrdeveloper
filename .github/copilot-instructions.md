@@ -17,17 +17,29 @@ Este arquivo serve como guia de referência para futuras interações com o GitH
 **NUNCA faça operações git automaticamente!**
 
 - ✅ Aguarde o usuário testar as mudanças primeiro
-- ✅ Só faça commit/push quando explicitamente solicitado
+- ✅ Só faça commit/push quando explicitamente solicitado pelo usuário (ver palavras-chave autorizadas abaixo)
 - ✅ Permita que o usuário valide as alterações antes de versionar
-- ✅ **EM VEZ DE FAZER OPERAÇÕES GIT, EXPLIQUE O QUE FOI FEITO**
+- ✅ **Explique detalhadamente o que foi feito e quais comandos você pretende executar antes de qualquer ação que modifique o repositório**
 
-**📝 Esta restrição se aplica em TODOS os casos onde o usuário vai testar, validar e possivelmente pedir para alterar algo.**
+Observação importante: esta regra é uma política de segurança — o assistente NÃO executa operações que alterem o repositório sem autorização explícita do usuário. Em outras palavras: "NUNCA faça operações git automaticamente" é a regra por padrão; exceções são permitidas somente quando o usuário dá autorização clara (por exemplo, dizendo exatamente: `pode commitar`, `pode criar uma release`, `criar uma branch`, ou outra frase previamente acordada).
 
-**🔧 Esta restrição também se aplica a operações que afetam o repositório, incluindo:**
+**🔧 Esta restrição aplica-se também a operações que afetam o repositório remoto ou o GitHub:**
 
-- Operações git (commit, push, pull, etc.)
-- GitHub CLI (`gh`) para criação/edição de PRs, issues, etc.
-- Qualquer operação que modifique o estado do repositório ou GitHub
+- Operações git que modificam histórico (commit, push, reset, rebase, tag)
+- Ações do GitHub CLI (`gh`) que criam/editar/remover recursos (PRs, releases, issues)
+- Qualquer operação que publique credenciais ou modifique o estado do repositório remoto
+
+Antes de realizar qualquer ação autorizada, o assistente deve executar os checks pré-ação listados na seção "Preconditions" abaixo.
+
+### Preconditions (verificações obrigatórias antes de qualquer ação automática)
+
+- Verificar que o cliente `gh` está instalado: `gh --version`
+- Verificar que o usuário está autenticado com `gh`: `gh auth status` (se não autenticado, solicitar ao usuário que autentique manualmente)
+- Verificar a branch base esperada (`develop`/`main`) existe remotamente: `git fetch origin && git branch -r | grep origin/develop`
+- Confirmar que o working tree local está num estado esperado: `git status --porcelain` (não prosseguir se houver conflitos ou mudanças desconhecidas)
+- Verificar permissões de push/tag/PR via `gh` quando aplicável (ou pedir confirmação ao usuário)
+
+Se qualquer pré-condição falhar, não executar a ação; informe o usuário e forneça os comandos que ele pode rodar localmente para habilitar/autorizar a ação.
 
 ### ✅ GitHub CLI (gh)
 
