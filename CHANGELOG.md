@@ -1,3 +1,13 @@
+## [1.1.2-beta.1](https://github.com/JaegerCaiser/mrdeveloper/compare/v1.1.1...v1.1.2-beta.1) (2025-11-04)
+
+
+### Bug Fixes
+
+* add allow-unrelated-histories flag to sync workflow merge ([6bc6a27](https://github.com/JaegerCaiser/mrdeveloper/commit/6bc6a2726130be8ab6555fa88d0f603d88d8fc0f))
+* add released labels configuration to semantic-release ([89d189b](https://github.com/JaegerCaiser/mrdeveloper/commit/89d189bb2e671dee81570844e27f9f33a074e5fa))
+* correct semantic-release labels configuration to prevent invalid label names ([1713ae3](https://github.com/JaegerCaiser/mrdeveloper/commit/1713ae39769232c65ccb0a158539696ae3585d17))
+* **release:** consolidate workflow fixes and documentation updates ([0a90585](https://github.com/JaegerCaiser/mrdeveloper/commit/0a9058582fc0ad2caf3bf395b0989bfd36a2c1e5))
+
 # [1.2.0-beta.1](https://github.com/JaegerCaiser/mrdeveloper/compare/v1.1.2...v1.2.0-beta.1) (2025-11-04)
 
 
