@@ -68,6 +68,8 @@ Se qualquer pré-condição falhar, não executar a ação; informe o usuário e
 - Execute diretamente no terminal
 - Exemplos: `gh pr create`, `gh pr edit`, `gh pr merge`, `gh repo clone`
 - **Para PRs complexas**: Crie temporariamente um arquivo `.md` com a descrição completa e use `--body-file arquivo.md` para `gh pr create` ou `gh pr edit`
+- **Como criar arquivos temporários**: Use a ferramenta `create_file` diretamente ao invés de comandos no terminal com `EOF` para manter o terminal limpo
+- **Exemplo**: Crie `pr_description.md` usando `create_file`, depois use `--body-file pr_description.md`
 
 #### 🧹 Limpeza:
 
@@ -126,17 +128,20 @@ git push -u origin feature/nome-da-feature
 
 **Quando o usuário disser "pode criar uma release", execute o fluxo de Release:**
 
-1. **Ir para develop**: `git checkout develop`
-2. **Atualizar develop**: `git pull origin develop`
-3. **Criar branch release**: `git checkout -b release/nome-descritivo` (usar nome descritivo baseado no conventional commits, ex: `release/new-authentication-system`, `release/ui-improvements`, `release/bug-fixes`)
-4. **Criar PR para main**: Usar `gh pr create` com título "Release: Nome Descritivo" e descrição detalhando todas as mudanças desde a última release. **Analisar profundamente:**
+1. **Verificar PRs abertas**: `gh pr list --state open --base main --json number,headRefName,title | cat` - verificar se já existe PR de branch `release/*`
+2. **Se existir PR release aberta**: Informar ao usuário e perguntar se quer continuar ou mergear a existente primeiro
+3. **Ir para develop**: `git checkout develop`
+4. **Atualizar develop**: `git pull origin develop`
+5. **Criar branch release**: `git checkout -b release/nome-descritivo` (usar nome descritivo baseado no conventional commits, ex: `release/new-authentication-system`, `release/ui-improvements`, `release/bug-fixes`)
+6. **Push da branch**: `git push -u origin release/nome-descritivo` (enviar branch para repositório remoto)
+7. **Criar PR para main**: Usar `gh pr create` com título "Release: Nome Descritivo" e descrição detalhando todas as mudanças desde a última release. **Analisar profundamente:**
    - Ver commits com `git log main..HEAD`
    - Examinar conteúdo alterado em cada arquivo
    - Entender o contexto e impacto das mudanças
    - **Se não entender o contexto, perguntar ao usuário antes de prosseguir**
    - Comparar com `main` para garantir descrição precisa
-5. **Aguardar aprovação**: Não fazer merge automático, aguardar revisão
-6. **Merge**: Após aprovação, fazer merge via interface do GitHub (semantic-release criará tag automaticamente)
+8. **Aguardar aprovação**: Não fazer merge automático, aguardar revisão
+9. **Merge**: Após aprovação, fazer merge via interface do GitHub (semantic-release criará tag automaticamente)
 
 **IMPORTANTE: Nomenclatura da Release Branch**
 - ✅ Use `release/nome-descritivo` (ex: `release/new-authentication-system`)
@@ -339,23 +344,44 @@ pnpm lint:fix     # Correção automática
 
 ## 📝 Padrões de Commit
 
+**IMPORTANTE: As mensagens de commit controlam o versionamento automático com `semantic-release`. Siga estas regras rigorosamente.**
+
 ### Formato
 
 ```
-tipo: descrição clara e objetiva
+tipo(escopo opcional): descrição clara e objetiva
 
-[Corpo opcional explicando mudanças]
+[corpo opcional explicando as mudanças]
+
+[rodapé opcional, ex: BREAKING CHANGE ou referência de issue]
 ```
 
-### Tipos
+### Tipos e Impacto na Versão
 
-- `feat:` Nova funcionalidade
-- `fix:` Correção de bug
-- `docs:` Documentação
-- `style:` Formatação/código
-- `refactor:` Refatoração
-- `test:` Testes
-- `chore:` Manutenção
+- `feat`: **(Minor Release)** Adiciona uma nova funcionalidade. Ex: `feat: adicionar login com Google`.
+- `fix`: **(Patch Release)** Corrige um bug. Ex: `fix: corrigir erro no cálculo de impostos`.
+- `docs`: Apenas documentação. **Não gera release.**
+- `style`: Mudanças de formatação, sem impacto no código. **Não gera release.**
+- `refactor`: Refatoração de código sem mudança de comportamento. **Não gera release.**
+- `test`: Adição ou correção de testes. **Não gera release.**
+- `chore`: Manutenção, build, etc. **Não gera release.**
+
+### Revertendo Commits
+
+- **`revert`**: Para desfazer um commit anterior, **SEMPRE** use o tipo `revert`.
+  - **Como usar:** `git revert <hash-do-commit>`
+  - **Mensagem:** `revert: feat: adicionar login com Google`
+  - **Impacto:** O `semantic-release` irá anular o commit original. Se um `feat` for revertido, ele não gerará mais uma release `minor`.
+
+### Breaking Changes (Major Release)
+
+- Para uma mudança que quebra a compatibilidade (major release), adicione `BREAKING CHANGE:` no rodapé do commit.
+- **Exemplo:**
+  ```
+  feat: refatorar sistema de autenticação
+
+  BREAKING CHANGE: O endpoint de login foi alterado de `/login` para `/auth/login`.
+  ```
 
 ## 🎨 Padrões de UI/UX
 

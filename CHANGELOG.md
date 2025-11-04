@@ -1,3 +1,18 @@
+# [1.2.0-beta.1](https://github.com/JaegerCaiser/mrdeveloper/compare/v1.1.2...v1.2.0-beta.1) (2025-11-04)
+
+
+### Bug Fixes
+
+* change prerelease identifier to valid 'rc' for semantic-release ([f4fb780](https://github.com/JaegerCaiser/mrdeveloper/commit/f4fb780b7be1f8661869165f56e83e5d66cd0304))
+* correct semantic-release labels configuration to prevent invalid label names ([1713ae3](https://github.com/JaegerCaiser/mrdeveloper/commit/1713ae39769232c65ccb0a158539696ae3585d17))
+* revert prerelease identifier back to 'beta' for semantic-release consistency ([25a73a0](https://github.com/JaegerCaiser/mrdeveloper/commit/25a73a0da12b14720fc7850b776f7b64dfcb3275))
+
+
+### Features
+
+* add protection against multiple release branches ([dd78a09](https://github.com/JaegerCaiser/mrdeveloper/commit/dd78a09fbe9cd9f41e98c57917d55c7da7c8b989))
+* consolidate release branch protection ([ad91450](https://github.com/JaegerCaiser/mrdeveloper/commit/ad91450d20fcc874322865fc556cffbf24201c9e))
+
 ## [1.1.2](https://github.com/JaegerCaiser/mrdeveloper/compare/v1.1.1...v1.1.2) (2025-11-04)
 
 
