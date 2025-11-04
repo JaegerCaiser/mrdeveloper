@@ -1,3 +1,10 @@
+## [1.1.1-beta.2](https://github.com/JaegerCaiser/mrdeveloper/compare/v1.1.1-beta.1...v1.1.1-beta.2) (2025-11-04)
+
+
+### Bug Fixes
+
+* add released labels configuration to semantic-release ([eb8f56f](https://github.com/JaegerCaiser/mrdeveloper/commit/eb8f56fab7b67b02effbaa7cacfef719eaf9cb02))
+
 ## [1.1.1-beta.1](https://github.com/JaegerCaiser/mrdeveloper/compare/v1.1.0...v1.1.1-beta.1) (2025-11-04)
 
 
