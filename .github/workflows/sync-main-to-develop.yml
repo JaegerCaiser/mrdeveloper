@@ -54,13 +54,22 @@ jobs:
           BRANCH_NAME="sync/main-to-develop"
           echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
 
-          # Create/reset the sync branch from develop
           git checkout -B $BRANCH_NAME origin/develop
 
-          # Merge main into it
-          git merge origin/main --allow-unrelated-histories --no-edit -m "chore: sync main back to develop"
+          # Tenta o merge. O '|| true' impede que o script pare em caso de conflito.
+          git merge origin/main --allow-unrelated-histories --no-edit -m "chore: sync main back to develop" || true
 
-          # Force push the updated branch
+          # Verifica se há arquivos com conflitos (Unmerged paths)
+          if git diff --name-only --diff-filter=U | grep .; then
+            echo "::warning::Merge conflicts detected. Committing conflicted state to be resolved in the PR."
+            # Adiciona todos os arquivos (incluindo os com marcadores de conflito) e faz o commit.
+            git add .
+            git commit -m "chore: sync main with conflicts for manual resolution"
+          else
+            echo "Merge completed successfully."
+          fi
+
+          # Continua o fluxo e força o push da branch, seja ela com merge limpo ou com conflitos.
           git push --force https://github-actions[bot]:${GH_PAT}@github.com/${GITHUB_REPOSITORY}.git HEAD:$BRANCH_NAME
 
       - name: Create or Update Pull Request
