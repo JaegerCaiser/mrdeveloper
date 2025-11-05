@@ -14,23 +14,45 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for code changes
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            code:
+              - 'src/**'
+              - 'public/**'
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+              - 'vite.config.ts'
+              - 'tsconfig.json'
+              - 'eslint.config.mjs'
+              - '.github/workflows/**'
 
       - name: Setup pnpm
+        if: steps.filter.outputs.code == 'true'
         uses: pnpm/action-setup@v4
 
       - name: Setup Node.js ${{ inputs.node-version }}
+        if: steps.filter.outputs.code == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: ${{ inputs.node-version }}
           cache: "pnpm"
 
       - name: Install dependencies
+        if: steps.filter.outputs.code == 'true'
         run: pnpm install --frozen-lockfile
 
       - name: Ensure build cache directories exist
+        if: steps.filter.outputs.code == 'true'
         run: mkdir -p .vite node_modules/.cache && touch .eslintcache
 
       - name: Cache build artifacts
+        if: steps.filter.outputs.code == 'true'
         uses: actions/cache@v4
         with:
           path: |
@@ -43,11 +65,13 @@ jobs:
             build-${{ runner.os }}-node-${{ inputs.node-version }}-
 
       - name: Run linting
+        if: steps.filter.outputs.code == 'true'
         run: pnpm run lint
         env:
           ESLINT_CACHE: .eslintcache
 
       - name: Run tests
+        if: steps.filter.outputs.code == 'true'
         run: pnpm run test:ci
 
       - name: Upload debug logs on failure
