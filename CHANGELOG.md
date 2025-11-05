@@ -1,3 +1,33 @@
+## [1.1.5](https://github.com/JaegerCaiser/mrdeveloper/compare/v1.1.4...v1.1.5) (2025-11-05)
+
+
+### Bug Fixes
+
+* **ci:** handle merge conflicts in sync workflow ([b94b87e](https://github.com/JaegerCaiser/mrdeveloper/commit/b94b87ea8cd547ca983e9519582db51190355995))
+
+## [1.1.4](https://github.com/JaegerCaiser/mrdeveloper/compare/v1.1.3...v1.1.4) (2025-11-05)
+
+
+### Bug Fixes
+
+* **ci:** make sync workflow idempotent ([da74a77](https://github.com/JaegerCaiser/mrdeveloper/commit/da74a770acb843ebefcfd4628bffca23992e05fd))
+
+## [1.1.3](https://github.com/JaegerCaiser/mrdeveloper/compare/v1.1.2...v1.1.3) (2025-11-04)
+
+
+### Bug Fixes
+
+* **ci:** correct syntax for concurrency group in preview workflow ([2f9d673](https://github.com/JaegerCaiser/mrdeveloper/commit/2f9d673562838d66f413113aee1709f05c6d28d7))
+* **ci:** use correct 'if' syntax for concurrency group ([272d13a](https://github.com/JaegerCaiser/mrdeveloper/commit/272d13a082ac80e34e548228dd6f249db5886117))
+* **ci:** use correct logical expression for concurrency group ([e355b2e](https://github.com/JaegerCaiser/mrdeveloper/commit/e355b2ea5ff05976e06f302aceb04bb3e7dac66a))
+* correct semantic-release labels configuration to prevent invalid label names ([106df1f](https://github.com/JaegerCaiser/mrdeveloper/commit/106df1f6f8f4865b566f3545590a3cc33fba3beb))
+* correct semantic-release labels configuration to prevent invalid label names ([1713ae3](https://github.com/JaegerCaiser/mrdeveloper/commit/1713ae39769232c65ccb0a158539696ae3585d17))
+* prevent duplicate workflow runs with conditional job execution ([b2a8777](https://github.com/JaegerCaiser/mrdeveloper/commit/b2a87771214bcee558a29175851e9b3ec379198a))
+* prevent workflow duplication by restricting PR trigger to main branch only ([e25d709](https://github.com/JaegerCaiser/mrdeveloper/commit/e25d709d33b58916911898beced5f3d7884f13bc))
+* **release:** consolidate workflow fixes and documentation updates ([bd0358a](https://github.com/JaegerCaiser/mrdeveloper/commit/bd0358a9fca49ee0d1f6fb9eebc12ed7ff7acafd))
+* simplify duplicate detection logic ([e118ae3](https://github.com/JaegerCaiser/mrdeveloper/commit/e118ae3fe14ae096c003806859270ae9dc1724a0))
+* use != 'true' condition for cleaner job skipping ([5ce1111](https://github.com/JaegerCaiser/mrdeveloper/commit/5ce1111e38ff064b6e8c754caa922fa5e51569c1))
+
 ## [1.1.3-beta.1](https://github.com/JaegerCaiser/mrdeveloper/compare/v1.1.2...v1.1.3-beta.1) (2025-11-04)
 
 
