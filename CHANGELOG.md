@@ -1,3 +1,10 @@
+## [1.1.4](https://github.com/JaegerCaiser/mrdeveloper/compare/v1.1.3...v1.1.4) (2025-11-05)
+
+
+### Bug Fixes
+
+* **ci:** make sync workflow idempotent ([da74a77](https://github.com/JaegerCaiser/mrdeveloper/commit/da74a770acb843ebefcfd4628bffca23992e05fd))
+
 ## [1.1.3](https://github.com/JaegerCaiser/mrdeveloper/compare/v1.1.2...v1.1.3) (2025-11-04)
 
 
