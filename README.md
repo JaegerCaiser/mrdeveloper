@@ -163,7 +163,7 @@ Este projeto utiliza **GitHub Actions** com infraestrutura completa de CI/CD seg
 
 #### ✅ **Ambiente de Produção** (`production.yml`)
 
-- **Trigger**: Push na branch `main`
+- **Trigger**: Push na branch `main` (após merge de `release/*` ou `hotfix/*`)
 - **Recursos**:
   - 🧪 Testes completos e linting
   - 🚀 Deploy automático para produção no Vercel
