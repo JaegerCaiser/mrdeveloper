@@ -42,6 +42,14 @@
 
 ---
 
+## 📜 A Regra de Ouro do Hotfix
+
+Para garantir a estabilidade do projeto, seguimos um processo rigoroso e bem definido para correções de emergência em produção. Este fluxo de trabalho é a nossa "Regra de Ouro" para lidar com bugs críticos de forma rápida e segura.
+
+**[➡️ Leia o Guia Completo do Processo de Hotfix](./.github/HOTFIX_PROCESS.md)**
+
+---
+
 ## ✨ Features
 
 - **🎨 Modern Portfolio Design** - Clean, responsive portfolio with dark theme
