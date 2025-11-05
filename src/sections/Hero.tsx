@@ -1,17 +1,14 @@
 import { ArrowRight, Download } from "lucide-react";
-import { Helmet } from "react-helmet-async";
 import "./Hero.scss";
 
 const Hero: React.FC = () => {
   return (
     <section id="hero" className="hero" aria-label="Introdução">
-      <Helmet>
-        <title>Matheus Caiser • Desenvolvedor Full Stack</title>
-        <meta
-          name="description"
-          content="Portfólio de Matheus Caiser, desenvolvedor web Full Stack especialista em criar soluções modernas e performáticas com React, Node.js, TypeScript e outras tecnologias de ponta."
-        />
-      </Helmet>
+      <title>Matheus Caiser • Desenvolvedor Full Stack</title>
+      <meta
+        name="description"
+        content="Portfólio de Matheus Caiser, desenvolvedor web Full Stack especialista em criar soluções modernas e performáticas com React, Node.js, TypeScript e outras tecnologias de ponta."
+      />
       <div className="hero__content">
         <div className="hero__inner">
           <h1 className="hero__title">
