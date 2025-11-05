@@ -72,7 +72,7 @@ jobs:
     if: needs.check-duplicate-run.outputs.should_skip != 'true'
     uses: ./.github/workflows/reusable-deploy-vercel.yml
     with:
-      environment: Preview
+      environment: Preview-${{ github.event.pull_request.number }}
       ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
       prebuilt: true
       prod: false
