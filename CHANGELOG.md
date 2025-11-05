@@ -1,3 +1,10 @@
+## [1.1.5](https://github.com/JaegerCaiser/mrdeveloper/compare/v1.1.4...v1.1.5) (2025-11-05)
+
+
+### Bug Fixes
+
+* **ci:** handle merge conflicts in sync workflow ([b94b87e](https://github.com/JaegerCaiser/mrdeveloper/commit/b94b87ea8cd547ca983e9519582db51190355995))
+
 ## [1.1.4](https://github.com/JaegerCaiser/mrdeveloper/compare/v1.1.3...v1.1.4) (2025-11-05)
 
 
