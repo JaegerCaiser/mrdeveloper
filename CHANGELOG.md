@@ -1,3 +1,10 @@
+## [1.2.1-beta.1](https://github.com/JaegerCaiser/mrdeveloper/compare/v1.2.0...v1.2.1-beta.1) (2025-11-06)
+
+
+### Bug Fixes
+
+* **ci:** correct gh pr list command syntax in sync workflow ([67b9c21](https://github.com/JaegerCaiser/mrdeveloper/commit/67b9c21c5e37732c77c45e39d792bdf3b7a0a3ea))
+
 # [1.2.0](https://github.com/JaegerCaiser/mrdeveloper/compare/v1.1.5...v1.2.0) (2025-11-06)
 
 
