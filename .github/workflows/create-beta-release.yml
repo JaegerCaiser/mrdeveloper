@@ -32,10 +32,22 @@ jobs:
           if [ "$PR_COUNT" -gt 0 ]; then
             echo "Found open PR. Semantic release will not run on this push."
             echo "should_run=false" >> $GITHUB_OUTPUT
-          else
-            echo "No open PR found. Proceeding with semantic-release."
-            echo "should_run=true" >> $GITHUB_OUTPUT
+            exit 0
           fi
+
+          # Check for other active release branches
+          OTHER_RELEASE_BRANCHES=$(gh api repos/${{ github.repository }}/branches --jq '.[] | select(.name | startswith("release/")) | select(.name != "'$BRANCH_NAME'") | .name' | tr '\n' ' ')
+          OTHER_COUNT=$(echo "$OTHER_RELEASE_BRANCHES" | wc -w)
+
+          if [ "$OTHER_COUNT" -gt 0 ]; then
+            echo "❌ Found $OTHER_COUNT other release branches: $OTHER_RELEASE_BRANCHES"
+            echo "Multiple release branches are not allowed. Please merge or delete conflicting branches."
+            echo "should_run=false" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+          echo "No open PR found and no conflicting release branches. Proceeding with semantic-release."
+          echo "should_run=true" >> $GITHUB_OUTPUT
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
