@@ -76,10 +76,10 @@ jobs:
       - name: Create or Update Pull Request
         if: steps.merge.outputs.sync_needed == 'true'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_PAT_FOR_RELEASE }}
           BRANCH_NAME: ${{ steps.merge.outputs.branch_name }}
         run: |
-          EXISTING_PR_URL=$(gh pr list --base develop --head "$BRANCH_NAME" --state open --json url --jq -r '.[0].url')
+          EXISTING_PR_URL=$(gh pr list --base develop --head "$BRANCH_NAME" --state open --json url --jq '.[0].url')
 
           if [ -n "$EXISTING_PR_URL" ]; then
             echo "PR already exists: $EXISTING_PR_URL"
