@@ -10,6 +10,7 @@ on:
 
 jobs:
   create-sync-pr:
+    name: Create Sync Pull Request
     # Só roda se o workflow de produção foi um sucesso
     if: github.event.workflow_run.conclusion == 'success'
 
