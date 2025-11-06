@@ -1,3 +1,10 @@
+## [1.2.4](https://github.com/JaegerCaiser/mrdeveloper/compare/v1.2.3...v1.2.4) (2025-11-06)
+
+
+### Bug Fixes
+
+* **ci:** add always-run job for required checks on documentation PRs ([03b71ab](https://github.com/JaegerCaiser/mrdeveloper/commit/03b71ab0a866135f0df121e7a203575bc3146b48))
+
 ## [1.2.3](https://github.com/JaegerCaiser/mrdeveloper/compare/v1.2.2...v1.2.3) (2025-11-06)
 
 
