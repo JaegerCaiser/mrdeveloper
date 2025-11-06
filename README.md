@@ -73,14 +73,14 @@ Para garantir a estabilidade do projeto, seguimos um processo rigoroso e bem def
 - **React 18.3.1** - UI library with modern hooks and concurrent features
 - **TypeScript 5.9.3** - Type safety and enhanced developer experience
 - **SCSS 1.93.2** - Advanced CSS preprocessing with variables and mixins
-- **Vite 7.1.12** - Fast build tool and development server
-- **Lucide React 0.548.0** - Beautiful, customizable icons
+- **Vite 7.2.0** - Fast build tool and development server
+- **Lucide React 0.552.0** - Beautiful, customizable icons
 - **React Helmet Async 2.0.5** - Document head management for SEO
 - **Vercel Analytics 1.5.0** - Privacy-focused web analytics
 
 ### Development & Quality
 
-- **ESLint 9.38.0** - Code linting with React and TypeScript rules
+- **ESLint 9.39.1** - Code linting with React and TypeScript rules
 - **pnpm 10.20.0** - Fast, efficient package manager (via corepack)
 - **Semantic Release 25.0.1** - Automated versioning and changelog generation
 - **Vercel CLI 34.2.0** - Deployment and project management
@@ -244,6 +244,14 @@ git push origin feature/nova-funcionalidade
 <a id="recent-improvements"></a>
 
 ## 🚀 Recent Improvements
+
+### v1.2.0 (TBD) - CI/CD Saga & Modernization
+
+- **[#107](https://github.com/JaegerCaiser/mrdeveloper/pull/107)**: A complete overhaul of the CI/CD workflows, focusing on efficiency, clarity, and best practices. This historic PR documents a deep-dive into debugging GitHub Actions, resulting in:
+  - **Path Filtering**: Workflows now intelligently skip unnecessary jobs for documentation-only changes.
+  - **Workflow Simplification**: Removed redundant actions (`bobheadxi/deployments`) in favor of native GitHub Actions `environment` features.
+  - **Bug Fixes**: Resolved multiple subtle bugs related to git history, action versions, and environment variable handling.
+  - **Enhanced Documentation**: The PR description itself serves as a detailed log of the lessons learned.
 
 ### v1.1.0 - Performance Optimization & Corepack Integration
 

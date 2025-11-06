@@ -1,3 +1,18 @@
+# [1.2.0-beta.1](https://github.com/JaegerCaiser/mrdeveloper/compare/v1.1.5...v1.2.0-beta.1) (2025-11-06)
+
+
+### Bug Fixes
+
+* **ci:** add checkout step to duplicate run check job ([c7c97f8](https://github.com/JaegerCaiser/mrdeveloper/commit/c7c97f814f036e090a5662268518d60d1b60a4dd))
+
+
+### Features
+
+* **animation:** add visual debugger and set absolute desktop variables ([09af88e](https://github.com/JaegerCaiser/mrdeveloper/commit/09af88ea795e51adc858241d4732246de9490577))
+* **ci:** improve ci workflows for clarity and efficiency ([78ef813](https://github.com/JaegerCaiser/mrdeveloper/commit/78ef813fb1772ad8d8ee034d1f49e2ef1fbfa529))
+* **ci:** name sync-main-to-develop workflow job ([7839973](https://github.com/JaegerCaiser/mrdeveloper/commit/783997371d7475bc44e25becaee7562847927293))
+* upgrade to react 19 and refactor seo tags ([7af7977](https://github.com/JaegerCaiser/mrdeveloper/commit/7af7977c0a2a66757398f7a1d5523cfba96af98a))
+
 ## [1.1.5](https://github.com/JaegerCaiser/mrdeveloper/compare/v1.1.4...v1.1.5) (2025-11-05)
 
 

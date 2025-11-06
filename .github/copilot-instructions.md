@@ -12,6 +12,16 @@ Este arquivo serve como guia de referência para futuras interações com o GitH
 
 ## ⚠️ IMPORTANTE: Workflow de Desenvolvimento
 
+### 🌱 Ponto de Partida para Novas Branches
+
+**SEMPRE crie novas branches a partir da base correta!**
+
+- **Para `feature`, `chore`, `fix`, `refactor`:**
+  - ✅ Sempre comece a partir da branch `develop` (`git checkout develop && git pull`).
+- **Para `hotfix`:**
+  - ✅ Sempre comece a partir da branch `main` (`git checkout main && git pull`).
+- ❌ **NUNCA** crie uma nova branch a partir de outra branch de trabalho (ex: uma `feature` a partir de outra `feature`). Isso evita a contaminação de históricos de commits entre Pull Requests.
+
 ### 🚫 Git Operations
 
 **NUNCA faça operações git automaticamente!**
@@ -302,6 +312,16 @@ pnpm build        # Build de produção
 pnpm lint         # Verificação de código
 pnpm lint:fix     # Correção automática
 ```
+
+### Ambiente de Desenvolvimento
+
+**⚠️ IMPORTANTE: Sessões de Terminal e Comandos de Ambiente**
+
+- **Sessões Isoladas:** Cada comando que executo no terminal pode iniciar uma nova sessão. Isso significa que comandos que modificam o ambiente (como `nvm use`, `export VAR=valor`, `source .env`) podem não persistir entre diferentes execuções.
+- **Solução:** Para garantir que o ambiente esteja configurado corretamente, sempre executarei comandos de setup e os comandos que dependem deles de forma encadeada.
+  - **Exemplo 1 (Node.js):** `nvm use && pnpm dev`
+  - **Exemplo 2 (Variáveis de Ambiente):** `export API_KEY=123 && npm start`
+- **Instrução ao Usuário:** Se eu encontrar um problema relacionado ao ambiente (versão de ferramenta, variável faltando, etc.), vou solicitar a execução do comando encadeado para garantir a consistência.
 
 ### Build System Específico
 

@@ -25,7 +25,8 @@ jobs:
     needs: test-and-lint
     uses: ./.github/workflows/reusable-deploy-vercel.yml
     with:
-      environment: Develop
+      environment: Development
+      vercel-environment: preview
       ref: ${{ github.ref }}
       prebuilt: true
     secrets:
