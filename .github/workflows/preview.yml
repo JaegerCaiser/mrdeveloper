@@ -35,10 +35,10 @@ jobs:
         run: |
           EVENT_NAME="${{ github.event_name }}"
           BRANCH_NAME="${{ github.event_name == 'pull_request' && github.head_ref || github.ref_name }}"
-          
+
           echo "Event: $EVENT_NAME"
           echo "Branch: $BRANCH_NAME"
-          
+
           # If this is a push to a release branch, check if there's an open PR for it
           if [ "$EVENT_NAME" = "push" ] && [[ "$BRANCH_NAME" == release/* ]]; then
             PR_COUNT=$(gh pr list --head "$BRANCH_NAME" --state open --json number --jq length)
@@ -72,7 +72,8 @@ jobs:
     if: needs.check-duplicate-run.outputs.should_skip != 'true'
     uses: ./.github/workflows/reusable-deploy-vercel.yml
     with:
-      environment: Preview
+      environment: Preview-${{ github.event.pull_request.number }}
+      vercel-environment: preview
       ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
       prebuilt: true
       prod: false
@@ -80,7 +81,8 @@ jobs:
       vercel-token: ${{ secrets.VERCEL_TOKEN }}
       github-token: ${{ secrets.GITHUB_TOKEN }}
 
-  validate-release-branch:
+  validate-branch-for-main:
+    name: Validate Branch for Main
     if: github.event_name == 'pull_request' && github.base_ref == 'main'
     runs-on: ubuntu-latest
     steps:
@@ -88,11 +90,11 @@ jobs:
         run: |
           SOURCE_BRANCH="${{ github.head_ref }}"
           echo "Source branch: $SOURCE_BRANCH"
-          if [[ "$SOURCE_BRANCH" != release/* ]]; then
-            echo "::error::Pull Request from branch '$SOURCE_BRANCH' cannot be merged into 'main'. Only branches starting with 'release/' are allowed."
-            exit 1
+          if [[ "$SOURCE_BRANCH" == release/* ]] || [[ "$SOURCE_BRANCH" == hotfix/* ]]; then
+            echo "Source branch '$SOURCE_BRANCH' is valid for merging into 'main'."
           else
-            echo "Source branch '$SOURCE_BRANCH' is a valid release branch."
+            echo "::error::Pull Request from branch '$SOURCE_BRANCH' cannot be merged into 'main'. Only branches starting with 'release/' or 'hotfix/' are allowed."
+            exit 1
           fi
 
   update-pr-comment:

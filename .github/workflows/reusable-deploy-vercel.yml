@@ -6,6 +6,9 @@ on:
       environment:
         required: true
         type: string
+      vercel-environment:
+        required: true
+        type: string
       ref:
         required: true
         type: string
@@ -41,35 +44,41 @@ jobs:
       contents: read
 
     steps:
-      - name: Create GitHub Deployment
-        id: deployment
-        uses: bobheadxi/deployments@v1.5.0
-        with:
-          step: start
-          token: ${{ secrets.github-token }}
-          env: ${{ inputs.environment }}
-          ref: ${{ inputs.ref }}
-
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for code changes
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            code:
+              - 'src/**'
+              - 'public/**'
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+              - 'vite.config.ts'
+              - 'tsconfig.json'
+              - 'eslint.config.mjs'
+              - '.github/workflows/**'
 
       - name: Install Vercel CLI
+        if: steps.filter.outputs.code == 'true'
         run: npm install --global vercel@latest
 
       - name: Pull Vercel Environment Information
+        if: steps.filter.outputs.code == 'true'
         run: |
-          ENV_NAME=$(echo "${{ inputs.environment }}" | tr '[:upper:]' '[:lower:]')
-
-          if [ "$ENV_NAME" = "develop" ]; then
-            vercel pull --yes --token=${{ secrets.vercel-token }}
-          else
-            vercel pull --yes --environment=$ENV_NAME --token=${{ secrets.vercel-token }}
-          fi
+          vercel pull --yes --environment=${{ inputs.vercel-environment }} --token=${{ secrets.vercel-token }}
 
       - name: Ensure Vercel cache directory exists
+        if: steps.filter.outputs.code == 'true'
         run: mkdir -p ~/.vercel && touch ~/.vercel/.gitkeep
 
       - name: Cache Vercel CLI
+        if: steps.filter.outputs.code == 'true'
         uses: actions/cache@v4
         with:
           path: ~/.vercel
@@ -78,9 +87,11 @@ jobs:
             vercel-cli-${{ runner.os }}
 
       - name: Build Project Artifacts
+        if: steps.filter.outputs.code == 'true'
         run: vercel build ${{ inputs.prod && '--prod' || '' }} --token=${{ secrets.vercel-token }}
 
       - name: Deploy to Vercel
+        if: steps.filter.outputs.code == 'true'
         id: deploy_step
         run: |
           DEPLOY_COMMAND="vercel deploy ${{ inputs.prebuilt && '--prebuilt' || '' }} ${{ inputs.prod && '--prod' || '' }} --token=${{ secrets.vercel-token }}"
@@ -93,6 +104,11 @@ jobs:
             echo "Error: Vercel deploy failed with exit code $DEPLOY_STATUS."
             exit $DEPLOY_STATUS
           fi
+
+      - name: Report Skipped Deployment
+        if: steps.filter.outputs.code != 'true'
+        run: |
+          echo "Deployment skipped: No code changes detected."
 
       - name: Upload debug logs on failure
         if: failure()
@@ -111,14 +127,3 @@ jobs:
             /tmp/node-*
             /tmp/npm-*
             /tmp/pnpm-*
-
-      - name: Update GitHub Deployment Status
-        if: always()
-        uses: bobheadxi/deployments@v1.5.0
-        with:
-          step: finish
-          token: ${{ secrets.github-token }}
-          env: ${{ inputs.environment }}
-          status: ${{ job.status }}
-          deployment_id: ${{ steps.deployment.outputs.deployment_id }}
-          env_url: ${{ steps.deploy_step.outputs.deployment_url }}

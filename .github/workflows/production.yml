@@ -27,6 +27,7 @@ jobs:
     uses: ./.github/workflows/reusable-deploy-vercel.yml
     with:
       environment: Production
+      vercel-environment: production
       ref: ${{ github.sha }}
       prebuilt: true
       prod: true
