@@ -1,3 +1,13 @@
+## [1.2.2-beta.1](https://github.com/JaegerCaiser/mrdeveloper/compare/v1.2.1...v1.2.2-beta.1) (2025-11-06)
+
+
+### Bug Fixes
+
+* **ci:** add validation for multiple release branches in beta workflow ([31b8f45](https://github.com/JaegerCaiser/mrdeveloper/commit/31b8f45735db202528389a21e9698ac78cb1d936))
+* **ci:** use PAT instead of GITHUB_TOKEN for PR creation in sync workflow ([7c0a069](https://github.com/JaegerCaiser/mrdeveloper/commit/7c0a0694859703a5bc95d8631b119436f030c45c))
+* prevent duplicate production workflow runs ([3571cb7](https://github.com/JaegerCaiser/mrdeveloper/commit/3571cb7c82ef84cf66be33dd6e4bdb7256a24bc2))
+* prevent update-pr-comment job from running without code changes ([25d00d7](https://github.com/JaegerCaiser/mrdeveloper/commit/25d00d790f53c5da1896fe26d12f7278d51e220c))
+
 ## [1.2.1](https://github.com/JaegerCaiser/mrdeveloper/compare/v1.2.0...v1.2.1) (2025-11-06)
 
 
