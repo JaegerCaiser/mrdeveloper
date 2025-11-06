@@ -35,10 +35,10 @@ jobs:
         run: |
           EVENT_NAME="${{ github.event_name }}"
           BRANCH_NAME="${{ github.event_name == 'pull_request' && github.head_ref || github.ref_name }}"
-          
+
           echo "Event: $EVENT_NAME"
           echo "Branch: $BRANCH_NAME"
-          
+
           # If this is a push to a release branch, check if there's an open PR for it
           if [ "$EVENT_NAME" = "push" ] && [[ "$BRANCH_NAME" == release/* ]]; then
             PR_COUNT=$(gh pr list --head "$BRANCH_NAME" --state open --json number --jq length)
@@ -73,6 +73,7 @@ jobs:
     uses: ./.github/workflows/reusable-deploy-vercel.yml
     with:
       environment: Preview-${{ github.event.pull_request.number }}
+      vercel-environment: preview
       ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
       prebuilt: true
       prod: false
