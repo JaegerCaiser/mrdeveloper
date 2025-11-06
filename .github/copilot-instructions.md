@@ -208,7 +208,7 @@ git push -u origin feature/nome-da-feature
 
 ### Visão Geral
 
-**Portfolio React SPA** - Site de portfólio moderno com animações, construído com React 18 + TypeScript + Vite.
+**Portfolio React SPA** - Site de portfólio moderno com animações, construído com React 19 + TypeScript + Vite.
 
 **Arquitetura Principal:**
 
@@ -540,5 +540,5 @@ $transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
 
 ---
 
-_Atualizado em: 4 de novembro de 2025_
+_Atualizado em: 6 de novembro de 2025_
 _Próxima revisão: Quando necessário_
