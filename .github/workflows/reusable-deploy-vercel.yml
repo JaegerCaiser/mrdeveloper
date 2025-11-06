@@ -6,6 +6,9 @@ on:
       environment:
         required: true
         type: string
+      vercel-environment:
+        required: true
+        type: string
       ref:
         required: true
         type: string
@@ -68,13 +71,7 @@ jobs:
       - name: Pull Vercel Environment Information
         if: steps.filter.outputs.code == 'true'
         run: |
-          ENV_NAME=$(echo "${{ inputs.environment }}" | tr '[:upper:]' '[:lower:]')
-
-          if [ "$ENV_NAME" = "develop" ]; then
-            vercel pull --yes --token=${{ secrets.vercel-token }}
-          else
-            vercel pull --yes --environment=$ENV_NAME --token=${{ secrets.vercel-token }}
-          fi
+          vercel pull --yes --environment=${{ inputs.vercel-environment }} --token=${{ secrets.vercel-token }}
 
       - name: Ensure Vercel cache directory exists
         if: steps.filter.outputs.code == 'true'
