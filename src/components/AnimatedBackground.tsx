@@ -1,7 +1,17 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Particle } from "../utils/Particle";
 
-// Spatial grid for O(n) neighbor finding
+// --- Otimizações de Performance ---
+// As classes abaixo são otimizações de baixo nível para garantir que a animação
+// rode de forma fluida, mesmo com centenas de partículas e interações.
+
+/**
+ * @class SpatialGrid
+ * @description Uma estrutura de dados para encontrar partículas vizinhas de forma eficiente.
+ * Em vez de verificar a distância contra todas as outras partículas (complexidade O(n²)),
+ * o espaço é dividido em uma grade. Para encontrar vizinhos, só precisamos verificar
+ * as células da grade ao redor da partícula, resultando em uma complexidade próxima a O(n).
+ */
 class SpatialGrid {
   grid: Particle[][][];
   gridSize: number;
@@ -20,22 +30,18 @@ class SpatialGrid {
   }
 
   clear() {
-    // Otimização: em vez de percorrer toda a grid, podemos usar uma abordagem mais eficiente
-    // Mantém as referências aos arrays para reduzir alocações de GC
     for (let x = 0; x < this.gridWidth; x++) {
       const row = this.grid[x];
       for (let y = 0; y < this.gridHeight; y++) {
-        row[y].length = 0; // Reset array sem realocar
+        row[y].length = 0;
       }
     }
   }
 
   add(particle: Particle) {
-    // Otimização: reduz verificações Math.max/Math.min usando operações bitwise
-    const x = (particle.gridX | 0) & 0x7fff; // Converte para int e limita
+    const x = (particle.gridX | 0) & 0x7fff;
     const y = (particle.gridY | 0) & 0x7fff;
 
-    // Verificação de bounds mais eficiente
     if (x >= 0 && x < this.gridWidth && y >= 0 && y < this.gridHeight) {
       this.grid[x][y].push(particle);
     }
@@ -59,7 +65,12 @@ class SpatialGrid {
   }
 }
 
-// Connection batching system
+/**
+ * @class ConnectionBatch
+ * @description Agrupa operações de desenho do canvas. Em vez de chamar `ctx.stroke()` para
+ * cada linha, agrupamos todas as linhas com o mesmo estilo em um `Path2D` e as
+ * desenhamos de uma só vez. Isso reduz drasticamente o número de chamadas à API do canvas.
+ */
 class ConnectionBatch {
   paths: Path2D[] = [];
   styles: Array<{
@@ -112,21 +123,22 @@ class ConnectionBatch {
   }
 }
 
-// Distance cache for performance
+/**
+ * @class DistanceCache
+ * @description Memoriza os cálculos de distância (ao quadrado) entre partículas.
+ * Como as posições das partículas mudam a cada frame, o cache é limpo periodicamente
+ * para evitar o uso de dados obsoletos.
+ */
 class DistanceCache {
   cache: Map<number, number> = new Map();
   maxSize = 10000;
 
-  // Função hash mais eficiente para coordenadas
   private hash(x1: number, y1: number, x2: number, y2: number): number {
-    // Arredonda para reduzir colisões e usa uma função hash simples
-    const rx1 = Math.round(x1) & 0xffff; // Máscara para 16 bits
+    const rx1 = Math.round(x1) & 0xffff;
     const ry1 = Math.round(y1) & 0xffff;
     const rx2 = Math.round(x2) & 0xffff;
     const ry2 = Math.round(y2) & 0xffff;
 
-    // Combina as coordenadas em um único número de 64 bits (simulado com 32 bits)
-    // Usa uma função hash simples para distribuir melhor
     return (
       ((rx1 * 73856093) ^
         (ry1 * 19349663) ^
@@ -155,17 +167,21 @@ class DistanceCache {
   }
 }
 
-// Opacity cache for mouse distance calculations
+/**
+ * @class OpacityCache
+ * @description Otimização crucial para o cálculo de opacidade. Em vez de usar `Math.sqrt`
+ * (uma operação cara) a cada frame para cada partícula, calculamos a opacidade
+ * com base na distância ao quadrado, usando uma aproximação linear.
+ */
 class OpacityCache {
   cache: Map<string, number> = new Map();
-  maxSize = 2000; // Menor que distance cache pois opacidades mudam menos frequentemente
+  maxSize = 2000;
   mouseX = 0;
   mouseY = 0;
   mouseRadius = 800;
-  invMouseRadius = 1 / 800; // Pré-computado
+  mouseRadiusSq = 800 * 800; // Pre-computado raio ao quadrado
 
   updateMouse(mouseX: number, mouseY: number, mouseRadius: number) {
-    // Só limpa cache se mouse mudou significativamente
     if (
       Math.abs(this.mouseX - mouseX) > 10 ||
       Math.abs(this.mouseY - mouseY) > 10 ||
@@ -175,19 +191,25 @@ class OpacityCache {
       this.mouseX = mouseX;
       this.mouseY = mouseY;
       this.mouseRadius = mouseRadius;
-      this.invMouseRadius = 1 / mouseRadius;
+      this.mouseRadiusSq = mouseRadius * mouseRadius; // Atualiza raio ao quadrado
     }
   }
 
+  // Esta versão usa uma queda linear com base na distância ao quadrado para evitar Math.sqrt
   get(x: number, y: number): number {
     const key = `${Math.round(x)},${Math.round(y)}`;
     let opacity = this.cache.get(key);
     if (opacity === undefined) {
       const dx = x - this.mouseX;
       const dy = y - this.mouseY;
-      const distance = Math.sqrt(dx * dx + dy * dy);
-      const normalizedDistance = distance * this.invMouseRadius;
-      opacity = Math.max(0.05, Math.pow(1 - normalizedDistance, 2));
+      const distSq = dx * dx + dy * dy;
+
+      if (distSq >= this.mouseRadiusSq) {
+        opacity = 0.05;
+      } else {
+        opacity = Math.max(0.05, 1 - distSq / this.mouseRadiusSq);
+      }
+
       if (this.cache.size < this.maxSize) {
         this.cache.set(key, opacity);
       }
@@ -200,149 +222,151 @@ class OpacityCache {
   }
 }
 
+// --- Componente React ---
+
+interface DebugInfo {
+  particleCount: number;
+  mouseRadius: number;
+}
+
 const AnimatedBackground: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [debugInfo, setDebugInfo] = useState<DebugInfo | null>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d", { alpha: false });
     if (!ctx) return;
-    canvas.style.backgroundColor = "transparent";
-    canvas.style.pointerEvents = "none";
 
-    // Responsive configuration computed from viewport and device capabilities
-    // sensible defaults so TS knows variables are initialized
-    let particleCount: number = 500;
-    let gridSize: number = 50;
-    let mouseRadius: number = 800;
-    let maxLineLength: number = 95;
-    let maxLineLengthSquared: number = maxLineLength * maxLineLength;
-    let propagationRadius: number = 40;
-    let propagationRadiusSquared: number =
-      propagationRadius * propagationRadius;
-    let maxLayers: number = 6;
+    // --- Variáveis de Estado da Animação ---
+    let animationFrameId: number;
+    const particles: Particle[] = [];
+    let frameCount = 0;
+    let globalOpacity = 0;
+    let targetOpacity = 0;
+    const opacitySpeed = 0.01;
+    let effectiveRadius = 0;
+    let targetRadius = 0;
+    const radiusSpeed = 0.005;
+    let isVisible = true;
 
-    // Pre-computed constants for opacity calculations (kept static)
-    const propagationOpacityBands = 6; // 6 faixas de opacidade (0-5)
-    const interOpacityBands = 8; // 8 faixas de opacidade (0-7)
+    const mouse = { x: -1000, y: -1000, radius: 800 };
+
+    // --- Parâmetros de Configuração ---
+    let gridSize: number,
+      mouseRadius: number,
+      maxLineLength: number,
+      maxLineLengthSquared: number,
+      propagationRadius: number,
+      propagationRadiusSquared: number,
+      maxLayers: number;
+
+    // Constantes pré-calculadas para otimizar o loop de renderização.
+    const propagationOpacityBands = 6;
+    const interOpacityBands = 8;
     const invPropagationBands = 1 / (propagationOpacityBands - 1);
     const invInterBands = 1 / (interOpacityBands - 1);
 
-    // Declare spatial grid early (will be assigned in resize)
-    let spatialGrid!: SpatialGrid;
-
-    const resize = () => {
-      // Use visualViewport when available for accurate mobile viewport height
-      const win = window as unknown as { visualViewport?: VisualViewport };
-      const vv = win.visualViewport;
-      const cssWidth =
-        vv && vv.width ? Math.round(vv.width) : window.innerWidth;
-      const cssHeight =
-        vv && vv.height ? Math.round(vv.height) : window.innerHeight;
-
-      const dpr = Math.max(1, window.devicePixelRatio || 1);
-
-      // Set CSS size (what layout uses)
-      canvas.style.width = cssWidth + "px";
-      canvas.style.height = cssHeight + "px";
-
-      // Set backing store size for high-DPI crispness
-      canvas.width = Math.round(cssWidth * dpr);
-      canvas.height = Math.round(cssHeight * dpr);
-
-      // Ensure drawing operations use CSS pixel coordinates by applying transform
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-      // Recompute responsive config and rebuild spatial grid/particles if needed
-      const cfg = computeConfig(cssWidth, cssHeight);
-      if (cfg) {
-        spatialGrid = new SpatialGrid(gridSize, cssWidth, cssHeight);
-      }
-    };
-
-    resize();
-    window.addEventListener("resize", resize);
-
-    // Initialize systems (will be assigned later after config computation)
-    // spatialGrid is created in resize()/computeConfig to match CSS size
-    const distanceCache = new DistanceCache();
+    // --- Sistemas de Otimização ---
+    let spatialGrid: SpatialGrid;
     const connectionBatch = new ConnectionBatch();
+    const distanceCache = new DistanceCache();
     const opacityCache = new OpacityCache();
 
-    const mouse = { x: -1000, y: -1000 };
-    let globalOpacity = 0;
-    let targetOpacity = 0;
-    const opacitySpeed = 0.01; // Velocidade suave de fade
-    let effectiveRadius = 0;
-    let targetRadius = 0;
-    const radiusSpeed = 0.005; // Velocidade de shrink/implode mais lenta
+    /**
+     * @function computeConfig
+     * @description Calcula os parâmetros da animação com base no tamanho da tela.
+     * Para telas maiores, usa valores fixos. Para telas menores, calcula dinamicamente
+     * para garantir boa performance em dispositivos móveis.
+     */
+    const computeConfig = (w: number, h: number) => {
+      const area = w * h;
+      const isMobile = w < 768;
+      let newParticleCount: number;
 
+      if (isMobile) {
+        const dpr = window.devicePixelRatio || 1;
+        const base = Math.max(
+          60,
+          Math.min(800, Math.round((area / 6000) * (dpr / 1)))
+        );
+        newParticleCount = Math.max(60, Math.round(base * 0.25));
+        gridSize = 36;
+        maxLineLength = 60;
+        propagationRadius = 28;
+        maxLayers = 4;
+        mouseRadius = Math.max(200, Math.round(Math.min(w, h) * 0.55));
+      } else {
+        newParticleCount = 400;
+        gridSize = 100;
+        mouseRadius = 800;
+        maxLineLength = 95;
+        propagationRadius = 40;
+        maxLayers = 30;
+      }
+
+      maxLineLengthSquared = maxLineLength * maxLineLength;
+      propagationRadiusSquared = propagationRadius * propagationRadius;
+      mouse.radius = mouseRadius;
+
+      return { newParticleCount };
+    };
+
+    /**
+     * @function handleResize
+     * @description Lida com o redimensionamento da janela. Ajusta o tamanho do canvas,
+     * recalcula a configuração e gerencia o "pool" de partículas.
+     */
+    const handleResize = () => {
+      const win = window as unknown as { visualViewport?: VisualViewport };
+      const vv = win.visualViewport;
+      const cssWidth = vv?.width ? Math.round(vv.width) : window.innerWidth;
+      const cssHeight = vv?.height ? Math.round(vv.height) : window.innerHeight;
+      const dpr = Math.max(1, window.devicePixelRatio || 1);
+
+      canvas.style.width = `${cssWidth}px`;
+      canvas.style.height = `${cssHeight}px`;
+      canvas.width = Math.round(cssWidth * dpr);
+      canvas.height = Math.round(cssHeight * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      const { newParticleCount } = computeConfig(cssWidth, cssHeight);
+
+      // --- Lógica de Pooling de Partículas ---
+      // Em vez de recriar o array de partículas a cada redimensionamento (o que causa
+      // "engasgos" na animação), reutilizamos as partículas existentes, adicionando
+      // ou removendo apenas a diferença. Isso é muito mais eficiente.
+      const diff = newParticleCount - particles.length;
+      if (diff > 0) {
+        for (let i = 0; i < diff; i++) {
+          particles.push(new Particle(cssWidth, cssHeight));
+        }
+      } else {
+        particles.length = newParticleCount;
+      }
+      // A classe Particle já armazena as dimensões no construtor.
+      // A recriação de partículas no 'if (diff > 0)' garante que as novas partículas
+      // tenham as dimensões corretas. Não é necessário atualizar as existentes.
+
+      spatialGrid = new SpatialGrid(gridSize, cssWidth, cssHeight);
+    };
+
+    // --- Handlers de Eventos ---
     const checkMouseInHero = (x: number, y: number) => {
       if (x === -1000 || y === -1000) return false;
       const elementUnderMouse = document.elementFromPoint(x, y);
       return elementUnderMouse?.closest(".hero") !== null;
     };
 
-    // Compute per-viewport configuration for responsiveness
-    function computeConfig(w: number, h: number) {
-      const dpr =
-        typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1;
-      const area = w * h;
-
-      // Base particle number scaled by viewport area and devicePixelRatio
-      const base = Math.max(
-        60,
-        Math.min(800, Math.round((area / 6000) * (dpr / 1)))
-      );
-
-      if (w <= 420) {
-        particleCount = Math.max(60, Math.round(base * 0.25));
-        gridSize = 36;
-        maxLineLength = 60;
-        propagationRadius = 28;
-        maxLayers = 4;
-      } else if (w <= 900) {
-        particleCount = Math.max(120, Math.round(base * 0.6));
-        gridSize = 44;
-        maxLineLength = 80;
-        propagationRadius = 34;
-        maxLayers = 5;
-      } else {
-        particleCount = Math.max(300, Math.round(base));
-        gridSize = 50;
-        maxLineLength = 95;
-        propagationRadius = 40;
-        maxLayers = 6;
-      }
-
-      // Mouse radius proportional to the smaller viewport dimension
-      mouseRadius = Math.max(200, Math.round(Math.min(w, h) * 0.55));
-
-      // Derived squared values
-      maxLineLengthSquared = maxLineLength * maxLineLength;
-      propagationRadiusSquared = propagationRadius * propagationRadius;
-
-      return {
-        particleCount,
-        gridSize,
-        mouseRadius,
-        maxLineLength,
-        propagationRadius,
-        maxLayers,
-      };
-    }
-
     const handleMouseMove = (e: MouseEvent) => {
       const isInHero = checkMouseInHero(e.clientX, e.clientY);
       if (isInHero) {
         mouse.x = e.clientX;
         mouse.y = e.clientY;
-        opacityCache.updateMouse(mouse.x, mouse.y, mouseRadius);
         targetOpacity = 1;
-        targetRadius = mouseRadius;
+        targetRadius = mouse.radius;
       } else {
-        // Não setar mouse.x = -1000 imediatamente, deixar o raio controlar
         targetOpacity = 0;
         targetRadius = 0;
       }
@@ -360,65 +384,65 @@ const AnimatedBackground: React.FC = () => {
       }
     };
 
+    const handleVisibility = (): void => {
+      isVisible = document.visibilityState === "visible";
+      if (isVisible) {
+        lastFrameTime = performance.now();
+        animationFrameId = requestAnimationFrame(animate);
+      } else {
+        cancelAnimationFrame(animationFrameId);
+      }
+    };
+
+    // --- Inicialização ---
+    handleResize();
+    window.addEventListener("resize", handleResize);
     window.addEventListener("mousemove", handleMouseMove, { passive: true });
     window.addEventListener("mouseleave", handleMouseLeave, { passive: true });
     window.addEventListener("scroll", handleScroll, { passive: true });
-
-    // Pause/resume when tab visibility changes to save resources
-    const handleVisibility = (): void => {
-      if (document.hidden) {
-        targetOpacity = 0;
-        targetRadius = 0;
-      }
-    };
     document.addEventListener("visibilitychange", handleVisibility, {
       passive: true,
     });
 
-    // compute initial config and create particle set accordingly
-    computeConfig(canvas.width, canvas.height);
-    const particles: Particle[] = [];
-    for (let i = 0; i < particleCount; i++) {
-      particles.push(new Particle(canvas.width, canvas.height));
-    }
-
-    // Recreate spatial grid with configured gridSize
-    spatialGrid = new SpatialGrid(gridSize, canvas.width, canvas.height);
-
-    let animationFrameId: number;
-    let frameCount = 0;
-
-    // Performance-adaptive animation loop
     let lastFrameTime = performance.now();
+    let lastDebugUpdateTime = 0;
+    const debugUpdateInterval = 250;
 
+    /**
+     * @function animate
+     * @description O coração da animação. Este loop é executado a cada frame.
+     */
     const animate = () => {
+      if (!isVisible) return;
+      animationFrameId = requestAnimationFrame(animate);
       frameCount++;
 
       const now = performance.now();
       const dt = now - lastFrameTime;
       lastFrameTime = now;
 
-      // If we're running slow (dt > 40ms) and particleCount is large, gradually reduce particleCount
+      // Otimização adaptativa: se a animação estiver lenta (frame > 40ms),
+      // reduz gradualmente o número de partículas para melhorar a performance.
       if (dt > 40 && particles.length > 200) {
         const reduceBy = Math.min(20, Math.round(particles.length * 0.02));
         particles.splice(0, reduceBy);
       }
 
-      // Update global opacity and effective radius for smooth transitions
+      // Interpolação linear para suavizar a aparição/desaparição do efeito.
       globalOpacity += (targetOpacity - globalOpacity) * opacitySpeed;
       effectiveRadius += (targetRadius - effectiveRadius) * radiusSpeed;
 
-      // Stop animation when radius reaches zero
       if (effectiveRadius <= 1) {
         mouse.x = -1000;
         mouse.y = -1000;
+      } else {
+        opacityCache.updateMouse(mouse.x, mouse.y, mouse.radius);
       }
 
-      // Clear canvas
       ctx.fillStyle = "#000000";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Update spatial grid and draw particles
+      // Atualiza e desenha cada partícula, e as adiciona à grade espacial.
       spatialGrid.clear();
       for (let i = 0; i < particles.length; i++) {
         particles[i].update(gridSize);
@@ -426,43 +450,46 @@ const AnimatedBackground: React.FC = () => {
         spatialGrid.add(particles[i]);
       }
 
-      // Clear distance cache every 120 frames to prevent memory bloat
+      // Limpa o cache de distância periodicamente.
       if (frameCount % 120 === 0) {
         distanceCache.clear();
       }
 
-      // Find particles near mouse using spatial grid
+      // Encontra partículas próximas ao mouse usando a grade espacial.
       const mouseGridX = Math.floor(mouse.x / gridSize);
       const mouseGridY = Math.floor(mouse.y / gridSize);
       const nearbyParticles =
         mouse.x !== -1000
-          ? spatialGrid.getNeighbors(mouseGridX, mouseGridY, mouseRadius)
+          ? spatialGrid.getNeighbors(mouseGridX, mouseGridY, mouse.radius)
           : [];
 
-      // Filter particles within effective radius
+      // Filtra as partículas que estão realmente dentro do raio de efeito.
       const effectiveRadiusSquared = effectiveRadius * effectiveRadius;
       const connectedParticles: Particle[] = [];
       for (const p of nearbyParticles) {
         const distSquared = distanceCache.get(mouse.x, mouse.y, p.x, p.y);
         if (distSquared < effectiveRadiusSquared) {
-          p.layer = 0; // Partículas conectadas diretamente ao mouse = camada 0
+          p.layer = 0;
           connectedParticles.push(p);
         }
       }
 
       if (connectedParticles.length > 0) {
         ctx.save();
-        ctx.globalCompositeOperation = "lighter";
+        ctx.globalCompositeOperation = "lighter"; // Efeito de brilho nas sobreposições.
         ctx.globalAlpha = globalOpacity;
 
         const processedSet = new Set<Particle>(connectedParticles);
 
-        // Função para calcular opacidade baseada na proximidade do mouse (usando cache)
         const getOpacityFromMouseDistance = (x: number, y: number): number => {
           return opacityCache.get(x, y);
         };
 
-        // Batch mouse connections with distance-based opacity
+        // --- Renderização das Conexões ---
+        // O código abaixo agrupa as linhas por estilo e as desenha em lotes (batching)
+        // para otimizar a performance.
+
+        // 1. Conexões diretas com o mouse.
         for (const p of connectedParticles) {
           const distSquared = distanceCache.get(mouse.x, mouse.y, p.x, p.y);
           if (distSquared > maxLineLengthSquared) continue;
@@ -492,11 +519,10 @@ const AnimatedBackground: React.FC = () => {
           connectionBatch.addLine(mouse.x, mouse.y, p.x, p.y, 2);
         }
 
-        // Multi-layer propagation with optimized neighbor finding and opacity banding
+        // 2. Conexões propagadas em camadas.
         let currentLayer = [...connectedParticles];
         let styleOffset = 3;
 
-        // Agrupar conexões de propagação por faixas de opacidade para otimizar performance
         const propagationLinesByOpacity: Array<
           Array<{ cp: Particle; p: Particle; layer: number }>
         > = Array.from({ length: propagationOpacityBands }, () => []);
@@ -518,19 +544,17 @@ const AnimatedBackground: React.FC = () => {
 
               const distSquared = distanceCache.get(cp.x, cp.y, p.x, p.y);
               if (distSquared < propagationRadiusSquared) {
-                // Opacidade baseada na proximidade do mouse para AMBAS as partículas
                 const cpOpacity = getOpacityFromMouseDistance(cp.x, cp.y);
                 const pOpacity = getOpacityFromMouseDistance(p.x, p.y);
-                const connectionOpacity = Math.min(cpOpacity, pOpacity); // Usa a menor opacidade
+                const connectionOpacity = Math.min(cpOpacity, pOpacity);
 
-                // Mapear opacidade para banda (0-5)
                 const band = Math.min(
                   propagationOpacityBands - 1,
                   Math.floor(connectionOpacity * propagationOpacityBands)
                 );
                 propagationLinesByOpacity[band].push({ cp, p, layer });
 
-                p.layer = layer + 1; // Define a camada da partícula
+                p.layer = layer + 1;
                 processedSet.add(p);
                 nextLayer.push(p);
               }
@@ -538,18 +562,15 @@ const AnimatedBackground: React.FC = () => {
           }
 
           currentLayer = nextLayer;
-          if (currentLayer.length === 0) break; // Early exit if no more propagation
+          if (currentLayer.length === 0) break;
         }
 
-        // Desenhar conexões de propagação agrupadas por banda de opacidade
         for (let band = 0; band < propagationOpacityBands; band++) {
           const lines = propagationLinesByOpacity[band];
           if (lines.length === 0) continue;
 
-          // Calcular opacidade base da banda
           const bandOpacity = band * invPropagationBands;
 
-          // Configurar estilos para esta banda
           connectionBatch.setStyle(
             styleOffset,
             `rgba(255, 30, 30, ${bandOpacity * 0.4})`,
@@ -568,7 +589,6 @@ const AnimatedBackground: React.FC = () => {
             0.6
           );
 
-          // Adicionar todas as linhas desta banda
           for (const line of lines) {
             connectionBatch.addLine(
               line.cp.x,
@@ -593,17 +613,16 @@ const AnimatedBackground: React.FC = () => {
             );
           }
 
-          styleOffset += 3; // Próxima banda
+          styleOffset += 3;
         }
 
-        // Batch inter-connections between processed particles
         const processedArray = Array.from(processedSet);
         const processedIndexMap = new Map<Particle, number>();
         processedArray.forEach((p, index) => processedIndexMap.set(p, index));
 
+        // 3. Conexões entre partículas (inter-conexões).
         const interLines: Array<{ p1: Particle; p2: Particle }> = [];
 
-        // Use spatial grid to find inter-connections efficiently
         for (let i = 0; i < processedArray.length; i++) {
           const p1 = processedArray[i];
           const p1GridX = Math.floor(p1.x / gridSize);
@@ -616,7 +635,6 @@ const AnimatedBackground: React.FC = () => {
 
           for (const p2 of neighbors) {
             if (p2 === p1 || !processedSet.has(p2)) continue;
-            // Avoid duplicate connections by comparing indices - O(1) lookup now
             const p2Index = processedIndexMap.get(p2)!;
             if (p2Index <= i) continue;
 
@@ -627,9 +645,7 @@ const AnimatedBackground: React.FC = () => {
           }
         }
 
-        // Batch inter-connection drawing with optimized distance-based opacity
         if (interLines.length > 0) {
-          // Agrupar por faixas de opacidade para otimizar performance
           const linesByOpacity: Array<Array<{ p1: Particle; p2: Particle }>> =
             Array.from({ length: interOpacityBands }, () => []);
 
@@ -637,7 +653,6 @@ const AnimatedBackground: React.FC = () => {
             const p1Opacity = getOpacityFromMouseDistance(line.p1.x, line.p1.y);
             const p2Opacity = getOpacityFromMouseDistance(line.p2.x, line.p2.y);
             const interOpacity = Math.min(p1Opacity, p2Opacity) * 0.7;
-            // Mapear opacidade para banda (0-7)
             const band = Math.min(
               interOpacityBands - 1,
               Math.floor(interOpacity * interOpacityBands)
@@ -645,12 +660,10 @@ const AnimatedBackground: React.FC = () => {
             linesByOpacity[band].push(line);
           }
 
-          // Desenhar cada banda com sua opacidade específica
           for (let band = 0; band < interOpacityBands; band++) {
             const lines = linesByOpacity[band];
             if (lines.length === 0) continue;
 
-            // Calcular opacidade base da banda
             const bandOpacity = band * invInterBands * 0.7;
 
             connectionBatch.setStyle(
@@ -695,45 +708,82 @@ const AnimatedBackground: React.FC = () => {
               );
             }
 
-            styleOffset += 3; // Próxima banda
+            styleOffset += 3;
           }
         }
 
-        // Draw all batched connections in single operations
         connectionBatch.draw(ctx);
         ctx.restore();
       }
 
-      animationFrameId = requestAnimationFrame(animate);
+      // Atualiza as informações de debug em intervalos para não impactar a performance.
+      if (
+        process.env.NODE_ENV === "development" &&
+        now - lastDebugUpdateTime > debugUpdateInterval
+      ) {
+        setDebugInfo({
+          particleCount: particles.length,
+          mouseRadius: mouse.radius,
+        });
+        lastDebugUpdateTime = now;
+      }
     };
 
     animate();
 
+    // --- Limpeza ---
+    // É crucial remover os event listeners quando o componente é desmontado
+    // para evitar vazamentos de memória.
     return () => {
-      window.removeEventListener("resize", resize);
+      cancelAnimationFrame(animationFrameId);
+      window.removeEventListener("resize", handleResize);
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseleave", handleMouseLeave);
       window.removeEventListener("scroll", handleScroll);
       document.removeEventListener("visibilitychange", handleVisibility);
-      cancelAnimationFrame(animationFrameId);
     };
   }, []);
 
   return (
-    <div
-      className="canvas"
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        width: "100vw",
-        height: "100vh",
-        zIndex: -1,
-        pointerEvents: "none",
-      }}
-    >
-      <canvas ref={canvasRef} className="connecting-dots" />
-    </div>
+    <>
+      {/* O painel de debug só é renderizado em ambiente de desenvolvimento. */}
+      {process.env.NODE_ENV === "development" && debugInfo && (
+        <div
+          style={{
+            position: "fixed",
+            top: "10px",
+            left: "10px",
+            backgroundColor: "rgba(0, 0, 0, 0.7)",
+            color: "#64ffda",
+            padding: "8px 12px",
+            borderRadius: "4px",
+            fontFamily: "monospace",
+            fontSize: "14px",
+            zIndex: 9999,
+            border: "1px solid #64ffda",
+          }}
+        >
+          <p style={{ margin: 0 }}>Particles: {debugInfo.particleCount}</p>
+          <p style={{ margin: 0 }}>
+            Mouse Radius: {debugInfo.mouseRadius.toFixed(2)}
+          </p>
+        </div>
+      )}
+      <div
+        className="canvas"
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100vw",
+          height: "100vh",
+          zIndex: -1,
+          pointerEvents: "none",
+        }}
+      >
+        <canvas ref={canvasRef} className="connecting-dots" />
+      </div>
+    </>
   );
 };
 

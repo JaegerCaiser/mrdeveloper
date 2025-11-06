@@ -245,6 +245,14 @@ git push origin feature/nova-funcionalidade
 
 ## 🚀 Recent Improvements
 
+### v1.2.0 (TBD) - CI/CD Saga & Modernization
+
+- **[#107](https://github.com/JaegerCaiser/mrdeveloper/pull/107)**: A complete overhaul of the CI/CD workflows, focusing on efficiency, clarity, and best practices. This historic PR documents a deep-dive into debugging GitHub Actions, resulting in:
+  - **Path Filtering**: Workflows now intelligently skip unnecessary jobs for documentation-only changes.
+  - **Workflow Simplification**: Removed redundant actions (`bobheadxi/deployments`) in favor of native GitHub Actions `environment` features.
+  - **Bug Fixes**: Resolved multiple subtle bugs related to git history, action versions, and environment variable handling.
+  - **Enhanced Documentation**: The PR description itself serves as a detailed log of the lessons learned.
+
 ### v1.1.0 - Performance Optimization & Corepack Integration
 
 #### ⚡ **Corepack pnpm Integration**
