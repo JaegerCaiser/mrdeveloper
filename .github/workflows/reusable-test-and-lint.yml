@@ -7,10 +7,17 @@ on:
         required: true
         type: string
 
+    outputs:
+      code-changed:
+        description: "Indicates if code files were changed"
+        value: ${{ jobs.test-and-lint.outputs.code-changed }}
+
 jobs:
   test-and-lint:
     name: Test & Lint
     runs-on: ubuntu-latest
+    outputs:
+      code-changed: ${{ steps.set-output.outputs.code-changed }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -31,6 +38,10 @@ jobs:
               - 'tsconfig.json'
               - 'eslint.config.mjs'
               - '.github/workflows/**'
+
+      - name: Set code-changed output
+        id: set-output
+        run: echo "code-changed=${{ steps.filter.outputs.code }}" >> $GITHUB_OUTPUT
 
       - name: Setup pnpm
         if: steps.filter.outputs.code == 'true'

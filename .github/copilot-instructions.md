@@ -77,7 +77,7 @@ Se qualquer pré-condição falhar, não executar a ação; informe o usuário e
 
 - Execute diretamente no terminal
 - Exemplos: `gh pr create`, `gh pr edit`, `gh pr merge`, `gh repo clone`
-- **Para PRs complexas**: Crie temporariamente um arquivo `.md` com a descrição completa e use `--body-file arquivo.md` para `gh pr create` ou `gh pr edit`
+- **Para TODAS as PRs**: Crie temporariamente um arquivo `.md` com a descrição completa e use `--body-file arquivo.md` para `gh pr create` ou `gh pr edit`
 - **Como criar arquivos temporários**: Use a ferramenta `create_file` diretamente ao invés de comandos no terminal com `EOF` para manter o terminal limpo
 - **Exemplo**: Crie `pr_description.md` usando `create_file`, depois use `--body-file pr_description.md`
 
@@ -529,5 +529,5 @@ $transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
 
 ---
 
-_Atualizado em: 4 de novembro de 2025_
+_Atualizado em: 6 de novembro de 2025_
 _Próxima revisão: Quando necessário_
