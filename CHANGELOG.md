@@ -1,3 +1,10 @@
+## [1.2.3](https://github.com/JaegerCaiser/mrdeveloper/compare/v1.2.2...v1.2.3) (2025-11-06)
+
+
+### Bug Fixes
+
+* **ci:** use PAT instead of GITHUB_TOKEN for PR creation in sync workflow ([7c0a069](https://github.com/JaegerCaiser/mrdeveloper/commit/7c0a0694859703a5bc95d8631b119436f030c45c))
+
 ## [1.2.2](https://github.com/JaegerCaiser/mrdeveloper/compare/v1.2.1...v1.2.2) (2025-11-06)
 
 ### Bug Fixes
