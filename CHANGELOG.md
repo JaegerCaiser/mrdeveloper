@@ -1,3 +1,27 @@
+# [1.3.0](https://github.com/JaegerCaiser/mrdeveloper/compare/v1.2.4...v1.3.0) (2025-11-07)
+
+
+### Bug Fixes
+
+* correct sync workflow to use PAT instead of GitHub App ([722aa49](https://github.com/JaegerCaiser/mrdeveloper/commit/722aa49d5eda30f440cf238a2cd049103335900c))
+
+
+### Features
+
+* replace semantic-release with cycjimmy/semantic-release-action ([98d8f0f](https://github.com/JaegerCaiser/mrdeveloper/commit/98d8f0f079d3fd673daaf0ff2e13208fa172d58c))
+
+# [1.3.0-beta.1](https://github.com/JaegerCaiser/mrdeveloper/compare/v1.2.3...v1.3.0-beta.1) (2025-11-07)
+
+
+### Bug Fixes
+
+* correct sync workflow to use PAT instead of GitHub App ([722aa49](https://github.com/JaegerCaiser/mrdeveloper/commit/722aa49d5eda30f440cf238a2cd049103335900c))
+
+
+### Features
+
+* replace semantic-release with cycjimmy/semantic-release-action ([98d8f0f](https://github.com/JaegerCaiser/mrdeveloper/commit/98d8f0f079d3fd673daaf0ff2e13208fa172d58c))
+
 ## [1.2.3](https://github.com/JaegerCaiser/mrdeveloper/compare/v1.2.2...v1.2.3) (2025-11-06)
 
 

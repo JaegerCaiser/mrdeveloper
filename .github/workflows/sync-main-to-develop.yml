@@ -28,8 +28,8 @@ jobs:
 
       - name: Configure Git User
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "bot@users.noreply.github.com"
+          git config --global user.name "mrdeveloper-bot"
+          git config --global user.email "bot@mrdeveloper.dev"
 
       - name: Merge main into sync branch and push
         id: merge
@@ -71,7 +71,7 @@ jobs:
           fi
 
           # Continua o fluxo e força o push da branch, seja ela com merge limpo ou com conflitos.
-          git push --force https://github-actions[bot]:${GH_PAT}@github.com/${GITHUB_REPOSITORY}.git HEAD:$BRANCH_NAME
+          git push --force https://${GH_PAT}@github.com/${GITHUB_REPOSITORY}.git HEAD:$BRANCH_NAME
 
       - name: Create or Update Pull Request
         if: steps.merge.outputs.sync_needed == 'true'
