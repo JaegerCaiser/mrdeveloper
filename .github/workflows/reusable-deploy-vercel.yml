@@ -57,7 +57,7 @@ jobs:
       # ✅ MÁGICA: O paths-filter ESTÁ DE VOLTA
       - name: Check for code changes
         id: filter
-        uses: dorny/paths-filter@v3
+        uses: dorny/paths-filter@v3.0.2
         with:
           filters: |
             code:
@@ -69,29 +69,43 @@ jobs:
               - 'tsconfig.json'
               - 'eslint.config.mjs'
               - '.github/workflows/**'
+            docs:
+              # Documentação importante que deve trigger CI/CD
+              - 'src/**/*.mdx'        # Blogs (precisam ser publicados)
+              - 'README.md'           # Documentação principal
+              - 'CHANGELOG.md'        # Histórico de mudanças
+              - 'CUSTOMIZATION.md'    # Documentação de customização
+              # Workflows docs (já incluídos no filtro code)
 
       - name: Set code-changed output
         id: set-output
-        run: echo "code-changed=${{ steps.filter.outputs.code }}" >> $GITHUB_OUTPUT
+        run: |
+          # Considera mudança se houve alteração em código OU documentação
+          # Isso permite que blogs (.mdx) também triggerem deploy
+          if [[ "${{ steps.filter.outputs.code }}" == "true" || "${{ steps.filter.outputs.docs }}" == "true" ]]; then
+            echo "code-changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "code-changed=false" >> $GITHUB_OUTPUT
+          fi
 
       # ✅ MÁGICA: Todos os steps de deploy agora dependem do filtro
       - name: Install Vercel CLI
-        if: steps.filter.outputs.code == 'true'
+        if: steps.set-output.outputs.code-changed == 'true'
         run: npm install --global vercel@latest
 
       - name: Pull Vercel Environment Information
-        if: steps.filter.outputs.code == 'true'
+        if: steps.set-output.outputs.code-changed == 'true'
         run: |
           # Correção do case-sensitive (Preview vs preview)
           ENV_NAME=$(echo "${{ inputs.vercel-environment }}" | tr '[:upper:]' '[:lower:]')
           vercel pull --yes --environment=$ENV_NAME --token=${{ secrets.vercel-token }}
 
       - name: Ensure Vercel cache directory exists
-        if: steps.filter.outputs.code == 'true'
+        if: steps.set-output.outputs.code-changed == 'true'
         run: mkdir -p ~/.vercel && touch ~/.vercel/.gitkeep
 
       - name: Cache Vercel CLI
-        if: steps.filter.outputs.code == 'true'
+        if: steps.set-output.outputs.code-changed == 'true'
         uses: actions/cache@v4
         with:
           path: ~/.vercel
@@ -100,11 +114,11 @@ jobs:
             vercel-cli-${{ runner.os }}
 
       - name: Build Project Artifacts
-        if: steps.filter.outputs.code == 'true'
+        if: steps.set-output.outputs.code-changed == 'true'
         run: vercel build ${{ inputs.prod && '--prod' || '' }} --token=${{ secrets.vercel-token }}
 
       - name: Deploy to Vercel
-        if: steps.filter.outputs.code == 'true'
+        if: steps.set-output.outputs.code-changed == 'true'
         id: deploy_step
         run: |
           DEPLOY_COMMAND="vercel deploy ${{ inputs.prebuilt && '--prebuilt' || '' }} ${{ inputs.prod && '--prod' || '' }} --token=${{ secrets.vercel-token }}"

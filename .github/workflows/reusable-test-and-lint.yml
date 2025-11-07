@@ -38,32 +38,46 @@ jobs:
               - 'tsconfig.json'
               - 'eslint.config.mjs'
               - '.github/workflows/**'
+            docs:
+              # Documentação importante que deve trigger CI/CD
+              - 'src/**/*.mdx'        # Blogs (precisam ser publicados)
+              - 'README.md'           # Documentação principal
+              - 'CHANGELOG.md'        # Histórico de mudanças
+              - 'CUSTOMIZATION.md'    # Documentação de customização
+              # Workflows docs (já incluídos no filtro code)
 
       - name: Set code-changed output
         id: set-output
-        run: echo "code-changed=${{ steps.filter.outputs.code }}" >> $GITHUB_OUTPUT
+        run: |
+          # Considera mudança se houve alteração em código OU documentação
+          # Isso permite que blogs (.mdx) também triggerem CI/CD
+          if [[ "${{ steps.filter.outputs.code }}" == "true" || "${{ steps.filter.outputs.docs }}" == "true" ]]; then
+            echo "code-changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "code-changed=false" >> $GITHUB_OUTPUT
+          fi
 
       - name: Setup pnpm
-        if: steps.filter.outputs.code == 'true'
+        if: steps.set-output.outputs.code-changed == 'true'
         uses: pnpm/action-setup@v4
 
       - name: Setup Node.js ${{ inputs.node-version }}
-        if: steps.filter.outputs.code == 'true'
+        if: steps.set-output.outputs.code-changed == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: ${{ inputs.node-version }}
           cache: "pnpm"
 
       - name: Install dependencies
-        if: steps.filter.outputs.code == 'true'
+        if: steps.set-output.outputs.code-changed == 'true'
         run: pnpm install --frozen-lockfile
 
       - name: Ensure build cache directories exist
-        if: steps.filter.outputs.code == 'true'
+        if: steps.set-output.outputs.code-changed == 'true'
         run: mkdir -p .vite node_modules/.cache && touch .eslintcache
 
       - name: Cache build artifacts
-        if: steps.filter.outputs.code == 'true'
+        if: steps.set-output.outputs.code-changed == 'true'
         uses: actions/cache@v4
         with:
           path: |
@@ -76,13 +90,13 @@ jobs:
             build-${{ runner.os }}-node-${{ inputs.node-version }}-
 
       - name: Run linting
-        if: steps.filter.outputs.code == 'true'
+        if: steps.set-output.outputs.code-changed == 'true'
         run: pnpm run lint
         env:
           ESLINT_CACHE: .eslintcache
 
       - name: Run tests
-        if: steps.filter.outputs.code == 'true'
+        if: steps.set-output.outputs.code-changed == 'true'
         run: pnpm run test:ci
 
       - name: Upload debug logs on failure
