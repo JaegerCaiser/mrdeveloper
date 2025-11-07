@@ -51,6 +51,7 @@ jobs:
       github-token: ${{ secrets.GITHUB_TOKEN }}
 
   validate-release-branch:
+    name: Validate Release Branch for Main
     # ✅ SEGUINDO O TUTORIAL: 'if:' sem aspas
     if: github.event_name == 'pull_request' && github.base_ref == 'main'
     runs-on: ubuntu-latest
