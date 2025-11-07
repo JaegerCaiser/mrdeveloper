@@ -6,6 +6,17 @@ Provide project context and coding guidelines that AI should follow when generat
 
 # 🤖 GitHub Copilot - Guia de Interação
 
+## ⭐ Princípio Fundamental: Verificar, Depois Agir
+
+**NUNCA confie na memória ou no contexto da conversa. SEMPRE verifique o estado atual do repositório antes de executar qualquer ação.**
+
+- **Antes de Commitar:** Use `git status --porcelain` para confirmar os arquivos a serem commitados.
+- **Antes de Fazer Push:** Use `git log --left-right` para comparar a branch local com a remota se houver risco de divergência.
+- **Antes de Criar um PR de Release:** Use `git log main..HEAD` para gerar a lista de mudanças a partir da fonte da verdade (o Git), não da memória.
+- **Antes de Editar um Arquivo:** Releia o arquivo se houver qualquer dúvida sobre seu estado atual.
+
+Este princípio é a base para evitar retrabalho e garantir que todas as ações sejam deliberadas e baseadas em fatos.
+
 ## 📋 Sobre Esta Documentação
 
 Este arquivo serve como guia de referência para futuras interações com o GitHub Copilot no desenvolvimento deste projeto.
@@ -210,7 +221,7 @@ git push -u origin feature/nome-da-feature
 
 ### Visão Geral
 
-**Portfolio React SPA** - Site de portfólio moderno com animações, construído com React 18 + TypeScript + Vite.
+**Portfolio React SPA** - Site de portfólio moderno com animações, construído com React 19 + TypeScript + Vite.
 
 **Arquitetura Principal:**
 
