@@ -31,9 +31,6 @@ jobs:
           filters: |
             code:
               - 'src/**'
-              - '!src/**/*.md'
-              - '!src/**/*.mdx'
-              - '!src/**/*.txt'
               - 'public/**'
               - 'package.json'
               - 'pnpm-lock.yaml'
@@ -42,11 +39,12 @@ jobs:
               - 'eslint.config.mjs'
               - '.github/workflows/**'
             docs:
-              - '**/*.md'
-              - '**/*.mdx'
-              - '**/*.txt'
-              # Excluir arquivos que fazem sentido trigger CI/CD mesmo sendo docs
-              - '!**/.github/**/*.md'
+              # Documentação importante que deve trigger CI/CD
+              - 'src/**/*.mdx'        # Blogs (precisam ser publicados)
+              - 'README.md'           # Documentação principal
+              - 'CHANGELOG.md'        # Histórico de mudanças
+              - 'CUSTOMIZATION.md'    # Documentação de customização
+              # Workflows docs (já incluídos no filtro code)
 
       - name: Set code-changed output
         id: set-output
