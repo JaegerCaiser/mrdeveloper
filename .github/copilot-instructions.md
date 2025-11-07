@@ -65,6 +65,17 @@ Se qualquer pré-condição falhar, não executar a ação; informe o usuário e
 
 **Sempre execute comandos `gh` de modo que o output seja exibido diretamente no terminal.**
 
+#### ⚠️ REGRA IMPORTANTE: Output de Comandos gh
+
+**TODOS os comandos `gh` que geram output devem terminar com `| cat` para evitar output interativo/pagers!**
+
+- ✅ **CERTO:** `gh pr list --json number,title | cat`
+- ❌ **ERRADO:** `gh pr list --json number,title` (pode travar)
+- ✅ **CERTO:** `gh api repos/owner/repo | cat`
+- ❌ **ERRADO:** `gh api repos/owner/repo` (pode travar)
+
+**Exceção:** Comandos interativos como `gh pr create` não precisam de `| cat`.
+
 #### 📊 Para comandos que retornam dados estruturados:
 
 - **SEMPRE** redirecione para arquivo temporário
@@ -77,9 +88,10 @@ Se qualquer pré-condição falhar, não executar a ação; informe o usuário e
 
 - Execute diretamente no terminal
 - Exemplos: `gh pr create`, `gh pr edit`, `gh pr merge`, `gh repo clone`
-- **Para TODAS as PRs**: Crie temporariamente um arquivo `.md` com a descrição completa e use `--body-file arquivo.md` para `gh pr create` ou `gh pr edit`
+- **🚨 REGRA OBRIGATÓRIA PARA PRS**: **SEMPRE** crie um arquivo `.md` temporário com a descrição completa e use `--body-file arquivo.md` para `gh pr create` ou `gh pr edit`
 - **Como criar arquivos temporários**: Use a ferramenta `create_file` diretamente ao invés de comandos no terminal com `EOF` para manter o terminal limpo
 - **Exemplo**: Crie `pr_description.md` usando `create_file`, depois use `--body-file pr_description.md`
+- **❌ PROIBIDO**: Passar corpo da PR inline no comando (evita comandos gigantes e ilegíveis)
 
 #### 🧹 Limpeza:
 
@@ -181,8 +193,9 @@ git push -u origin feature/nome-da-feature
 - ✅ Só faça merge após revisão e aprovação
 
 **A branch \`main\` está protegida e só aceita merges de:**
-- Branches \`release/*\`
-- Branches \`hotfix/*\`
+
+- Branches \`release/\*\`
+- Branches \`hotfix/\*\`
 
 ### 📝 Documentação
 
