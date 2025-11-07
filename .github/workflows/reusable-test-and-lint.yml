@@ -31,6 +31,9 @@ jobs:
           filters: |
             code:
               - 'src/**'
+              - '!src/**/*.md'
+              - '!src/**/*.mdx'
+              - '!src/**/*.txt'
               - 'public/**'
               - 'package.json'
               - 'pnpm-lock.yaml'
