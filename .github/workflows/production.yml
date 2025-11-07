@@ -16,7 +16,7 @@ on:
 
 jobs:
   test-and-lint:
-    name: Production - Test & Lint
+    name: CI - Test & Lint
     # Este job SEMPRE roda para satisfazer o Required Check
     # O filtro de paths está DENTRO do reusable-test-and-lint
     uses: ./.github/workflows/reusable-test-and-lint.yml
@@ -24,7 +24,7 @@ jobs:
       node-version: "22.x"
 
   deploy-production:
-    name: Production - Deploy to Vercel
+    name: CI - Deploy to Vercel
     needs: test-and-lint
     # ✅ CORREÇÃO: Aplicando o tutorial
     # 'if:' sem aspas externas

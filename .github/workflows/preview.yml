@@ -27,7 +27,7 @@ on:
 
 jobs:
   test-and-lint:
-    name: Preview - Test & Lint
+    name: CI - Test & Lint
     # Este job SEMPRE roda (para satisfazer o check obrigatório)
     # O 'dummy pass' acontece DENTRO do 'reusable-lint'
     uses: ./.github/workflows/reusable-test-and-lint.yml
@@ -35,7 +35,7 @@ jobs:
       node-version: "22.x"
 
   deploy-preview:
-    name: Preview - Deploy to Vercel
+    name: CI - Deploy to Vercel
     needs: test-and-lint
     # ❌ REMOVIDO: O 'if: needs.test-and-lint.outputs.code-changed == 'true''
     # Este job TEM que rodar sempre para o status check
