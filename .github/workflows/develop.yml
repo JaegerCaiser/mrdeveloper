@@ -15,13 +15,13 @@ on:
 
 jobs:
   test-and-lint:
-    name: Test & Lint
+    name: Develop - Test & Lint
     uses: ./.github/workflows/reusable-test-and-lint.yml
     with:
       node-version: "22.x"
 
   deploy-develop:
-    name: Deploy to Vercel Preview
+    name: Develop - Deploy to Vercel
     needs: test-and-lint
     uses: ./.github/workflows/reusable-deploy-vercel.yml
     with:
