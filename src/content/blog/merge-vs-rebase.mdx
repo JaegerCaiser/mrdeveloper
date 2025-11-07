@@ -1,0 +1,71 @@
+---
+title: "Merge Commit vs. Rebase: Qual a Melhor Estratégia para seu Histórico Git?"
+publishedAt: "2025-11-06"
+summary: "Um debate clássico no mundo Git: você deve preferir um histórico linear e limpo com rebase, ou um histórico rastreável e completo com merge commits? Vamos analisar os prós e contras de cada abordagem."
+---
+
+Se você já trabalhou em uma equipe de desenvolvimento, provavelmente já se deparou com este debate: qual é a maneira "certa" de incorporar as mudanças de uma feature branch na branch principal? A resposta geralmente se resume a duas estratégias principais oferecidas pelo GitHub: **Create a merge commit** e **Rebase and merge**.
+
+Ambas as abordagens têm o mesmo resultado final — o código da sua feature chega à branch de destino — mas elas contam a *história* de como ele chegou lá de maneiras drasticamente diferentes.
+
+## A Abordagem 1: "Create a merge commit" (O Historiador)
+
+Esta é a estratégia padrão do Git. Ela preserva a história exatamente como ela aconteceu.
+
+-   **Como funciona:** Quando você faz o merge de um Pull Request, o Git cria um novo commit, o "merge commit". Este commit especial tem dois "pais": o último commit da branch de destino e o último commit da sua feature branch. Ele une os dois históricos.
+
+-   **Como fica o `git log`:**
+    ```
+    *   Merge pull request #123 from feature/nova-feature (main)
+    |\
+    | * feat: Adiciona nova funcionalidade (feature/nova-feature)
+    | * fix: Corrige bug na funcionalidade
+    * | commit anterior (main)
+    |/
+    * ...
+    ```
+    O histórico se torna um grafo, parecendo uma "árvore de natal".
+
+-   **Prós:**
+    *   **Rastreabilidade Absoluta:** É indiscutível *quando* o PR foi mergeado e de onde ele veio. O contexto do PR está permanentemente gravado no histórico do Git.
+    *   **Não Reescreve a História:** Os commits originais da feature branch permanecem intocados, o que é considerado mais seguro por alguns.
+
+-   **Contras:**
+    *   **Histórico "Poluído":** O log fica cheio de commits de merge que, para alguns, são apenas ruído e dificultam a leitura da evolução linear do projeto.
+
+## A Abordagem 2: "Rebase and merge" (O Editor)
+
+Esta estratégia prioriza um histórico limpo e legível.
+
+-   **Como funciona:** Antes de fazer o merge, o Git pega todos os commits da sua feature branch e os "reaplica", um por um, em cima do último commit da branch de destino. Depois disso, a branch de destino pode ser simplesmente "avançada" para incluir esses novos commits, sem a necessidade de um merge commit.
+
+-   **Como fica o `git log`:**
+    ```
+    * feat: Adiciona nova funcionalidade (main)
+    * fix: Corrige bug na funcionalidade
+    * commit anterior (main)
+    * ...
+    ```
+    O histórico fica perfeitamente linear, como se todo o trabalho tivesse sido feito diretamente na branch principal.
+
+-   **Prós:**
+    *   **Histórico Limpo e Legível:** É extremamente fácil seguir a sequência de mudanças no projeto.
+    *   **Facilita a Depuração:** Ferramentas como `git bisect` (para encontrar quando um bug foi introduzido) funcionam muito melhor em um histórico linear.
+
+-   **Contras:**
+    *   **Perda de Contexto do PR:** Você perde a informação explícita de "quando o PR #123 foi mergeado" diretamente no log do Git. Esse contexto passa a viver apenas na interface do GitHub.
+    *   **Reescreve a História:** Os hashes dos seus commits originais são alterados durante o rebase.
+
+## Conclusão: Qual é o Melhor?
+
+Não há uma resposta "certa". É uma escolha filosófica para o seu projeto.
+
+-   **Escolha "Merge Commit" se:** Você valoriza a rastreabilidade histórica e a integridade dos commits acima de tudo. É ótimo para projetos com auditorias rigorosas ou para equipes com muitos desenvolvedores juniores, pois é o fluxo mais simples de entender.
+
+-   **Escolha "Rebase and Merge" se:** Você valoriza um histórico limpo e legível e está confortável em usar a interface do GitHub para encontrar o contexto de um PR. É uma abordagem muito popular em projetos de alta performance e equipes que priorizam a clareza do `git log`.
+
+No nosso projeto, optamos pelo **"Rebase and Merge"**. A clareza do histórico linear supera a perda do contexto do merge commit no log, e essa decisão nos ajuda a manter o projeto organizado e fácil de navegar.
+
+---
+
+*Escrito com ❤️ por **Matheus Caiser, The Mr. Developer***
