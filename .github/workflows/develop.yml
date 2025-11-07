@@ -15,14 +15,17 @@ on:
 
 jobs:
   test-and-lint:
-    name: Test & Lint
+    name: Develop - Test & Lint
     uses: ./.github/workflows/reusable-test-and-lint.yml
     with:
       node-version: "22.x"
 
   deploy-develop:
-    name: Deploy to Vercel Preview
+    name: Develop - Deploy to Vercel
     needs: test-and-lint
+    # ✅ CORREÇÃO: Aplicando o tutorial
+    # 'if:' sem aspas externas
+    if: needs.test-and-lint.outputs.code-changed == 'true'
     uses: ./.github/workflows/reusable-deploy-vercel.yml
     with:
       environment: Development

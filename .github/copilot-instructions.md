@@ -6,6 +6,17 @@ Provide project context and coding guidelines that AI should follow when generat
 
 # 🤖 GitHub Copilot - Guia de Interação
 
+## ⭐ Princípio Fundamental: Verificar, Depois Agir
+
+**NUNCA confie na memória ou no contexto da conversa. SEMPRE verifique o estado atual do repositório antes de executar qualquer ação.**
+
+- **Antes de Commitar:** Use `git status --porcelain` para confirmar os arquivos a serem commitados.
+- **Antes de Fazer Push:** Use `git log --left-right` para comparar a branch local com a remota se houver risco de divergência.
+- **Antes de Criar um PR de Release:** Use `git log main..HEAD` para gerar a lista de mudanças a partir da fonte da verdade (o Git), não da memória.
+- **Antes de Editar um Arquivo:** Releia o arquivo se houver qualquer dúvida sobre seu estado atual.
+
+Este princípio é a base para evitar retrabalho e garantir que todas as ações sejam deliberadas e baseadas em fatos.
+
 ## 📋 Sobre Esta Documentação
 
 Este arquivo serve como guia de referência para futuras interações com o GitHub Copilot no desenvolvimento deste projeto.
@@ -210,7 +221,7 @@ git push -u origin feature/nome-da-feature
 
 ### Visão Geral
 
-**Portfolio React SPA** - Site de portfólio moderno com animações, construído com React 18 + TypeScript + Vite.
+**Portfolio React SPA** - Site de portfólio moderno com animações, construído com React 19 + TypeScript + Vite.
 
 **Arquitetura Principal:**
 
@@ -353,6 +364,23 @@ pnpm lint:fix     # Correção automática
 - `reusable-deploy-vercel.yml`: Deploy para Vercel com preview/production
 - `reusable-release.yml`: Semantic release automation
 - Cache de build artifacts (`.vite`, `node_modules/.cache`, `.eslintcache`)
+
+**Debugging de Workflows do GitHub Actions:**
+
+- **Tutorial completo:** Consulte `tutorial-github-actions-schema.md` para guia detalhado
+- **Passo 1:** Execute `pnpm lint:yaml` para verificar sintaxe YAML
+- **Passo 2:** Execute `pnpm lint` para verificar código relacionado
+- **Passo 3:** Valide YAML com Python se necessário
+- **Passo 4:** Analise erros específicos do linter (ex: condições `if`)
+- **Regra:** YAML válido ≠ Workflow válido - sempre teste todas as camadas
+
+**Correção de Erros de Lint em Workflows:**
+
+- **Sintaxe YAML:** Use `pnpm lint:yaml` para validar arquivos `.github/workflows/*.yml`
+- **Condições `if`:** Não use aspas em expressões GitHub Actions
+  - ❌ Errado: `if: "always() && !contains(...)"`
+  - ✅ Correto: `if: always() && !contains(...)`
+- **Validação:** YAML válido não significa workflow válido - teste sempre
 
 ### Workflow Preview - Otimizações Recentes
 
