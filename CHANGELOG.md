@@ -1,3 +1,14 @@
+## [1.3.1](https://github.com/JaegerCaiser/mrdeveloper/compare/v1.3.0...v1.3.1) (2025-11-07)
+
+
+### Bug Fixes
+
+* add missing name field to validate-release-branch job ([90cf1a3](https://github.com/JaegerCaiser/mrdeveloper/commit/90cf1a3ced15beb3c2e40a0f67079daccd0eac44))
+* correct preview URL link in PR comment ([b983a4b](https://github.com/JaegerCaiser/mrdeveloper/commit/b983a4b72400e381a11111695a7672dd697a4221))
+* rename workflow jobs to prevent status check conflicts ([7f1170e](https://github.com/JaegerCaiser/mrdeveloper/commit/7f1170ed09ce5c361041651cbc57099601d38abb))
+* rename workflow jobs to prevent status check conflicts ([b723c32](https://github.com/JaegerCaiser/mrdeveloper/commit/b723c320ab002923fc62e731e0086809c2620be7))
+* restore proper preview URL link format in PR comment ([5a63117](https://github.com/JaegerCaiser/mrdeveloper/commit/5a6311781003512c3fa14b9fb786c897cc0eb6ae))
+
 ## [1.3.1-beta.1](https://github.com/JaegerCaiser/mrdeveloper/compare/v1.3.0...v1.3.1-beta.1) (2025-11-07)
 
 
