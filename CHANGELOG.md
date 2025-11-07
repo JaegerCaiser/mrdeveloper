@@ -1,3 +1,12 @@
+## [1.3.1-beta.1](https://github.com/JaegerCaiser/mrdeveloper/compare/v1.3.0...v1.3.1-beta.1) (2025-11-07)
+
+
+### Bug Fixes
+
+* correct preview URL link in PR comment ([b983a4b](https://github.com/JaegerCaiser/mrdeveloper/commit/b983a4b72400e381a11111695a7672dd697a4221))
+* rename workflow jobs to prevent status check conflicts ([7f1170e](https://github.com/JaegerCaiser/mrdeveloper/commit/7f1170ed09ce5c361041651cbc57099601d38abb))
+* rename workflow jobs to prevent status check conflicts ([b723c32](https://github.com/JaegerCaiser/mrdeveloper/commit/b723c320ab002923fc62e731e0086809c2620be7))
+
 # [1.3.0](https://github.com/JaegerCaiser/mrdeveloper/compare/v1.2.4...v1.3.0) (2025-11-07)
 
 
