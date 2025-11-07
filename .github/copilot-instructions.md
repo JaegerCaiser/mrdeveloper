@@ -354,6 +354,23 @@ pnpm lint:fix     # Correção automática
 - `reusable-release.yml`: Semantic release automation
 - Cache de build artifacts (`.vite`, `node_modules/.cache`, `.eslintcache`)
 
+**Debugging de Workflows do GitHub Actions:**
+
+- **Tutorial completo:** Consulte `tutorial-github-actions-schema.md` para guia detalhado
+- **Passo 1:** Execute `pnpm lint:yaml` para verificar sintaxe YAML
+- **Passo 2:** Execute `pnpm lint` para verificar código relacionado
+- **Passo 3:** Valide YAML com Python se necessário
+- **Passo 4:** Analise erros específicos do linter (ex: condições `if`)
+- **Regra:** YAML válido ≠ Workflow válido - sempre teste todas as camadas
+
+**Correção de Erros de Lint em Workflows:**
+
+- **Sintaxe YAML:** Use `pnpm lint:yaml` para validar arquivos `.github/workflows/*.yml`
+- **Condições `if`:** Não use aspas em expressões GitHub Actions
+  - ❌ Errado: `if: "always() && !contains(...)"`
+  - ✅ Correto: `if: always() && !contains(...)`
+- **Validação:** YAML válido não significa workflow válido - teste sempre
+
 ### Workflow Preview - Otimizações Recentes
 
 **Implementado em novembro de 2025 - Resolução de duplicação e status checks quebrados:**

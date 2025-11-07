@@ -29,6 +29,10 @@ on:
       deployment_url:
         description: "URL do deployment no Vercel"
         value: ${{ jobs.deploy.outputs.deployment_url }}
+      # ✅ MÁGICA: Exportando o resultado do filtro
+      code-changed:
+        description: "Indica se o deploy realmente rodou"
+        value: ${{ jobs.deploy.outputs.code-changed }}
 
 jobs:
   deploy:
@@ -36,6 +40,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       deployment_url: ${{ steps.deploy_step.outputs.deployment_url }}
+      code-changed: ${{ steps.filter.outputs.code }}
     environment:
       name: ${{ inputs.environment }}
       url: ${{ steps.deploy_step.outputs.deployment_url }}
@@ -49,6 +54,7 @@ jobs:
         with:
           fetch-depth: 0
 
+      # ✅ MÁGICA: O paths-filter ESTÁ DE VOLTA
       - name: Check for code changes
         id: filter
         uses: dorny/paths-filter@v3
@@ -64,6 +70,11 @@ jobs:
               - 'eslint.config.mjs'
               - '.github/workflows/**'
 
+      - name: Set code-changed output
+        id: set-output
+        run: echo "code-changed=${{ steps.filter.outputs.code }}" >> $GITHUB_OUTPUT
+
+      # ✅ MÁGICA: Todos os steps de deploy agora dependem do filtro
       - name: Install Vercel CLI
         if: steps.filter.outputs.code == 'true'
         run: npm install --global vercel@latest
@@ -71,7 +82,9 @@ jobs:
       - name: Pull Vercel Environment Information
         if: steps.filter.outputs.code == 'true'
         run: |
-          vercel pull --yes --environment=${{ inputs.vercel-environment }} --token=${{ secrets.vercel-token }}
+          # Correção do case-sensitive (Preview vs preview)
+          ENV_NAME=$(echo "${{ inputs.vercel-environment }}" | tr '[:upper:]' '[:lower:]')
+          vercel pull --yes --environment=$ENV_NAME --token=${{ secrets.vercel-token }}
 
       - name: Ensure Vercel cache directory exists
         if: steps.filter.outputs.code == 'true'
@@ -104,11 +117,6 @@ jobs:
             echo "Error: Vercel deploy failed with exit code $DEPLOY_STATUS."
             exit $DEPLOY_STATUS
           fi
-
-      - name: Report Skipped Deployment
-        if: steps.filter.outputs.code != 'true'
-        run: |
-          echo "Deployment skipped: No code changes detected."
 
       - name: Upload debug logs on failure
         if: failure()

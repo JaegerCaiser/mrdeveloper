@@ -17,7 +17,8 @@ on:
 jobs:
   test-and-lint:
     name: Production - Test & Lint
-    if: ${{ !contains(github.event.head_commit.message, 'chore(release)') }}
+    # Este job SEMPRE roda para satisfazer o Required Check
+    # O filtro de paths está DENTRO do reusable-test-and-lint
     uses: ./.github/workflows/reusable-test-and-lint.yml
     with:
       node-version: "22.x"
@@ -25,10 +26,14 @@ jobs:
   deploy-production:
     name: Production - Deploy to Vercel
     needs: test-and-lint
+    # ✅ CORREÇÃO: Aplicando o tutorial
+    # 'if:' sem aspas externas
+    # Pula o deploy se 'code-changed' for falso
+    if: needs.test-and-lint.outputs.code-changed == 'true'
     uses: ./.github/workflows/reusable-deploy-vercel.yml
     with:
       environment: Production
-      vercel-environment: production
+      vercel-environment: production #
       ref: ${{ github.sha }}
       prebuilt: true
       prod: true
@@ -38,8 +43,14 @@ jobs:
 
   run-semantic-release:
     name: Run Semantic Release
-    needs: deploy-production
-    if: ${{ !contains(github.event.head_commit.message, 'chore(release)') }}
+    needs: [test-and-lint, deploy-production] # Depende dos dois
+    
+    # ✅ CORREÇÃO: Aplicando o tutorial
+    # 'if:' sem aspas externas
+    # 'always()' garante que ele rode mesmo se 'deploy-production' for 'skipped'
+    # 'not(contains...)' é a trava anti-loop (substituindo o '!')
+    if: always() && !contains(github.event.head_commit.message, 'chore(release)')
+    
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -50,7 +61,7 @@ jobs:
         uses: actions/checkout@v5
         with:
           fetch-depth: 0
-          persist-credentials: false
+          persist-credentials: false #
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
