@@ -52,6 +52,12 @@
   }
 }
 
+.navigation-bar__right {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
 .navigation {
   display: flex;
   font-size: 2rem; /* align with reference site */

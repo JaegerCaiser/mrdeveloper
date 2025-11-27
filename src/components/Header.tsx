@@ -1,6 +1,7 @@
 import { useState, useEffect, memo } from "react";
 import "./Header.scss";
 import logoSvg from "../logo.svg";
+import LanguageSwitcher from "./LanguageSwitcher";
 
 const Header: React.FC = () => {
   const [activeSection, setActiveSection] = useState("hero");
@@ -42,11 +43,13 @@ const Header: React.FC = () => {
     const heroSection = document.querySelector("#hero");
     const aboutSection = document.querySelector("#about");
     const experienceSection = document.querySelector("#experience");
+    const writingSection = document.querySelector("#writing");
     const contactSection = document.querySelector("#contact");
 
     if (heroSection) observerNav.observe(heroSection);
     if (aboutSection) observerNav.observe(aboutSection);
     if (experienceSection) observerNav.observe(experienceSection);
+    if (writingSection) observerNav.observe(writingSection);
     if (contactSection) observerNav.observe(contactSection);
 
     return () => {
@@ -84,6 +87,15 @@ const Header: React.FC = () => {
         Experience
       </a>
       <a
+        href="#writing"
+        id="nav-writing"
+        className={`navigation__item ${
+          activeSection === "writing" ? "navigation__item--active" : ""
+        }`}
+      >
+        Writing
+      </a>
+      <a
         href="#contact"
         id="nav-contact"
         className={`navigation__item ${
@@ -103,6 +115,10 @@ const Header: React.FC = () => {
 
       {/* Desktop navigation (hidden on small screens via CSS) */}
       <div className="navigation">{navLinks}</div>
+
+      <div className="navigation-bar__right">
+        <LanguageSwitcher />
+      </div>
     </nav>
   );
 };

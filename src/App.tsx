@@ -7,6 +7,7 @@ import Footer from "./components/Footer";
 import Hero from "./sections/Hero";
 import About from "./sections/About";
 import Experience from "./sections/Experience";
+import Writing from "./sections/Writing";
 import Contact from "./sections/Contact";
 import { Analytics } from "@vercel/analytics/react";
 
@@ -19,6 +20,7 @@ const App = () => {
         <Header />
         <About />
         <Experience />
+        <Writing />
         <Contact />
       </main>
       <Footer />

@@ -2,6 +2,7 @@
 title: "A Saga do CI/CD: Como Corrigimos uma Race Condition no GitHub Actions"
 publishedAt: "2025-11-06"
 summary: "Uma história real de depuração de um workflow de CI/CD, onde a concorrência de gatilhos e a ordem de execução causaram uma falha sutil, mas crítica, no nosso processo de release."
+tags: ["ci-cd", "github-actions", "devops"]
 ---
 
 Todo desenvolvedor que já configurou um pipeline de CI/CD conhece a sensação: a satisfação de ver os checks verdes e a automação funcionando... e a frustração profunda quando uma falha misteriosa acontece. Recentemente, passei por uma dessas sagas ao tentar otimizar os workflows de um projeto, e a jornada para encontrar a solução foi cheia de lições valiosas.
@@ -72,7 +73,7 @@ Quando implementamos o paths-filter no `preview.yml`, o job `deploy-preview` era
 ```yaml
 # ❌ ANTES: Job pulado completamente
 deploy-preview:
-  if: needs.test-and-lint.outputs.code-changed == 'true'  # ← Isso fazia o job ser skipped
+  if: needs.test-and-lint.outputs.code-changed == 'true' # ← Isso fazia o job ser skipped
   uses: ./.github/workflows/reusable-deploy-vercel.yml
 ```
 
@@ -105,15 +106,15 @@ jobs:
               # ... outros arquivos de código
 
       - name: Install Vercel CLI
-        if: steps.filter.outputs.code == 'true'  # ← Condição no step
+        if: steps.filter.outputs.code == 'true' # ← Condição no step
         run: npm install --global vercel@latest
 
       - name: Build Project Artifacts
-        if: steps.filter.outputs.code == 'true'  # ← Condição no step
+        if: steps.filter.outputs.code == 'true' # ← Condição no step
         run: vercel build
 
       - name: Deploy to Vercel
-        if: steps.filter.outputs.code == 'true'  # ← Condição no step
+        if: steps.filter.outputs.code == 'true' # ← Condição no step
         run: vercel deploy
 ```
 
@@ -125,10 +126,12 @@ Agora ambos os reusable workflows seguem o **mesmo padrão arquitetural**:
 - **`reusable-deploy-vercel.yml`**: Paths-filter + steps condicionais
 
 **Comportamento final:**
+
 - **PRs com mudanças no código**: Jobs rodam e fazem trabalho real ✅
 - **PRs só com documentação**: Jobs rodam (status checks verdes) mas pulam steps internos ✅
 
 **Benefícios alcançados:**
+
 - ✅ **Status checks consistentes** (sempre success)
 - 💰 **Otimização de custos** (deploy condicional no Vercel)
 - 🔄 **Arquitetura uniforme** nos reusable workflows
@@ -139,6 +142,7 @@ Agora ambos os reusable workflows seguem o **mesmo padrão arquitetural**:
 O que começou como uma simples otimização se tornou uma jornada profunda pela arquitetura do GitHub Actions. A lição final é clara: workflows de CI/CD são parte do código e merecem a mesma atenção à arquitetura, separação de responsabilidades e depuração que aplicamos à nossa aplicação.
 
 **Nunca subestime:**
+
 - A importância de um bom `fetch-depth`
 - O poder das race conditions em sistemas concorrentes
 - A necessidade de status checks consistentes
