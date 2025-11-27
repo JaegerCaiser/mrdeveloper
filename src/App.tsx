@@ -9,11 +9,13 @@ import About from "./sections/About";
 import Experience from "./sections/Experience";
 import Writing from "./sections/Writing";
 import Contact from "./sections/Contact";
+import FlyingSanta from "./components/FlyingSanta";
 import { Analytics } from "@vercel/analytics/react";
 
 const App = () => {
   return (
     <div className="app">
+      <FlyingSanta />
       <AnimatedBackground />
       <main className="main" role="main">
         <Hero />
