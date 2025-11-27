@@ -1,0 +1,31 @@
+@use "../styles/variables" as *;
+
+.language-switcher {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0.5rem;
+  border-radius: 20px;
+
+  button {
+    font-family: $font-secondary;
+    font-weight: 700;
+    font-size: 0.8rem;
+    padding: 0.3rem 0.8rem;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: $transition;
+    color: rgba($color-text, 0.6);
+
+    &.is-active {
+      background: $color-blue;
+      color: $color-background;
+      box-shadow: 0 2px 10px rgba($color-blue, 0.3);
+    }
+
+    &:not(.is-active):hover {
+      color: $color-text;
+    }
+  }
+}

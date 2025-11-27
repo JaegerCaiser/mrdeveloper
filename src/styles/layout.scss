@@ -71,6 +71,20 @@ button {
   pointer-events: none; // do not block interactions
 }
 
+// Modal open state
+body.modal-is-open {
+  .hero,
+  .navigation-bar,
+  .about,
+  .experience,
+  .contact,
+  .footer {
+    filter: blur(8px);
+    pointer-events: none;
+    transition: filter 0.3s ease-out;
+  }
+}
+
 // Main content wrapper
 .main {
   position: relative;
