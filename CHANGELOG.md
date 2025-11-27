@@ -1,3 +1,11 @@
+## [1.4.1](https://github.com/JaegerCaiser/mrdeveloper/compare/v1.4.0...v1.4.1) (2025-11-27)
+
+
+### Bug Fixes
+
+* **ci:** allow hotfix branches in preview validation ([a745e79](https://github.com/JaegerCaiser/mrdeveloper/commit/a745e79a099e69e90ca8a688b3f6952fb1d0777f))
+* disable pointer events on flying santa canvas ([cd708d0](https://github.com/JaegerCaiser/mrdeveloper/commit/cd708d0570c1f9b1fbe10bd13b9e4b035716a0ce))
+
 # [1.4.0](https://github.com/JaegerCaiser/mrdeveloper/compare/v1.3.1...v1.4.0) (2025-11-27)
 
 
