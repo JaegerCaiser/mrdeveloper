@@ -1,0 +1,78 @@
+---
+title: "Merge Commit vs. Rebase: Which is the Best Strategy for Your Git History?"
+publishedAt: "2025-11-06"
+summary: "A classic debate in the Git world: should you prefer a clean, linear history with rebase, or a traceable and complete history with merge commits? Let's analyze the pros and cons of each approach."
+tags: ["git", "workflow", "best-practices"]
+---
+
+If you've ever worked on a development team, you've probably encountered this debate: what is the "right" way to incorporate changes from a feature branch into the main branch? The answer usually comes down to two main strategies offered by GitHub: **Create a merge commit** and **Rebase and merge**.
+
+Both approaches have the same end result—your feature code gets into the target branch—but they tell the _story_ of how it got there in drastically different ways.
+
+## Approach 1: "Create a merge commit" (The Historian)
+
+This is Git's default strategy. It preserves history exactly as it happened.
+
+- **How it works:** When you merge a Pull Request, Git creates a new commit, the "merge commit." This special commit has two "parents": the last commit of the target branch and the last commit of your feature branch. It joins the two histories.
+
+- **How the `git log` looks:**
+
+  ```
+  *   Merge pull request #123 from feature/new-feature (main)
+  |\
+  | * feat: Adds new functionality (feature/new-feature)
+  | * fix: Corrects a bug in the functionality
+  * | previous commit (main)
+  |/
+  * ...
+  ```
+
+  The history becomes a graph, resembling a "Christmas tree."
+
+- **Pros:**
+
+  - **Absolute Traceability:** It is indisputable _when_ the PR was merged and where it came from. The PR context is permanently recorded in the Git history.
+  - **Doesn't Rewrite History:** The original commits of the feature branch remain untouched, which is considered safer by some.
+
+- **Cons:**
+  - **"Cluttered" History:** The log gets filled with merge commits that, for some, are just noise and make it difficult to read the linear evolution of the project.
+
+## Approach 2: "Rebase and merge" (The Editor)
+
+This strategy prioritizes a clean and readable history.
+
+- **How it works:** Before merging, Git takes all the commits from your feature branch and "re-applies" them, one by one, on top of the last commit of the target branch. After that, the target branch can simply be "fast-forwarded" to include these new commits, without the need for a merge commit.
+
+- **How the `git log` looks:**
+
+  ```
+  * feat: Adds new functionality (main)
+  * fix: Corrects a bug in the functionality
+  * previous commit (main)
+  * ...
+  ```
+
+  The history becomes perfectly linear, as if all the work had been done directly on the main branch.
+
+- **Pros:**
+
+  - **Clean and Readable History:** It is extremely easy to follow the sequence of changes in the project.
+  - **Facilitates Debugging:** Tools like `git bisect` (to find when a bug was introduced) work much better on a linear history.
+
+- **Cons:**
+  - **Loss of PR Context:** You lose the explicit information of "when PR #123 was merged" directly in the Git log. This context now lives only in the GitHub interface.
+  - **Rewrites History:** The hashes of your original commits are changed during the rebase.
+
+## Conclusion: Which is Better?
+
+There is no "right" answer. It's a philosophical choice for your project.
+
+- **Choose "Merge Commit" if:** You value historical traceability and the integrity of commits above all else. It's great for projects with strict audits or for teams with many junior developers, as it's the simplest flow to understand.
+
+- **Choose "Rebase and Merge" if:** You value a clean, readable history and are comfortable using the GitHub interface to find the context of a PR. It is a very popular approach in high-performance projects and teams that prioritize the clarity of the `git log`.
+
+In our project, we opted for **"Rebase and Merge"**. The clarity of the linear history outweighs the loss of the merge commit context in the log, and this decision helps us keep the project organized and easy to navigate.
+
+---
+
+\*Written with ❤️ by **Matheus Caiser, The Mr. Developer\***

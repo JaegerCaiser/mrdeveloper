@@ -1,0 +1,155 @@
+---
+title: "A Saga do CI/CD: Como Corrigimos uma Race Condition no GitHub Actions"
+publishedAt: "2025-11-06"
+summary: "Uma história real de depuração de um workflow de CI/CD, onde a concorrência de gatilhos e a ordem de execução causaram uma falha sutil, mas crítica, no nosso processo de release."
+tags: ["ci-cd", "github-actions", "devops"]
+---
+
+Todo desenvolvedor que já configurou um pipeline de CI/CD conhece a sensação: a satisfação de ver os checks verdes e a automação funcionando... e a frustração profunda quando uma falha misteriosa acontece. Recentemente, passei por uma dessas sagas ao tentar otimizar os workflows de um projeto, e a jornada para encontrar a solução foi cheia de lições valiosas.
+
+## O Problema Inicial: Workflows Lentos e Redundantes
+
+Tudo começou com um objetivo simples: fazer nossos workflows rodarem mais rápido. Em Pull Requests que alteravam apenas a documentação (arquivos `.md`), nossos jobs de teste, lint e deploy eram executados desnecessariamente, gastando tempo e recursos.
+
+A solução parecia óbvia: usar um filtro de caminho para pular os jobs se nenhuma alteração no código fosse detectada.
+
+## A Primeira Tentativa e o Primeiro Erro
+
+Implementamos a popular action `dorny/paths-filter`. A ideia era simples: se os arquivos alterados não estivessem em `src/`, `package.json`, etc., os steps seguintes seriam pulados.
+
+```yaml
+- name: Check for code changes
+  id: filter
+  uses: dorny/paths-filter@v3
+  with:
+    filters: |
+      code:
+        - 'src/**'
+        - '.github/workflows/**'
+        # ... outros caminhos
+
+- name: Install dependencies
+  if: steps.filter.outputs.code == 'true'
+  run: pnpm install
+```
+
+**Onde quebrou?** O workflow falhou com um erro enigmático: `Error: Can't find common ancestor`.
+
+- **Lição 1: O `fetch-depth` é Crucial.** A action `actions/checkout` por padrão faz um checkout "superficial" (`fetch-depth: 1`), baixando apenas o último commit. O `paths-filter` precisa do histórico completo para comparar a branch do PR com a branch base. A solução foi adicionar `fetch-depth: 0` ao checkout.
+
+## O Segundo Erro: A Duplicidade de Deployments
+
+Com o primeiro erro corrigido, notamos que cada PR criava **duas** entradas de deployment: uma atribuída a mim e outra ao bot `github-actions[bot]`.
+
+- **Lição 2: `environment:` Nativo vs. Actions Manuais.** Descobrimos que estávamos usando dois mecanismos para o mesmo fim. A chave `environment:` no nosso job já instruía o GitHub a criar um deployment (atribuído ao usuário que iniciou o workflow). Ao mesmo tempo, a action `bobheadxi/deployments` também criava um deployment (atribuído ao bot). A solução foi remover a action e confiar 100% no mecanismo nativo do GitHub, que hoje já é robusto o suficiente para gerenciar o ciclo de vida completo do deployment.
+
+## O Furo Final: A Race Condition
+
+Tudo parecia perfeito, até que uma análise mais profunda revelou uma falha crítica. Nosso workflow `preview.yml` era acionado por dois eventos: `push` em branches `release/*` e `pull_request`.
+
+O objetivo era:
+
+1. No `push` para `release/*`, criar uma tag beta com `semantic-release`.
+2. No `pull_request`, apenas rodar testes e gerar um preview.
+
+O problema era a `concurrency: cancel-in-progress: true`.
+
+- **A Race Condition:** Quando um desenvolvedor fazia o push da branch de release e abria o PR em seguida, duas execuções do workflow eram disparadas. A `concurrency` cancelava a mais antiga (a do `push`), e a execução do `pull_request` continuava. Como o `semantic-release` só rodava no evento de `push`, a tag beta **nunca era criada**.
+
+- **Lição 3: Separe as Responsabilidades.** Um workflow não deve tentar servir a dois mestres. A solução foi dividir o `preview.yml` em dois:
+  1. **`preview.yml`:** Focado apenas em validação de PRs (gatilho `pull_request`).
+  2. **`create-beta-release.yml`:** Focado apenas em criar a release beta (gatilho `push`).
+
+Essa separação eliminou a competição entre os gatilhos e a race condition, garantindo que cada processo rode de forma confiável e independente.
+
+## O Capítulo Final: A Otimização Condicional
+
+Mas a saga não acabou aí. Após resolver a race condition, percebemos que nossa arquitetura ainda tinha uma falha fundamental: **os status checks ficavam inconsistentes**.
+
+### O Dilema dos Status Checks
+
+Quando implementamos o paths-filter no `preview.yml`, o job `deploy-preview` era completamente **pulados** quando não havia mudanças no código. Isso fazia com que os status checks aparecessem como "skipped" em vez de "success", quebrando a consistência dos required status checks.
+
+```yaml
+# ❌ ANTES: Job pulado completamente
+deploy-preview:
+  if: needs.test-and-lint.outputs.code-changed == 'true' # ← Isso fazia o job ser skipped
+  uses: ./.github/workflows/reusable-deploy-vercel.yml
+```
+
+### A Solução Arquitetural
+
+A resposta estava em mover o controle **para dentro** dos reusable workflows. Em vez de decidir no nível do job se rodar ou não, deixar os reusable workflows decidirem internamente quais steps executar.
+
+```yaml
+# ✅ DEPOIS: Job sempre roda, controle interno
+deploy-preview:
+  # Sem condição no job - sempre roda para status check consistente
+  uses: ./.github/workflows/reusable-deploy-vercel.yml
+```
+
+Dentro do `reusable-deploy-vercel.yml`, adicionamos o paths-filter e condições em todos os steps:
+
+```yaml
+jobs:
+  deploy:
+    steps:
+      - name: Check for code changes
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            code:
+              - 'src/**'
+              - 'public/**'
+              - 'package.json'
+              # ... outros arquivos de código
+
+      - name: Install Vercel CLI
+        if: steps.filter.outputs.code == 'true' # ← Condição no step
+        run: npm install --global vercel@latest
+
+      - name: Build Project Artifacts
+        if: steps.filter.outputs.code == 'true' # ← Condição no step
+        run: vercel build
+
+      - name: Deploy to Vercel
+        if: steps.filter.outputs.code == 'true' # ← Condição no step
+        run: vercel deploy
+```
+
+### O Resultado Perfeito
+
+Agora ambos os reusable workflows seguem o **mesmo padrão arquitetural**:
+
+- **`reusable-test-and-lint.yml`**: Paths-filter + steps condicionais
+- **`reusable-deploy-vercel.yml`**: Paths-filter + steps condicionais
+
+**Comportamento final:**
+
+- **PRs com mudanças no código**: Jobs rodam e fazem trabalho real ✅
+- **PRs só com documentação**: Jobs rodam (status checks verdes) mas pulam steps internos ✅
+
+**Benefícios alcançados:**
+
+- ✅ **Status checks consistentes** (sempre success)
+- 💰 **Otimização de custos** (deploy condicional no Vercel)
+- 🔄 **Arquitetura uniforme** nos reusable workflows
+- 📋 **Compatível com required status checks**
+
+## Conclusão
+
+O que começou como uma simples otimização se tornou uma jornada profunda pela arquitetura do GitHub Actions. A lição final é clara: workflows de CI/CD são parte do código e merecem a mesma atenção à arquitetura, separação de responsabilidades e depuração que aplicamos à nossa aplicação.
+
+**Nunca subestime:**
+
+- A importância de um bom `fetch-depth`
+- O poder das race conditions em sistemas concorrentes
+- A necessidade de status checks consistentes
+- A beleza de uma arquitetura uniforme
+
+E lembre-se: em CI/CD, assim como na vida, **separar responsabilidades** é sempre a melhor solução! 🚀
+
+---
+
+\*Escrito com ❤️ por **Matheus Caiser, The Mr. Developer\***
