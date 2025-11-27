@@ -1,3 +1,25 @@
+# [1.4.0-beta.1](https://github.com/JaegerCaiser/mrdeveloper/compare/v1.3.0...v1.4.0-beta.1) (2025-11-27)
+
+
+### Bug Fixes
+
+* add missing name field to validate-release-branch job ([c2036bc](https://github.com/JaegerCaiser/mrdeveloper/commit/c2036bccc6f9c0313f717368ef3000ee1275d29c))
+* correct preview URL link in PR comment ([b983a4b](https://github.com/JaegerCaiser/mrdeveloper/commit/b983a4b72400e381a11111695a7672dd697a4221))
+* exclude documentation files from triggering CI/CD workflows ([0db398c](https://github.com/JaegerCaiser/mrdeveloper/commit/0db398c7b7999e3f110d9f7fe0828177eedfd52a))
+* expand docs filter to cover all documentation files ([bcd551a](https://github.com/JaegerCaiser/mrdeveloper/commit/bcd551ab0a3e8b40800e1caefacf397d06ef20c7))
+* finalize paths-filter with dual-filter approach ([36a0a63](https://github.com/JaegerCaiser/mrdeveloper/commit/36a0a637e09fa6c3affb9f4872666ea92702276a))
+* rename workflow jobs to prevent status check conflicts ([7f1170e](https://github.com/JaegerCaiser/mrdeveloper/commit/7f1170ed09ce5c361041651cbc57099601d38abb))
+* rename workflow jobs to prevent status check conflicts ([b723c32](https://github.com/JaegerCaiser/mrdeveloper/commit/b723c320ab002923fc62e731e0086809c2620be7))
+* restore blog posts that were accidentally removed by merge ([7e23d07](https://github.com/JaegerCaiser/mrdeveloper/commit/7e23d07a8ff455c4285d62aa55250d27887c257b))
+* restore blog posts that were accidentally removed by merge ([b5b0e41](https://github.com/JaegerCaiser/mrdeveloper/commit/b5b0e41ff9ed6c6d6160e0ed0f8284ec169b50f1))
+* restore proper preview URL link format in PR comment ([8ef54af](https://github.com/JaegerCaiser/mrdeveloper/commit/8ef54af477ebb04204f7dea001d9a3fa6b50f2ef))
+
+
+### Features
+
+* add flying 3d santa component ([f4725ef](https://github.com/JaegerCaiser/mrdeveloper/commit/f4725ef61c09d0d04a36d84e28234715a1004c9e))
+* **blog:** add blog section with i18n support ([37a2f3b](https://github.com/JaegerCaiser/mrdeveloper/commit/37a2f3b87785132ac092ce97600c9c463e586417))
+
 ## [1.3.1](https://github.com/JaegerCaiser/mrdeveloper/compare/v1.3.0...v1.3.1) (2025-11-07)
 
 
