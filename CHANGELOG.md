@@ -1,3 +1,10 @@
+## [1.4.3](https://github.com/JaegerCaiser/mrdeveloper/compare/v1.4.2...v1.4.3) (2025-11-29)
+
+
+### Bug Fixes
+
+* Corrige permissões e autenticação no workflow de sync ([f86d53b](https://github.com/JaegerCaiser/mrdeveloper/commit/f86d53b0e765627fd4b8612cdbde36e5bafcfe5f))
+
 ## [1.4.2](https://github.com/JaegerCaiser/mrdeveloper/compare/v1.4.1...v1.4.2) (2025-11-29)
 
 
