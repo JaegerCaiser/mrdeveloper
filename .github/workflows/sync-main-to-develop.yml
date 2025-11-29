@@ -1,7 +1,5 @@
 name: Sync Main back to Develop
 
-# Dispara este workflow QUANDO o workflow "Production Environment"
-# (o 'name:' do seu production.yml) terminar com sucesso
 on:
   workflow_run:
     workflows: ["Production Environment"]
@@ -11,12 +9,9 @@ on:
 jobs:
   create-sync-pr:
     name: Create Sync Pull Request
-    # Só roda se o workflow de produção foi um sucesso
     if: github.event.workflow_run.conclusion == 'success'
-
     runs-on: ubuntu-latest
     permissions:
-      # Essencial: permissão para criar branchs e PRs
       contents: write
       pull-requests: write
 
@@ -33,15 +28,8 @@ jobs:
 
       - name: Merge main into sync branch and push
         id: merge
-        env:
-          GH_PAT: ${{ secrets.GH_PAT_FOR_RELEASE }}
         run: |
           echo "Starting sync process..."
-          if [ -z "$GH_PAT" ]; then
-            echo "::error::GH_PAT_FOR_RELEASE secret is not set"
-            exit 1
-          fi
-
           git fetch origin main develop
           if git merge-base --is-ancestor origin/main origin/develop; then
             echo "main is already merged into develop. No sync needed."
@@ -51,36 +39,29 @@ jobs:
 
           echo "main has new commits. Proceeding with sync..."
           echo "sync_needed=true" >> $GITHUB_OUTPUT
-
           BRANCH_NAME="sync/main-to-develop"
           echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
-
           git checkout -B $BRANCH_NAME origin/develop
 
-          # Tenta o merge. O '|| true' impede que o script pare em caso de conflito.
-          git merge origin/main --allow-unrelated-histories --no-edit -m "chore: sync main back to develop" || true
-
-          # Verifica se há arquivos com conflitos (Unmerged paths)
-          if git diff --name-only --diff-filter=U | grep .; then
-            echo "::warning::Merge conflicts detected. Committing conflicted state to be resolved in the PR."
-            # Adiciona todos os arquivos (incluindo os com marcadores de conflito) e faz o commit.
+          if git merge origin/main --allow-unrelated-histories --no-edit -m "chore: sync main back to develop"; then
+            echo "Merge successful without conflicts."
+          else
+            echo "::warning::Merge failed due to conflicts. Committing files with conflict markers."
             git add .
             git commit -m "chore: sync main with conflicts for manual resolution"
           else
             echo "Merge completed successfully."
           fi
 
-          # Continua o fluxo e força o push da branch, seja ela com merge limpo ou com conflitos.
-          git push --force https://${GH_PAT}@github.com/${GITHUB_REPOSITORY}.git HEAD:$BRANCH_NAME
+          git push --force https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git HEAD:$BRANCH_NAME
 
       - name: Create or Update Pull Request
         if: steps.merge.outputs.sync_needed == 'true'
         env:
-          GH_TOKEN: ${{ secrets.GH_PAT_FOR_RELEASE }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH_NAME: ${{ steps.merge.outputs.branch_name }}
         run: |
           EXISTING_PR_URL=$(gh pr list --base develop --head "$BRANCH_NAME" --state open --json url --jq '.[0].url')
-
           if [ -n "$EXISTING_PR_URL" ]; then
             echo "PR already exists: $EXISTING_PR_URL"
             gh pr comment "$EXISTING_PR_URL" --body "🔄 The sync branch has been updated with the latest changes from \`main\`."
@@ -90,5 +71,5 @@ jobs:
               --base develop \
               --head "$BRANCH_NAME" \
               --title "🔄 [Auto-Sync] Merge main back into develop" \
-              --body "This PR automatically syncs the latest production release from \`main\` back into \`develop\`.\n\nIncludes:\n- Version bump from \`semantic-release\`\n- Updated \`CHANGELOG.md\`\n- Any hotfixes that were merged to \`main\`"
+              --body "This PR automatically syncs the latest production release from \`main\` back into \`develop\`."
           fi
