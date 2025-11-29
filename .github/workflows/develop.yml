@@ -28,7 +28,7 @@ jobs:
     if: needs.test-and-lint.outputs.code-changed == 'true'
     uses: ./.github/workflows/reusable-deploy-vercel.yml
     with:
-      environment: Development
+      environment: Develop
       vercel-environment: preview
       ref: ${{ github.ref }}
       prebuilt: true

@@ -43,14 +43,16 @@ jobs:
           echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
           git checkout -B $BRANCH_NAME origin/develop
 
+          # Attempt to merge main into the sync branch.
+          # The 'if' statement handles the exit code, so the step won't fail on merge conflicts.
           if git merge origin/main --allow-unrelated-histories --no-edit -m "chore: sync main back to develop"; then
             echo "Merge successful without conflicts."
           else
-            echo "::warning::Merge failed due to conflicts. Committing files with conflict markers."
+            echo "::warning::Merge failed, likely due to conflicts. Committing files with conflict markers for manual resolution."
+            # After a failed merge, files with conflicts are in the working directory.
+            # We add and commit them to be resolved in the PR.
             git add .
             git commit -m "chore: sync main with conflicts for manual resolution"
-          else
-            echo "Merge completed successfully."
           fi
 
           git push --force https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git HEAD:$BRANCH_NAME
