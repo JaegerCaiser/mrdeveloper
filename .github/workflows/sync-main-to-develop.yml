@@ -43,18 +43,21 @@ jobs:
           echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
           git checkout -B $BRANCH_NAME origin/develop
 
-          # Attempt to merge main into the sync branch.
-          # The 'if' statement handles the exit code, so the step won't fail on merge conflicts.
+          # Tenta fazer o merge da 'main' na branch de sincronização.
+          # A estrutura 'if/else' trata o código de saída, então o passo não falhará em caso de conflitos.
           if git merge origin/main --allow-unrelated-histories --no-edit -m "chore: sync main back to develop"; then
-            echo "Merge successful without conflicts."
+            # Se o merge for bem-sucedido e não houver conflitos.
+            echo "Merge da main para a branch de sync foi bem-sucedido, sem conflitos."
           else
-            echo "::warning::Merge failed, likely due to conflicts. Committing files with conflict markers for manual resolution."
-            # After a failed merge, files with conflicts are in the working directory.
-            # We add and commit them to be resolved in the PR.
+            # Se o merge falhar (geralmente por conflitos).
+            echo "::warning::O merge falhou, provavelmente devido a conflitos. Arquivos com marcadores de conflito serão commitados para resolução manual."
+            # Após uma falha de merge, os arquivos com conflitos estão no diretório de trabalho.
+            # Adicionamos e commitamos esses arquivos para que possam ser resolvidos no Pull Request.
             git add .
-            git commit -m "chore: sync main with conflicts for manual resolution"
+            git commit -m "chore: Sincroniza main com conflitos para resolução manual"
           fi
 
+          # Faz o push do resultado para o repositório, seja um merge limpo ou com conflitos.
           git push --force https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git HEAD:$BRANCH_NAME
 
       - name: Create or Update Pull Request
