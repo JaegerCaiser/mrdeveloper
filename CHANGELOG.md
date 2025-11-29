@@ -1,3 +1,10 @@
+## [1.4.4](https://github.com/JaegerCaiser/mrdeveloper/compare/v1.4.3...v1.4.4) (2025-11-29)
+
+
+### Bug Fixes
+
+* **sync-workflow:** Corrige lógica de merge com else duplicado ([6ed025c](https://github.com/JaegerCaiser/mrdeveloper/commit/6ed025c268299f2e82098eb064cf159867713fb1))
+
 ## [1.4.3-beta.1](https://github.com/JaegerCaiser/mrdeveloper/compare/v1.4.2...v1.4.3-beta.1) (2025-11-29)
 
 
