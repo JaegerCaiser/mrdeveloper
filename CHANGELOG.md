@@ -1,3 +1,10 @@
+## [1.4.2](https://github.com/JaegerCaiser/mrdeveloper/compare/v1.4.1...v1.4.2) (2025-11-29)
+
+
+### Bug Fixes
+
+* the sync need to continue even the conflict ([05048ec](https://github.com/JaegerCaiser/mrdeveloper/commit/05048ec3394f7f5824cacf19ae7308ab4a7ca2f1))
+
 ## [1.4.1](https://github.com/JaegerCaiser/mrdeveloper/compare/v1.4.0...v1.4.1) (2025-11-27)
 
 
