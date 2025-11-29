@@ -1,3 +1,33 @@
+## [1.4.4](https://github.com/JaegerCaiser/mrdeveloper/compare/v1.4.3...v1.4.4) (2025-11-29)
+
+
+### Bug Fixes
+
+* **sync-workflow:** Corrige lógica de merge com else duplicado ([6ed025c](https://github.com/JaegerCaiser/mrdeveloper/commit/6ed025c268299f2e82098eb064cf159867713fb1))
+
+## [1.4.3-beta.1](https://github.com/JaegerCaiser/mrdeveloper/compare/v1.4.2...v1.4.3-beta.1) (2025-11-29)
+
+
+### Bug Fixes
+
+* Corrige permissões e autenticação no workflow de sync ([f86d53b](https://github.com/JaegerCaiser/mrdeveloper/commit/f86d53b0e765627fd4b8612cdbde36e5bafcfe5f))
+* **sync-workflow:** Corrige lógica de merge com else duplicado ([6ed025c](https://github.com/JaegerCaiser/mrdeveloper/commit/6ed025c268299f2e82098eb064cf159867713fb1))
+
+## [1.4.2](https://github.com/JaegerCaiser/mrdeveloper/compare/v1.4.1...v1.4.2) (2025-11-29)
+
+
+### Bug Fixes
+
+* the sync need to continue even the conflict ([05048ec](https://github.com/JaegerCaiser/mrdeveloper/commit/05048ec3394f7f5824cacf19ae7308ab4a7ca2f1))
+
+## [1.4.1](https://github.com/JaegerCaiser/mrdeveloper/compare/v1.4.0...v1.4.1) (2025-11-27)
+
+
+### Bug Fixes
+
+* **ci:** allow hotfix branches in preview validation ([a745e79](https://github.com/JaegerCaiser/mrdeveloper/commit/a745e79a099e69e90ca8a688b3f6952fb1d0777f))
+* disable pointer events on flying santa canvas ([cd708d0](https://github.com/JaegerCaiser/mrdeveloper/commit/cd708d0570c1f9b1fbe10bd13b9e4b035716a0ce))
+
 # [1.4.0](https://github.com/JaegerCaiser/mrdeveloper/compare/v1.3.1...v1.4.0) (2025-11-27)
 
 
