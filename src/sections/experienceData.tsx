@@ -15,7 +15,7 @@ export const experienceData: ExperienceItem[] = [
     id: "frontend-dev-dbc-unicred",
     title: "Front-end Developer",
     company: "DBC Company (Unicred)",
-    period: "January 2022 - Present",
+    period: "January 2023 - Present",
     description: (
       <ul>
         <li>
