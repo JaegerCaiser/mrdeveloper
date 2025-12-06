@@ -25,8 +25,17 @@ FROM nginx:alpine
 # Copie os arquivos de build do Vite para o diretório padrão do Nginx
 COPY --from=0 /app/build /usr/share/nginx/html
 
+# Garante que o conteúdo estático (ex: public/models/*.glb) também seja copiado
+# Isso instrui o Docker a copiar qualquer arquivo que esteja em `/app/public/models`
+# caso o build não tenha incluído esses binários diretamente em `/app/build`.
+COPY --from=0 /app/public/models /usr/share/nginx/html/models
+
 # Exponha a porta 80 para o Nginx
 EXPOSE 80
+
+# Adiciona mapeamento de MIME para .glb (model/gltf-binary) para garantir que o
+# Nginx entregue corretamente os modelos GLTF binários.
+RUN printf 'types {\n  model/gltf-binary glb;\n}\n' > /etc/nginx/conf.d/glb-mime.conf
 
 # Comando para iniciar o Nginx
 CMD ["nginx", "-g", "daemon off;"]
